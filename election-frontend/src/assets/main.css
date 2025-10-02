@@ -7,3 +7,41 @@ font-family: "Inter", sans-serif;
   margin: 0 auto; */
 }
 
+h1 {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+strong {
+  font-weight: bold;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition-duration: 300ms;
+}
+
+.btn-primary:hover {
+  background-color: #C72745;
+}
+
+.btn-secondary:hover {
+  background-color: #E5E5E5;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background-color: #EF3054;
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+

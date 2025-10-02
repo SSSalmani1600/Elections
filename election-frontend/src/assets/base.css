@@ -2,11 +2,11 @@
 
 @theme {
   --color-primary: #EF3054;
-  --color-secundairy: #FFFFFF;
+  --color-secondary: #FFFFFF;
   --color-background: #0B132B;
   --color-surface: #1C2541;
 
-  --color-text: #FFFFFF;
+  --color-text-base: #FFFFFF;
   --color-text-muted: #c0c0c0;
   --color-link: #EF3054;
 }
@@ -15,14 +15,12 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  font-weight: normal;
 }
 
 body {
   min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
+  color: var(--color-text-base);
+  background: var(--color-surface);
   transition: color 0.5s,
   background-color 0.5s;
   line-height: 1.6;
