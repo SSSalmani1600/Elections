@@ -1,10 +1,9 @@
 @import './base.css';
 @import 'tailwindcss';
+@import 'primeicons/primeicons.css';
 
 #app {
 font-family: "Inter", sans-serif;
-  /* max-width: 1280px;
-  margin: 0 auto; */
 }
 
 h1 {
@@ -14,6 +13,37 @@ h1 {
 
 strong {
   font-weight: bold;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.nav-link:after {
+  content: "";
+  width: 100%;
+  height: 2px;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  background-color: #EF3054;
+
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover:after {
+  transform: scaleX(1);
+}
+
+.router-link-active {
+  color: #EF3054;
+  transition: ease-in-out 300ms;
 }
 
 .btn {
@@ -32,7 +62,7 @@ strong {
 }
 
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .btn-primary {
