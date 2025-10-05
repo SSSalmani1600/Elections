@@ -45,4 +45,15 @@ public class JwtService {
             .parseSignedClaims(token)
             .getPayload();
     }
+
+    public String extractDisplayName(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.getSubject();
+    }
+
+    public boolean validateToken(String token) {
+        Claims claims = extractAllClaims(token);
+        if (!claims.getIssuer().equals("ga-stemmen.nl")) return false;
+        return !isTokenExpired(token);
+    }
 }
