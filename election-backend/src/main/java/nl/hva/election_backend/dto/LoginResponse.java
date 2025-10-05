@@ -6,7 +6,7 @@ public class LoginResponse {
 
     public LoginResponse() {}
 
-    public LoginResponse(String displayName, String token) {
+    public LoginResponse(String token, String displayName) {
         this.displayName = displayName;
         this.token = token;
     }

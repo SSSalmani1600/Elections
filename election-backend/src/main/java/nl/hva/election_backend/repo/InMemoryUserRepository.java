@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-@org.springframework.context.annotation.Profile("fake-db")
 @org.springframework.stereotype.Repository
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> store = new ConcurrentHashMap<>();

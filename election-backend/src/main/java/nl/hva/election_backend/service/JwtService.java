@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 public class JwtService {
-    private String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
+    private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
             "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
     private final String issuer = "ga-stemmen.nl";
 
@@ -23,7 +23,7 @@ public class JwtService {
 
         return Jwts.builder().claims().add(claims).subject(displayName)
                 .issuer(issuer).issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
                 .and().signWith(this.getKey()).compact();
     }
 
