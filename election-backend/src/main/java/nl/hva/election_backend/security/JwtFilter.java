@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,14 +15,13 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Component
-@Order
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService = new JwtService();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if ("OPTIONS".equals(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -35,22 +35,31 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.split(" ")[1];
-            if (!jwtService.validateToken(token) || token.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
-                response.getWriter().flush();
-                return;
-            };
 
-            String user = jwtService.extractDisplayName(token);
-            request.setAttribute("currentUser", user);
-            filterChain.doFilter(request, response);
+            try {
+                if (!jwtService.validateToken(token) || token.isEmpty()) {
+                    unauthorized(response, "invalid_token", "Invalid or expired JWT token");
+                    return;
+                }
+
+                String user = jwtService.extractDisplayName(token);
+                request.setAttribute("userName", user);
+                filterChain.doFilter(request, response);
+                return;
+            } catch (Exception e) {
+                unauthorized(response, "internal_error", String.valueOf(e));
+                return;
+            }
         }
 
+        unauthorized(response, "missing_token", "Authorization: Bearer <token> required");
+    }
+
+    private void unauthorized(HttpServletResponse response, String code, String message) throws IOException {
+        if (response.isCommitted()) return;
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\": \"no auth header\"}");
-        response.getWriter().flush();
+        response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
+        response.flushBuffer();
     }
 };
