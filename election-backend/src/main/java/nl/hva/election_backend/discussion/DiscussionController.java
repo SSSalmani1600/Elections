@@ -1,38 +1,50 @@
 package nl.hva.election_backend.discussion;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import java.util.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/discussions")
-@CrossOrigin(origins = "*")
+@CrossOrigin // laat frontend lokaal callen zonder CORS gedoe
 public class DiscussionController {
 
-    // heel simpel: in-memory lijst (reset bij restart)
-    private final List<Discussion> discussions = new ArrayList<>();
+    private final DiscussionService service;
+
+    public DiscussionController(DiscussionService service) {
+        this.service = service;
+    }
 
     @GetMapping
-    public List<Discussion> all() {
-        return discussions.stream()
-                .sorted(Comparator.comparing(Discussion::getLastActivityAt).reversed())
+    public List<DiscussionListItemDto> list() {
+        return service.list().stream()
+                .map(d -> new DiscussionListItemDto(
+                        d.getId(),
+                        d.getTitle(),
+                        d.getAuthor(),
+                        d.getLastActivityAt(),
+                        d.getReactionsCount()
+                ))
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public Discussion one(@PathVariable String id) {
-        return discussions.stream()
-                .filter(d -> d.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Not found"));
-    }
-
-    @PostMapping
-    public Discussion create(@RequestBody Map<String, String> body) {
-        String title  = body.getOrDefault("title", "");
-        String author = body.getOrDefault("author", "");
-        String text   = body.getOrDefault("body", "");
-        Discussion d = Discussion.create(title, author, text);
-        discussions.add(d);
-        return d;
+    public DiscussionDetailDto get(@PathVariable String id) {
+        try {
+            var d = service.getById(id);
+            return new DiscussionDetailDto(
+                    d.getId(),
+                    d.getTitle(),
+                    d.getAuthor(),
+                    d.getBody(),
+                    d.getCreatedAt(),
+                    d.getLastActivityAt(),
+                    d.getReactionsCount()
+            );
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Discussion not found");
+        }
     }
 }
