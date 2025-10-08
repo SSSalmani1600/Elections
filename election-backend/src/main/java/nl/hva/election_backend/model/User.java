@@ -12,6 +12,10 @@ public class User {
         this.displayName = displayName;
     }
 
+    public User() {
+
+    }
+
     public Long getId() {
         return id;
     }
