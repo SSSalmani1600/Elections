@@ -1,3 +1,4 @@
+<<<<<<< election-frontend/src/views/LoginView.vue
 <script setup lang="ts">
 import { login } from '@/services/AuthService'
 import type { LoginResponse } from '@/types/api'
@@ -83,3 +84,5 @@ async function loginHandler(): Promise<void> {
         </div>
     </form>
 </template>
+
+<style scoped></style>
