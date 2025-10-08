@@ -2,6 +2,7 @@ package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.LoginRequest;
 import nl.hva.election_backend.dto.LoginResponse;
+import nl.hva.election_backend.dto.RegisterRequest;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -41,4 +42,21 @@ public class AuthController {
 
         return ResponseEntity.ok(new LoginResponse(token, displayName));
     }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        try {
+            User user = authService.register(req.getEmail(), req.getPassword(), req.getDisplayName());
+            String token = jwtService.generateToken(user.getId().toString());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new LoginResponse(token, user.getDisplayName()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
+        }
+    }
+
 }
+
