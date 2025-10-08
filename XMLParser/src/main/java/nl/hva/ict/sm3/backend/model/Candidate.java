@@ -6,17 +6,15 @@ public class Candidate {
     private String initials;
     private String gender;
     private String localityName;
-    private String electionId;
     private String electionName;
     private String affiliationId;
 
-    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionId, String electionName, String affiliationId) {
+    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.initials = initials;
         this.gender = gender;
         this.localityName = localityName;
-        this.electionId = electionId;
         this.electionName = electionName;
         this.affiliationId = affiliationId;
     }
@@ -39,10 +37,6 @@ public class Candidate {
 
     public String getLocalityName() {
         return localityName;
-    }
-
-    public String getElectionId() {
-        return electionId;
     }
 
     public String getElectionName() {

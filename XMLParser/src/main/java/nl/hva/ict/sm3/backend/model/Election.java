@@ -1,7 +1,9 @@
 package nl.hva.ict.sm3.backend.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This will hold the information for one specific election.<br/>
