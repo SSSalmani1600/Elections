@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Discussions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root { --gap: 12px; --muted:#666; }
+        body { margin:0; font-family: system-ui, Arial, sans-serif; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        nav { display:flex; gap:12px; margin-bottom:16px; }
+        a { color:#0b5ed7; text-decoration:none; }
+        a:hover { text-decoration:underline; }
+        .btn { display:inline-block; padding:8px 12px; border:1px solid #ddd; border-radius:8px; }
+        .card { padding:12px; border:1px solid #eee; border-radius:10px; background:#fff; }
+        .muted { color:var(--muted); font-size:.9rem; }
+        .list { display:grid; gap:var(--gap); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav>
+        <a class="btn" href="/home.html">Home</a>
+    </nav>
+
+    <h1>Discussions</h1>
+
+    <p id="loading">Loading...</p>
+    <p id="error" style="display:none; color:#b00020;"></p>
+    <p id="empty" style="display:none;">No items</p>
+
+    <div id="list" class="list" style="display:none;"></div>
+</div>
+
+</script>
+</body>
+</html>
