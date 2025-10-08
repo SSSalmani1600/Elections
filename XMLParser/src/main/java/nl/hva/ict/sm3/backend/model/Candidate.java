@@ -8,9 +8,9 @@ public class Candidate {
     private String localityName;
     private String electionId;
     private String electionName;
-    private int affiliationId;
+    private String affiliationId;
 
-    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionId, String electionName, int affiliationId) {
+    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionId, String electionName, String affiliationId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.initials = initials;
@@ -49,7 +49,7 @@ public class Candidate {
         return electionName;
     }
 
-    public int getAffiliationId() {
+    public String getAffiliationId() {
         return affiliationId;
     }
 }
