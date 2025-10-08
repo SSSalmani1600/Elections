@@ -11,6 +11,13 @@ const years = [2023, 2021, 2019] as const;
 type Year = typeof years[number];
 const selectedYear = ref<Year>(2023);
 
+function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
 // fetch when year changes (and immediately on mount)
 const fetchParties = async () => {
   loading.value = true;
@@ -42,7 +49,7 @@ watch(selectedYear, fetchParties, { immediate: true });
         </p>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button type="button"
+          <button type="button" @click="scrollToSection('komende-verkiezingen')"
             class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition">
             Komende verkiezingen
           </button>
@@ -60,7 +67,7 @@ watch(selectedYear, fetchParties, { immediate: true });
     </div>
   </section>
 
-  <section class="px-6 py-16 md:py-20 text-white bg-[#0B132B]">
+  <section id="komende-verkiezingen" class="px-6 py-16 md:py-20 text-white bg-[#0B132B]">
     <div class="max-w-7xl mx-auto">
       <h2 class="text-2xl sm:text-3xl font-semibold mb-10">
         Komende verkiezingen
