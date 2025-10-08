@@ -22,7 +22,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen text-white font-sans">
+  <div class="min-h-screen text-white">
     <header class="flex flex-col md:flex-row justify-between items-center px-8 py-16 gap-8">
       <div>
         <div class="flex items-center gap-3">
