@@ -1,4 +1,3 @@
-<<<<<<< election-frontend/src/views/LoginView.vue
 <script setup lang="ts">
 import { login } from '@/services/AuthService'
 import type { LoginResponse } from '@/types/api'
@@ -49,36 +48,20 @@ async function loginHandler(): Promise<void> {
         <div class="flex flex-col gap-8 w-[500px]">
             <div class="flex flex-col">
                 <label for="Email" class="sr-only">Email</label>
-                <input
-                    v-model="email"
-                    @input="error.email = ''"
-                    type="text"
-                    name="email"
-                    id=""
-                    placeholder="Email"
-                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]"
-                />
+                <input v-model="email" @input="error.email = ''" type="text" name="email" id="" placeholder="Email"
+                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]" />
                 <span v-if="error.email" class="text-red-500 text-sm mt-3"> {{ error.email }}</span>
             </div>
             <div class="flex flex-col">
                 <label for="Password" class="sr-only">Password</label>
-                <input
-                    v-model="password"
-                    @input="error.password = ''"
-                    type="password"
-                    name="password"
-                    id=""
+                <input v-model="password" @input="error.password = ''" type="password" name="password" id=""
                     placeholder="Wachtwoord"
-                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]"
-                />
+                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]" />
                 <span v-if="error.password" class="text-red-500 text-sm mt-3">
-                    {{ error.password }}</span
-                >
+                    {{ error.password }}</span>
             </div>
-            <button
-                type="submit"
-                class="bg-[#EF3054] text-white p-3 text-[16px] rounded-[8px] cursor-pointer w-[90%] self-center"
-            >
+            <button type="submit"
+                class="bg-[#EF3054] text-white p-3 text-[16px] rounded-[8px] cursor-pointer w-[90%] self-center">
                 Log in
             </button>
         </div>
