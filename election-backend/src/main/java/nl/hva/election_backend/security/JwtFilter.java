@@ -5,14 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Objects;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
@@ -20,28 +18,38 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService = new JwtService();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        // Preflight doorlaten
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (request.getRequestURI().startsWith("/api/auth/")) {
+        // Auth endpoints altijd doorlaten
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review
+        if (uri.startsWith("/api/discussions")
+                && ("GET".equalsIgnoreCase(request.getMethod()) || "POST".equalsIgnoreCase(request.getMethod()))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Normale JWT check
         String authHeader = request.getHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.split(" ")[1];
-
+            String token = authHeader.substring("Bearer ".length());
             try {
-                if (!jwtService.validateToken(token) || token.isEmpty()) {
+                if (token.isEmpty() || !jwtService.validateToken(token)) {
                     unauthorized(response, "invalid_token", "Invalid or expired JWT token");
                     return;
                 }
-
                 String user = jwtService.extractDisplayName(token);
                 request.setAttribute("userName", user);
                 filterChain.doFilter(request, response);
@@ -52,6 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
+        // Als geen geldige header → 401
         unauthorized(response, "missing_token", "Authorization: Bearer <token> required");
     }
 
@@ -62,4 +71,4 @@ public class JwtFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
         response.flushBuffer();
     }
-};
+}

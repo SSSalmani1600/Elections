@@ -1,7 +1,7 @@
 package nl.hva.ict.sm3.backend.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This will hold the information for one specific election.<br/>
@@ -9,14 +9,10 @@ import java.util.Set;
  */
 public class Election {
     private final String id;
-    private Set<Candidate> candidates = new HashSet<>();
+    private List<Affiliation> affiliations = new ArrayList<>();
 
     public Election(String id) {
         this.id = id;
-    }
-
-    public Set<Candidate> getCandidates() {
-        return candidates;
     }
 
     @Override
@@ -26,5 +22,9 @@ public class Election {
 
     public String getId() {
         return id;
+    }
+
+    public List<Affiliation> getAffiliations() {
+        return affiliations;
     }
 }
