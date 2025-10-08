@@ -32,6 +32,55 @@
     <div id="list" class="list" style="display:none;"></div>
 </div>
 
+<!-- api helpers -->
+<script src="/api.js"></script>
+<script>
+    const elLoading = document.getElementById('loading');
+    const elError   = document.getElementById('error');
+    const elEmpty   = document.getElementById('empty');
+    const elList    = document.getElementById('list');
+
+    async function load() {
+        elLoading.style.display = '';
+        elError.style.display = 'none';
+        elEmpty.style.display = 'none';
+        elList.style.display = 'none';
+        elList.innerHTML = '';
+
+        try {
+            const items = await apiList();
+
+            if (!items || items.length === 0) {
+                elEmpty.style.display = '';
+                return;
+            }
+
+            for (const it of items) {
+                const title = document.createElement('a');
+                title.href = `/discussion.html?id=${encodeURIComponent(it.id)}`;
+                title.textContent = it.title;
+
+                const meta = document.createElement('div');
+                meta.className = 'muted';
+                meta.textContent = `by ${it.author} · ${fmt(it.lastActivityAt)} · 💬 ${it.reactionsCount}`;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.appendChild(title);
+                card.appendChild(meta);
+
+                elList.appendChild(card);
+            }
+            elList.style.display = 'grid';
+        } catch (e) {
+            elError.textContent = e?.message || 'load fail';
+            elError.style.display = '';
+        } finally {
+            elLoading.style.display = 'none';
+        }
+    }
+
+    load();
 </script>
 </body>
 </html>
