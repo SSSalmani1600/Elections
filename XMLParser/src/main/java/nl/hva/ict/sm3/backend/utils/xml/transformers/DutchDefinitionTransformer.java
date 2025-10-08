@@ -1,9 +1,12 @@
 package nl.hva.ict.sm3.backend.utils.xml.transformers;
 
+import nl.hva.ict.sm3.backend.model.Affiliation;
 import nl.hva.ict.sm3.backend.model.Election;
 import nl.hva.ict.sm3.backend.utils.xml.DefinitionTransformer;
 
 import java.util.Map;
+
+import static nl.hva.ict.sm3.backend.utils.xml.TagAndAttributeNames.*;
 
 /**
  * Just prints to content of electionData to the standard output.>br/>
@@ -29,5 +32,7 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
     @Override
     public void registerParty(Map<String, String> electionData) {
         System.out.println("Party: " + electionData);
+        String name = electionData.get(REGISTERED_APPELLATION);
+        election.getAffiliations().add(new Affiliation(name));
     }
 }
