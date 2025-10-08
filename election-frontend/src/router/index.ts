@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ElectionsView from '@/views/ElectionsView.vue'
+import RegisterView from '@/views/RegisterView.vue' // 👈 nieuw import
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,7 +30,13 @@ const router = createRouter({
             name: 'elections',
             component: ElectionsView,
         },
+        {
+            path: '/register',
+            name: 'register',
+            component: RegisterView,
+        },
     ],
 })
 
 export default router
+
