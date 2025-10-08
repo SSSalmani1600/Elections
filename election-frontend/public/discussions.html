@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Discussions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root { --gap: 12px; --muted:#666; }
+        body { margin:0; font-family: system-ui, Arial, sans-serif; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        nav { display:flex; gap:12px; margin-bottom:16px; }
+        a { color:#0b5ed7; text-decoration:none; }
+        a:hover { text-decoration:underline; }
+        .btn { display:inline-block; padding:8px 12px; border:1px solid #ddd; border-radius:8px; }
+        .card { padding:12px; border:1px solid #eee; border-radius:10px; background:#fff; }
+        .muted { color:var(--muted); font-size:.9rem; }
+        .list { display:grid; gap:var(--gap); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav>
+        <a class="btn" href="/home.html">Home</a>
+    </nav>
+
+    <h1>Discussions</h1>
+
+    <p id="loading">Loading...</p>
+    <p id="error" style="display:none; color:#b00020;"></p>
+    <p id="empty" style="display:none;">No items</p>
+
+    <div id="list" class="list" style="display:none;"></div>
+</div>
+
+<!-- api helpers -->
+<script src="/api.js"></script>
+<script>
+    const elLoading = document.getElementById('loading');
+    const elError   = document.getElementById('error');
+    const elEmpty   = document.getElementById('empty');
+    const elList    = document.getElementById('list');
+
+    async function load() {
+        elLoading.style.display = '';
+        elError.style.display = 'none';
+        elEmpty.style.display = 'none';
+        elList.style.display = 'none';
+        elList.innerHTML = '';
+
+        try {
+            const items = await apiList();
+
+            if (!items || items.length === 0) {
+                elEmpty.style.display = '';
+                return;
+            }
+
+            for (const it of items) {
+                const title = document.createElement('a');
+                title.href = `/discussion.html?id=${encodeURIComponent(it.id)}`;
+                title.textContent = it.title;
+
+                const meta = document.createElement('div');
+                meta.className = 'muted';
+                meta.textContent = `by ${it.author} · ${fmt(it.lastActivityAt)} · 💬 ${it.reactionsCount}`;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.appendChild(title);
+                card.appendChild(meta);
+
+                elList.appendChild(card);
+            }
+            elList.style.display = 'grid';
+        } catch (e) {
+            elError.textContent = e?.message || 'load fail';
+            elError.style.display = '';
+        } finally {
+            elLoading.style.display = 'none';
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>
