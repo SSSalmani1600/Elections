@@ -11,23 +11,23 @@ const goToForum = () => router.push('/discussions')
 <template>
   <main
     class="flex flex-col items-center min-h-screen gap-16">
-    <div class="flex flex-col items-center w-fit mt-[75px] gap-8">
+    <div class="flex flex-col items-center w-fit mt-[75px] gap-8 px-4">
       <div class="flex flex-col items-center gap-3">
-        <h1 class="text-4xl font-bold">Maak kennis met de Nederlandse politiek</h1>
-        <p class="text-text-muted text-lg w-[60%] text-center"><strong>Leer</strong> partijen
+        <h1 class="text-4xl font-bold max-md:text-3xl text-center">Maak kennis met de Nederlandse politiek</h1>
+        <p class="text-text-muted text-lg w-[60%] text-center max-md:text-[16px]!"><strong>Leer</strong> partijen
           kennen, <strong>bekijk</strong> de uitslagen en <strong>ontdek</strong> jouw politieke
           match</p>
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 max-md:flex-col">
         <button class="btn btn-primary">Ontdek verkiezingen</button>
         <button class="btn btn-secondary">Doe de match quiz</button>
       </div>
     </div>
 
     <footer
-      class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12">
+      class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12 max-lg:flex-col">
       <div>
-        <img src="../assets/img/forum-image.svg" class="w-[250px]" alt="Forum image">
+        <img src="../assets/img/forum-image.svg" class="w-[250px] max-lg:w-[200px]" alt="Forum image">
       </div>
       <div class="flex flex-col gap-6">
         <div class="flex flex-col items-center gap-3">
