@@ -5,7 +5,6 @@ export interface LoginResponse {
 
 export interface Affiliation {
   name: string;
-  candidates: string;
 }
 
 export interface AffiliationResponse {
