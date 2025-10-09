@@ -26,20 +26,19 @@ const goToForum = () => router.push('/discussions')
 
 
     <!-- ✅ Grote footer -->
-    <footer
-      class="w-full bg-[color:rgb(12,20,40)] text-center py-16 mt-20 border-t border-[color:rgba(255,255,255,0.05)] flex flex-col items-center justify-center"
-    >
-      <h2 class="text-2xl font-bold text-[--color-primary] mb-4">Praat mee!</h2>
-      <p class="text-base text-[--color-text-muted] max-w-[700px] px-6 leading-relaxed">
-        In ons forum kun je jouw mening delen met anderen en ontdekken wat zij denken.
-        Je vindt er bovendien handige informatie en nieuwe perspectieven.
-      </p>
-      <button
-        @click="goToForum"
-        class="mt-6 px-6 py-3 rounded-lg font-semibold bg-[--color-primary] text-[--color-secondary] hover:opacity-90 transition"
-      >
-        Ga naar het forum
-      </button>
+    <footer class="w-full bg-background text-center py-16 flex flex-col items-center justify-center mt-auto">
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-3">
+          <h2 class="text-2xl font-bold">Praat mee!</h2>
+          <p class="text-text-muted max-w-[700px] px-6 leading-relaxed">
+            In ons forum kun je jouw mening delen met anderen en ontdekken wat zij denken.
+            Je vindt er bovendien handige informatie en nieuwe perspectieven.
+          </p>
+        </div>
+        <button @click="goToForum" class="btn btn-primary w-fit m-auto">
+          Ga naar het forum
+        </button>
+      </div>
     </footer>
   </main>
 </template>
