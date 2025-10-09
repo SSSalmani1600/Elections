@@ -10,7 +10,7 @@ const goToForum = () => router.push('/discussions')
 
 <template>
   <main
-    class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
+    class="flex flex-col items-center min-h-screen gap-16">
     <div class="flex flex-col items-center w-fit mt-[75px] gap-8">
       <div class="flex flex-col items-center gap-3">
         <h1 class="text-4xl font-bold">Maak kennis met de Nederlandse politiek</h1>
@@ -24,13 +24,15 @@ const goToForum = () => router.push('/discussions')
       </div>
     </div>
 
-
-    <!-- ✅ Grote footer -->
-    <footer class="w-full bg-background text-center py-16 flex flex-col items-center justify-center mt-auto">
+    <footer
+      class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12">
+      <div>
+        <img src="../assets/img/forum-image.svg" class="w-[250px]" alt="Forum image">
+      </div>
       <div class="flex flex-col gap-6">
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col items-center gap-3">
           <h2 class="text-2xl font-bold">Praat mee!</h2>
-          <p class="text-text-muted max-w-[700px] px-6 leading-relaxed">
+          <p class="text-text-muted px-6 leading-relaxed max-w-[500px]">
             In ons forum kun je jouw mening delen met anderen en ontdekken wat zij denken.
             Je vindt er bovendien handige informatie en nieuwe perspectieven.
           </p>
