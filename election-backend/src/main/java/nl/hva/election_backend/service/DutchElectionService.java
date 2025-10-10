@@ -47,7 +47,8 @@ public class DutchElectionService {
             System.out.println("Dutch Election results: " + election);
             // Now is also the time to send the election information to a database for example.
 
-            return election;
+            this.election = election;
+            return this.election;
         } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException | SAXException e) {
             // FIXME You should do here some proper error handling! The code below is NOT how you handle errors properly!
             System.err.println("Failed to process the election results!");
@@ -56,4 +57,7 @@ public class DutchElectionService {
         }
     }
 
+    public Election getElection() {
+        return this.election;
+    }
 }
