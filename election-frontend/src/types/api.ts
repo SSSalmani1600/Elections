@@ -6,6 +6,7 @@ export interface LoginResponse {
 export interface RegisterResponse {
   email: string;
   password: string;
+  username: string;
 }
 
 export interface ParserResponse {

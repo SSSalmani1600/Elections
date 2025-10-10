@@ -48,7 +48,7 @@ public class AuthController {
         try {
             User user = authService.register(req.getEmail(), req.getPassword(), req.getDisplayName());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RegisterResponse(user.getEmail(), user.getPasswordHash()));
+                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getDisplayName()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (IllegalStateException e) {

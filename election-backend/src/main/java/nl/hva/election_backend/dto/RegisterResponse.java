@@ -3,10 +3,12 @@ package nl.hva.election_backend.dto;
 public class RegisterResponse {
     private String email;
     private String password;
+    private String userName;
 
-    public RegisterResponse(String email, String password) {
+    public RegisterResponse(String email, String password, String userName) {
         this.email = email;
         this.password = password;
+        this.userName = userName;
     }
 
     public String getEmail() {
@@ -23,5 +25,13 @@ public class RegisterResponse {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

@@ -28,6 +28,7 @@ async function onSubmit() {
     const data: LoginResponse = await login(res.email, res.password)
 
     localStorage.setItem('JWT', data.token)
+    localStorage.setItem('username', res.username)
     success.value = `Account aangemaakt en automatisch ingelogd als ${data.displayName}!`
     setTimeout(() => router.replace('/'), 1500)
   } catch (err: unknown) {
