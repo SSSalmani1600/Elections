@@ -1,6 +1,6 @@
 package nl.hva.election_backend.controller.parser;
 
-import nl.hva.election_backend.model.Affiliation;
+import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.service.DutchElectionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/affiliations")
+@RequestMapping("api/parties")
 public class PartyController {
     DutchElectionService electionService;
 
@@ -20,6 +20,6 @@ public class PartyController {
 
     @GetMapping("/names")
     public Set<String> readAffiliations() {
-        return electionService.getElection().getAffiliations().stream().map(Affiliation::getName).collect(Collectors.toSet());
+        return electionService.getElection().getParties().stream().map(Party::getName).collect(Collectors.toSet());
     }
 }

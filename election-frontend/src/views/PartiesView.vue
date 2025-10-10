@@ -1,8 +1,7 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import type {AffiliationResponse, Affiliation} from "@/types/api.ts";
-import {getAffiliations} from "@/services/AffiliationService.ts";
+import {getParties} from "@/services/PartyService.ts";
 import IconSpinner from "@/components/icons/IconSpinner.vue";
 
 const data = ref<string[]>([]);
@@ -11,7 +10,7 @@ const loading = ref(false);
 onMounted(async () => {
   loading.value = true;
   try {
-    data.value = await getAffiliations();
+    data.value = await getParties();
     console.log(data.value);
   } catch (err: any) {
     console.log(err.message)
@@ -33,12 +32,12 @@ onMounted(async () => {
       </div>
       <div>
         <div class="grid grid-cols-3 gap-x-6 gap-y-4">
-          <a v-for="affiliation in data" :key="affiliation" href="/"
+          <a v-for="party in data" :key="party" href="/"
              class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4!">
             <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto">
             <div class="overflow-hidden">
               <div class="flex flex-col max-w-[250px]">
-                <span class="text-lg font-bold truncate">{{ affiliation }}</span>
+                <span class="text-lg font-bold truncate">{{ party }}</span>
                 <p class="text-text-muted  line-clamp-3"> simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, </p>
               </div>
             </div>

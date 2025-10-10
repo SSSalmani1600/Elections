@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class Election {
     private final String id;
-    private List<Affiliation> affiliations = new ArrayList<>();
+    private final List<Party> parties = new ArrayList<>();
 
     public Election(String id) {
         this.id = id;
@@ -24,8 +24,12 @@ public class Election {
         return id;
     }
 
-    public List<Affiliation> getAffiliations() {
-        return affiliations;
+    public List<Party> getParties() {
+        return parties;
+    }
+
+    public Party getPartyByName(String affiliationId) {
+        return parties.stream().filter(aff -> aff.getName().equals(affiliationId)).findFirst().orElse(null);
     }
 
 }

@@ -1,7 +1,7 @@
 package nl.hva.election_backend.utils.xml.transformers;
 
 
-import nl.hva.election_backend.model.Affiliation;
+import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.model.Election;
 import nl.hva.election_backend.utils.xml.DefinitionTransformer;
 
@@ -34,6 +34,6 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
     public void registerParty(Map<String, String> electionData) {
         System.out.println("Party: " + electionData);
         String name = electionData.get(REGISTERED_APPELLATION);
-        election.getAffiliations().add(new Affiliation(name));
+        election.getParties().add(new Party(name));
     }
 }

@@ -3,11 +3,11 @@ package nl.hva.election_backend.model;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Affiliation {
+public class Party {
     private String name;
     private Set<Candidate> candidates = new HashSet<>();
 
-    public Affiliation(String name) {
+    public Party(String name) {
         this.name = name;
     }
 

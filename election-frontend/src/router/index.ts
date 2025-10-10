@@ -4,7 +4,7 @@ import LoginView from '@/views/LoginView.vue'
 import ElectionsView from '@/views/ElectionsView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import PartyDetailView from '@/views/PartyDetailView.vue'
-import AffiliationsView from "@/views/AffiliationsView.vue";
+import PartiesView from "@/views/PartiesView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,8 +21,8 @@ const router = createRouter({
     },
     {
       path: '/partijen',
-      name: 'affiliations',
-      component: AffiliationsView,
+      name: 'parties',
+      component: PartiesView,
     },
     {
       path: '/verkiezingen',

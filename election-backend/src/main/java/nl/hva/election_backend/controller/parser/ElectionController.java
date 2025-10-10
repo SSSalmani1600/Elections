@@ -1,12 +1,8 @@
 package nl.hva.election_backend.controller.parser;
 
-import nl.hva.election_backend.model.Affiliation;
 import nl.hva.election_backend.model.Election;
 import nl.hva.election_backend.service.DutchElectionService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.

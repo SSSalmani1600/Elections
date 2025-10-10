@@ -34,7 +34,7 @@ public class DutchCandidateTransformer implements CandidateTransformer, TagAndAt
         String electionName = electionData.get(ELECTION_NAME);
         String affiliationName = (electionData.get(REGISTERED_NAME));
         Candidate candidate = new Candidate(firstName, lastName, initials, gender, localityName, electionName, affiliationName);
-        election.getAffiliations().stream()
+        election.getParties().stream()
                 .filter(a -> a.getName().equals(affiliationName))
                 .findFirst()
                 .ifPresent(a -> a.getCandidates().add(candidate));

@@ -7,7 +7,7 @@ public class Candidate {
     private String gender;
     private String localityName;
     private String electionName;
-    private String affiliationId;
+    private String partiesId;
 
     public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId) {
         this.firstName = firstName;
@@ -16,7 +16,7 @@ public class Candidate {
         this.gender = gender;
         this.localityName = localityName;
         this.electionName = electionName;
-        this.affiliationId = affiliationId;
+        this.partiesId = affiliationId;
     }
 
     public String getFirstName() {
@@ -43,7 +43,7 @@ public class Candidate {
         return electionName;
     }
 
-    public String getAffiliationId() {
-        return affiliationId;
+    public String getPartiesId() {
+        return partiesId;
     }
 }
