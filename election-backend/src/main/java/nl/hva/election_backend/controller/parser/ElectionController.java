@@ -1,7 +1,6 @@
-package nl.hva.election_backend.api;
+package nl.hva.election_backend.controller.parser;
 
 import nl.hva.election_backend.model.Affiliation;
-import nl.hva.election_backend.model.Candidate;
 import nl.hva.election_backend.model.Election;
 import nl.hva.election_backend.service.DutchElectionService;
 import org.springframework.web.bind.annotation.*;
@@ -39,25 +38,4 @@ public class ElectionController {
             return electionService.readResults(electionId, folderName);
         }
     }
-
-    @PostMapping("{electionId}/affiliations")
-    public Set<String> readAffiliations(@PathVariable String electionId, @RequestParam(required = false) String folderName) {
-        Election result;
-        if (folderName == null) {
-            result = electionService.readResults(electionId, electionId);
-        } else {
-            result = electionService.readResults(electionId, folderName);
-        }
-        return result.getAffiliations().stream().map(Affiliation::getName).collect(Collectors.toSet());
-    }
-
-//    @PostMapping("{electionId}/affiliations/{affiliationId}/candidates")
-//    public Set<Candidate> readCandidates(@PathVariable String electionId, @RequestParam(required = false) String folderName, @PathVariable String affiliationId) {
-//        Election result;
-//        if (folderName == null) {
-//            result = electionService.readResults(electionId, electionId);
-//        } else {
-//            result = electionService.readResults(electionId, folderName);
-//        }
-//    }
 }
