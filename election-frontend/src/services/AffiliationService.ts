@@ -1,5 +1,3 @@
-import type {AffiliationResponse, LoginResponse} from "@/types/api.ts";
-
 export async function getAffiliations(): Promise<Set<String>> {
   const res = await fetch("http://localhost:8081/elections/TK2023/affiliations", {
     method: "POST",

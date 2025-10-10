@@ -16,7 +16,7 @@ const toggleMenu = () => {
 
 
 <template>
-    <nav class="h-[100px] bg-background flex items-center">
+    <nav class="h-[100px] bg-background flex items-center sticky top-0 shadow-lg']">
         <div class="grid grid-cols-12 w-full px-6 max-lg:flex max-lg:justify-between max-lg:gap-10">
             <!-- LOGO -->
             <div class="col-span-4">
