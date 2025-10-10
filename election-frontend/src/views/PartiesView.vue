@@ -11,7 +11,6 @@ onMounted(async () => {
   loading.value = true;
   try {
     data.value = await getParties();
-    console.log(data.value);
   } catch (err: any) {
     console.log(err.message)
   } finally {
