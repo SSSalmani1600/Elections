@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * Demo controller for showing how you could load the election data in the backend.
  */
 @RestController
-@RequestMapping("elections")
+@RequestMapping("api/elections")
 public class ElectionController {
     private final DutchElectionService electionService;
 

@@ -11,11 +11,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService = new JwtService();
+    String[] whiteListURLs = {
+            "/api/auth/",
+            "/api/parties/",
+            "/api/elections/",
+    };
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -27,11 +33,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Auth endpoints altijd doorlaten
+        // White listed endpoints altijd doorlaten
         String uri = request.getRequestURI();
-        if (uri.startsWith("/api/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
+        for (String url : whiteListURLs) {
+            if (uri.startsWith(url)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review

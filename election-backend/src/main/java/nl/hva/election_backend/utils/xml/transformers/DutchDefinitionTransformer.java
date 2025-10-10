@@ -7,7 +7,7 @@ import nl.hva.election_backend.utils.xml.DefinitionTransformer;
 
 import java.util.Map;
 
-import static nl.hva.ict.sm3.backend.utils.xml.TagAndAttributeNames.*;
+import static nl.hva.election_backend.utils.xml.TagAndAttributeNames.*;
 
 /**
  * Just prints to content of electionData to the standard output.>br/>
