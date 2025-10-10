@@ -35,7 +35,7 @@ const toggleMenu = () => {
             <!-- AUTH LINKS (desktop) -->
             <div class="flex items-center col-span-4 justify-end gap-4 max-lg:hidden">
                 <template v-if="!isLoggedIn">
-                    <router-link to="/ingloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
+                    <router-link to="/inloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
                     <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
                 </template>
                 <template v-else>
