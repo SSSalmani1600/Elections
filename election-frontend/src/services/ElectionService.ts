@@ -8,5 +8,9 @@ export async function getParties(electionYear: number): Promise<ParserResponse> 
     },
   })
 
+  if (!res.ok) {
+    throw new Error(`Failed to fetch parties: ${res.statusText}`)
+  }
+
   return (await res.json()) as ParserResponse
 }
