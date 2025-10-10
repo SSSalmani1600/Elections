@@ -8,3 +8,12 @@ export interface ParserResponse {
     name: string
   }[]
 }
+
+export interface Affiliation {
+  name: string;
+}
+
+export interface AffiliationResponse {
+  id: string;
+  affiliations: Affiliation[];
+}

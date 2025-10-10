@@ -1,8 +1,12 @@
 package nl.hva.ict.sm3.backend.api;
 
+import nl.hva.ict.sm3.backend.model.Affiliation;
 import nl.hva.ict.sm3.backend.model.Election;
 import nl.hva.ict.sm3.backend.service.DutchElectionService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Demo controller for showing how you could load the election data in the backend.
@@ -32,5 +36,16 @@ public class ElectionController {
         } else {
             return electionService.readResults(electionId, folderName);
         }
+    }
+
+    @PostMapping("{electionId}/affiliations")
+    public Set<String> readAffiliations(@PathVariable String electionId, @RequestParam(required = false) String folderName) {
+        Election result;
+        if (folderName == null) {
+            result = electionService.readResults(electionId, electionId);
+        } else {
+            result = electionService.readResults(electionId, folderName);
+        }
+        return result.getAffiliations().stream().map(Affiliation::getName).collect(Collectors.toSet());
     }
 }
