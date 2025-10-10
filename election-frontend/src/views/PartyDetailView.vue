@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getParties } from '@/services/PartyDetailService'
+import { getParties } from '@/services/ElectionService.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
@@ -11,7 +11,7 @@ onMounted(async () => {
   try {
     const data = await getParties(2023)
     const foundParty = data.affiliations.find(
-      (p) => p.name.toLowerCase() === routeName.toLowerCase()
+      (p) => p.name.toLowerCase() === routeName.toLowerCase(),
     )
     partyName.value = foundParty?.name ?? routeName
   } catch (err) {
@@ -35,7 +35,8 @@ onMounted(async () => {
         </div>
 
         <p class="text-gray-300 mt-3 text-xl md:text-2xl">
-          Ontdek de standpunten van Partij <span class="font-bold text-white"> {{ partyName }}</span>
+          Ontdek de standpunten van Partij
+          <span class="font-bold text-white"> {{ partyName }}</span>
         </p>
       </div>
 
@@ -52,9 +53,10 @@ onMounted(async () => {
       <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
       <p class="text-gray-300 max-w-4xl leading-relaxed">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-        ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-        dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </p>
     </section>
   </div>
