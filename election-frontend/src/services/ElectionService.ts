@@ -1,7 +1,7 @@
 import type { ParserResponse } from '@/types/api'
 
 export async function getParties(electionYear: number): Promise<ParserResponse> {
-  const res = await fetch(`http://localhost:8081/elections/TK${electionYear.toString()}`, {
+  const res = await fetch(`http://localhost:8080/elections/TK${electionYear.toString()}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
