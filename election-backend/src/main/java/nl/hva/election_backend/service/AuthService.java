@@ -9,12 +9,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
     private final InMemoryUserRepository userRepo;
-    private final PasswordHasher hasher;
-    private final BCryptPasswordHasher bCryptPasswordHasher = new BCryptPasswordHasher();
+    private final BCryptPasswordHasher hasher = new BCryptPasswordHasher();
 
-    public AuthService(InMemoryUserRepository userRepo, PasswordHasher hasher) {
+    public AuthService(InMemoryUserRepository userRepo) {
         this.userRepo = userRepo;
-        this.hasher = hasher;
     }
 
     public User authenticate(String email, String password) {
@@ -46,9 +44,7 @@ public class AuthService {
         }
 
         // Hash via DI hasher; fallback naar expliciete BCrypt als hasher om wat voor reden dan ook null is.
-        String passwordHash = (hasher != null)
-                ? hasher.hash(rawPassword)
-                : bCryptPasswordHasher.hash(rawPassword);
+        String passwordHash = hasher.hash(rawPassword);
 
         User user = new User();
         user.setEmail(normalizedEmail);

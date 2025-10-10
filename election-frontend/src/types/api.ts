@@ -3,6 +3,12 @@ export interface LoginResponse {
   token: string
 }
 
+export interface RegisterResponse {
+  email: string;
+  password: string;
+  username: string;
+}
+
 export interface ParserResponse {
   affiliations: {
     name: string

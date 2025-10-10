@@ -1,148 +1,154 @@
 <script setup lang="ts">
-import { RouterView } from "vue-router"
-import { ref, onMounted, onBeforeUnmount } from "vue"
-import { useAuth } from "@/stores/useAuth"
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const menuIsOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
-const { isLoggedIn, displayName, logout } = useAuth()
+const token: string | null = localStorage.getItem('JWT')
+const isLoggedIn: boolean = token ? true : false
+const username: string = localStorage.getItem('username') || ''
 
 // mobiel menu
 const toggleMenu = () => {
-    menuIsOpen.value = !menuIsOpen.value
+  menuIsOpen.value = !menuIsOpen.value
 }
 
 // profielmenu
 const toggleUserMenu = () => {
-    userMenuOpen.value = !userMenuOpen.value
+  userMenuOpen.value = !userMenuOpen.value
+}
+
+const logout = () => {
+  localStorage.setItem('JWT', '')
+  location.reload()
 }
 
 // sluit dropdown als je buiten klikt
 const handleClickOutside = (event: MouseEvent) => {
-    if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
-        userMenuOpen.value = false
-    }
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    userMenuOpen.value = false
+  }
 }
 
 onMounted(() => {
-    document.addEventListener("click", handleClickOutside)
+  document.addEventListener('click', handleClickOutside)
 })
 onBeforeUnmount(() => {
-    document.removeEventListener("click", handleClickOutside)
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
 <template>
-    <nav class="h-[100px] bg-background flex items-center justify-between px-6 relative">
-        <!-- LOGO -->
-        <router-link to="/" class="flex items-center gap-2">
-            <img src="../assets/logo.svg" alt="Logo" class="h-8" />
-            <h1 class="text-white font-bold text-xl">GAstemmen.NL</h1>
-        </router-link>
+  <nav class="h-[100px] bg-background flex items-center justify-between px-6 relative">
+    <!-- LOGO -->
+    <router-link to="/" class="flex items-center gap-2">
+      <img src="../assets/logo.svg" alt="Logo" class="h-8" />
+    </router-link>
 
-        <!-- NAV LINKS -->
-        <div class="hidden lg:flex items-center justify-center gap-8">
-            <router-link to="/elections" class="nav-link">Verkiezingen</router-link>
-            <router-link to="/parties" class="nav-link">Partijen</router-link>
-            <router-link to="/forum" class="nav-link">Forum</router-link>
-        </div>
+    <!-- NAV LINKS -->
+    <div class="hidden lg:flex items-center justify-center gap-8">
+      <router-link to="/elections" class="nav-link">Verkiezingen</router-link>
+      <router-link to="/parties" class="nav-link">Partijen</router-link>
+      <router-link to="/forum" class="nav-link">Forum</router-link>
+    </div>
 
-        <!-- RECHTS (Login / User menu) -->
-        <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
-            <template v-if="!isLoggedIn">
-                <router-link to="/login" class="btn btn-primary !py-[6px]">Inloggen</router-link>
-                <router-link to="/register" class="btn btn-secondary !py-[6px]">Registreren</router-link>
-            </template>
+    <!-- RECHTS (Login / User menu) -->
+    <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
+      <template v-if="!isLoggedIn">
+        <router-link to="/login" class="btn btn-primary !py-[6px]">Inloggen</router-link>
+        <router-link to="/register" class="btn btn-secondary !py-[6px]">Registreren</router-link>
+      </template>
 
-            <template v-else>
-                <!-- Gebruikersicoon -->
-                <button
-                    @click.stop="toggleUserMenu"
-                    class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition"
-                >
-                    <i class="pi pi-user text-lg"></i>
-                </button>
-
-                <!-- Dropdown-menu -->
-                <Transition
-                    enter-active-class="transition ease-out duration-200"
-                    enter-from-class="opacity-0 translate-y-1"
-                    enter-to-class="opacity-100 translate-y-0"
-                    leave-active-class="transition ease-in duration-150"
-                    leave-from-class="opacity-100 translate-y-0"
-                    leave-to-class="opacity-0 translate-y-1"
-                >
-                    <div
-                        v-if="userMenuOpen"
-                        class="absolute top-full right-0 mt-3 w-48 bg-[#1c1f2b] shadow-lg rounded-lg border border-gray-700 py-2 z-50"
-                    >
-                        <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
-                            👋 Hallo, <strong>{{ displayName }}</strong>
-                        </p>
-                        <router-link
-                            to="/account"
-                            class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
-                            @click="userMenuOpen = false"
-                        >
-                            Mijn account
-                        </router-link>
-                        <button
-                            @click="logout"
-                            class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
-                        >
-                            Uitloggen
-                        </button>
-                    </div>
-                </Transition>
-            </template>
-        </div>
-
-        <!-- MOBIEL MENU -->
-        <button type="button" @click="toggleMenu" class="text-white cursor-pointer lg:hidden">
-            <i class="pi pi-bars text-2xl"></i>
+      <template v-else>
+        <!-- Gebruikersicoon -->
+        <button
+          @click.stop="toggleUserMenu"
+          class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition"
+        >
+          <i class="pi pi-user text-lg"></i>
         </button>
 
+        <!-- Dropdown-menu -->
         <Transition
-            enter-active-class="transition-transform duration-300 ease-in-out"
-            enter-from-class="translate-x-full"
-            enter-to-class="translate-x-0"
-            leave-active-class="transition-transform duration-300 ease-in-out"
-            leave-from-class="translate-x-0"
-            leave-to-class="translate-x-full"
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="opacity-0 translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 translate-y-1"
         >
-            <div
-                v-if="menuIsOpen"
-                class="lg:hidden w-3/5 max-md:w-3/4 z-10 h-screen flex bg-surface shadow-2xl fixed top-0 right-0"
+          <div
+            v-if="userMenuOpen"
+            class="absolute top-full right-0 mt-3 w-48 bg-[#1c1f2b] shadow-lg rounded-lg border border-gray-700 py-2 z-50"
+          >
+            <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
+              👋 Hallo, <strong>{{ username }}</strong>
+            </p>
+            <router-link
+              to="/account"
+              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+              @click="userMenuOpen = false"
             >
-                <div class="w-full h-full p-6 flex flex-col gap-6">
-                    <button @click="toggleMenu" class="text-primary text-2xl self-start">
-                        <i class="pi pi-times"></i>
-                    </button>
-
-                    <router-link to="/elections" class="nav-link" @click="toggleMenu">Verkiezingen</router-link>
-                    <router-link to="/parties" class="nav-link" @click="toggleMenu">Partijen</router-link>
-                    <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
-
-                    <template v-if="!isLoggedIn">
-                        <router-link to="/login" class="btn btn-primary" @click="toggleMenu">Inloggen</router-link>
-                        <router-link to="/register" class="btn btn-secondary" @click="toggleMenu">Registreren</router-link>
-                    </template>
-                    <template v-else>
-                        <p class="text-gray-200">👋 Hallo, {{ displayName }}</p>
-                        <router-link to="/account" class="btn btn-primary" @click="toggleMenu">Mijn account</router-link>
-                        <button @click="logout" class="btn btn-secondary">Uitloggen</button>
-                    </template>
-                </div>
-            </div>
+              Mijn account
+            </router-link>
+            <button
+              @click="logout"
+              class="block w-full cursor-pointer text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+            >
+              Uitloggen
+            </button>
+          </div>
         </Transition>
-    </nav>
+      </template>
+    </div>
 
-    <RouterView />
+    <!-- MOBIEL MENU -->
+    <button type="button" @click="toggleMenu" class="text-white cursor-pointer lg:hidden">
+      <i class="pi pi-bars text-2xl"></i>
+    </button>
+
+    <Transition
+      enter-active-class="transition-transform duration-300 ease-in-out"
+      enter-from-class="translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-300 ease-in-out"
+      leave-from-class="translate-x-0"
+      leave-to-class="translate-x-full"
+    >
+      <div
+        v-if="menuIsOpen"
+        class="lg:hidden w-3/5 max-md:w-3/4 z-10 h-screen flex bg-surface shadow-2xl fixed top-0 right-0"
+      >
+        <div class="w-full h-full p-6 flex flex-col gap-6">
+          <button @click="toggleMenu" class="text-primary text-2xl self-start">
+            <i class="pi pi-times"></i>
+          </button>
+
+          <router-link to="/elections" class="nav-link" @click="toggleMenu"
+            >Verkiezingen</router-link
+          >
+          <router-link to="/parties" class="nav-link" @click="toggleMenu">Partijen</router-link>
+          <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
+
+          <template v-if="!isLoggedIn">
+            <router-link to="/login" class="btn btn-primary" @click="toggleMenu"
+              >Inloggen</router-link
+            >
+            <router-link to="/register" class="btn btn-secondary" @click="toggleMenu"
+              >Registreren</router-link
+            >
+          </template>
+          <template v-else>
+            <p class="text-gray-200">👋 Hallo, {{ username }}</p>
+            <router-link to="/account" class="btn btn-primary" @click="toggleMenu"
+              >Mijn account</router-link
+            >
+            <button @click="logout" class="btn btn-secondary cursor-pointer">Uitloggen</button>
+          </template>
+        </div>
+      </div>
+    </Transition>
+  </nav>
 </template>
 
-<style scoped>
-.nav-link {
-    @apply text-white hover:text-[#EF3054] transition-colors;
-}
-</style>
+<style scoped></style>

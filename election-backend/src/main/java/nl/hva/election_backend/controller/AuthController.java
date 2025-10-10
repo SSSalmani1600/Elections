@@ -3,6 +3,7 @@ package nl.hva.election_backend.controller;
 import nl.hva.election_backend.dto.LoginRequest;
 import nl.hva.election_backend.dto.LoginResponse;
 import nl.hva.election_backend.dto.RegisterRequest;
+import nl.hva.election_backend.dto.RegisterResponse;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -46,9 +47,8 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
             User user = authService.register(req.getEmail(), req.getPassword(), req.getDisplayName());
-            String token = jwtService.generateToken(user.getId().toString());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new LoginResponse(token, user.getDisplayName()));
+                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getDisplayName()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (IllegalStateException e) {
