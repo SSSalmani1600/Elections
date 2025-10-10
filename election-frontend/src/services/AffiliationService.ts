@@ -1,6 +1,6 @@
 export async function getAffiliations(): Promise<Set<String>> {
-  const res = await fetch("http://localhost:8080/elections/TK2023/affiliations", {
-    method: "POST",
+  const res = await fetch("http://localhost:8080/api/affiliations/names", {
+    method: "GET",
     headers: {
       'Content-Type': 'application/json',
     },
