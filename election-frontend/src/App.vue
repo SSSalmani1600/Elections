@@ -27,16 +27,16 @@ const toggleMenu = () => {
 
             <!-- NAV LINKS (desktop) -->
             <div class="flex items-center justify-center gap-8 col-span-4 max-lg:hidden">
-                <router-link to="/elections" class="nav-link">Verkiezingen</router-link>
-                <router-link to="/parties" class="nav-link">Partijen</router-link>
+                <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
+                <router-link to="/partijen" class="nav-link">Partijen</router-link>
                 <router-link to="/forum" class="nav-link">Forum</router-link>
             </div>
 
             <!-- AUTH LINKS (desktop) -->
             <div class="flex items-center col-span-4 justify-end gap-4 max-lg:hidden">
                 <template v-if="!isLoggedIn">
-                    <router-link to="/login" class="btn btn-primary !py-[6px]">Inloggen</router-link>
-                    <router-link to="/register" class="btn btn-secondary !py-[6px]">Registreren</router-link>
+                    <router-link to="/ingloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
+                    <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
                 </template>
                 <template v-else>
                     <div class="relative">
