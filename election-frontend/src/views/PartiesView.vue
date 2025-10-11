@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {getParties} from "@/services/PartyService.ts";
 import IconSpinner from "@/components/icons/IconSpinner.vue";
 
@@ -18,6 +18,25 @@ onMounted(async () => {
   }
 })
 
+
+const pageSize = 9;
+const currentPage = ref(1);
+
+const totalPages = computed(() => Math.ceil(data.value.length / pageSize));
+const pages = computed((): number[] =>
+  Array.from({ length: totalPages.value }, (_, i) => i + 1)
+);
+
+const visibleParties = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  const end = currentPage.value * pageSize;
+  return data.value.slice(start, end);
+});
+
+const selectPage = (page: number) => {
+  currentPage.value = page;
+}
+
 </script>
 
 <template>
@@ -29,9 +48,10 @@ onMounted(async () => {
           <p class="text-text-muted">Hier vind je alle partijen die er op dit moment bestaan</p>
         </div>
       </div>
-      <div>
+      <div class="flex flex-col items-center gap-6">
         <div class="grid grid-cols-3 gap-x-6 gap-y-4">
-          <div v-for="party in data" :key="party" class="bg-primary w-full h-full rounded-lg">
+          <div v-for="party in visibleParties" :key="party"
+               class="bg-primary w-full h-full rounded-lg">
             <a href="/"
                class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300">
               <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto">
@@ -46,6 +66,15 @@ onMounted(async () => {
             </a>
           </div>
         </div>
+        <div class="flex items-center gap-4">
+          <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><i
+            class="pi pi-arrow-left"></i> Vorige
+          </button>
+          <button v-for="page in pages" :key="page" :class="{'active-page' :page === currentPage}" @click="selectPage(page)" class="py-1.5 px-3 rounded-lg cursor-pointer">{{ page }}</button>
+          <button class="pagination-btn" @click="currentPage++"
+                  :disabled="(currentPage === totalPages)">Volgende <i
+            class="pi pi-arrow-right"></i></button>
+        </div>
         <IconSpinner v-if="loading"/>
       </div>
     </div>
@@ -54,4 +83,17 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.pagination-btn {
+  cursor: pointer;
+}
+
+.pagination-btn[disabled] {
+  cursor: default;
+  opacity: 60%;
+}
+
+.active-page {
+  background: #EF3054;
+  transition-duration: 500ms;
+}
 </style>
