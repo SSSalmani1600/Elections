@@ -31,16 +31,20 @@ onMounted(async () => {
       </div>
       <div>
         <div class="grid grid-cols-3 gap-x-6 gap-y-4">
-          <a v-for="party in data" :key="party" href="/"
-             class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4!">
-            <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto">
-            <div class="overflow-hidden">
-              <div class="flex flex-col max-w-[250px]">
-                <span class="text-lg font-bold truncate">{{ party }}</span>
-                <p class="text-text-muted  line-clamp-3"> simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, </p>
+          <div v-for="party in data" :key="party" class="bg-primary w-full h-full rounded-lg">
+            <a href="/"
+               class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300">
+              <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto">
+              <div class="overflow-hidden">
+                <div class="flex flex-col max-w-[250px]">
+                  <span class="text-lg font-bold truncate">{{ party }}</span>
+                  <p class="text-text-muted  line-clamp-3"> simply dummy text of the printing and
+                    typesetting industry. Lorem Ipsum has been the industry's standard dummy text
+                    ever since the 1500s, </p>
+                </div>
               </div>
-            </div>
-          </a>
+            </a>
+          </div>
         </div>
         <IconSpinner v-if="loading"/>
       </div>
