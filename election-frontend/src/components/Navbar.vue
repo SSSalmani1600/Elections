@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <nav class="h-[100px] bg-background flex items-center justify-between px-6 relative">
+  <nav class="h-[100px] bg-background flex items-center justify-between px-6 sticky top-0 shadow-lg z-100">
     <!-- LOGO -->
     <router-link to="/" class="flex items-center gap-2">
       <img src="../assets/logo.svg" alt="Logo" class="h-8" />
