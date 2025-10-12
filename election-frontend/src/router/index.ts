@@ -45,7 +45,6 @@ const router = createRouter({
           name: 'forum',
           component: DiscussionsView,
       },
-
   ],
 })
 
