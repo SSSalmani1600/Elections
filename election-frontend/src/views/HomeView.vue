@@ -3,8 +3,6 @@ import {useRouter} from 'vue-router'
 
 const router = useRouter()
 
-const goToElections = () => router.push('/elections')
-const goToQuiz = () => router.push('/quiz')
 const goToForum = () => router.push('/forum')
 </script>
 
