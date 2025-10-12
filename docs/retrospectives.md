@@ -1,5 +1,24 @@
 # Retrospectives
 
+## Sprint 2
+
+_Datum: 9-10-2025_
+
+<img src="./images/retrospectives/retrospective-2.png" alt="alt Retrospective screenshot" width="300"/>
+
+### Concrete verbeterpunten
+
+- De dinsdag avond van de sprint review week wordt er gemerged, zodat er nog tijd is om dingen recht te trekken als er iets stuk gaat
+- Als er een merge request is aangemaakt, wordt er duidelijk gereageerd hierop met wie de merge request gaat goed keuren.
+
+### Teamleden aanwezig
+
+- Afnaan
+- Daan
+- Niek
+- Manal
+- Nabil
+
 ## Sprint 1
 
 _Datum: 18-9-2025_
