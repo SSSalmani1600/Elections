@@ -37,6 +37,10 @@ public class Party {
         this.votes = votes;
     }
 
+    public void setCandidates(Set<Candidate> candidates) {
+        this.candidates = candidates;
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Party that)) return false;
