@@ -120,21 +120,21 @@ onBeforeUnmount(() => {
         class="lg:hidden w-3/5 max-md:w-3/4 z-10 h-screen flex bg-surface shadow-2xl fixed top-0 right-0"
       >
         <div class="w-full h-full p-6 flex flex-col gap-6">
-          <button @click="toggleMenu" class="text-primary text-2xl self-start">
+          <button @click="toggleMenu" class="text-primary text-2xl self-start cursor-pointer">
             <i class="pi pi-times"></i>
           </button>
 
-          <router-link to="/elections" class="nav-link" @click="toggleMenu"
+          <router-link to="/verkiezingen" class="nav-link" @click="toggleMenu"
             >Verkiezingen</router-link
           >
-          <router-link to="/parties" class="nav-link" @click="toggleMenu">Partijen</router-link>
+          <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
           <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
 
           <template v-if="!isLoggedIn">
-            <router-link to="/login" class="btn btn-primary" @click="toggleMenu"
+            <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu"
               >Inloggen</router-link
             >
-            <router-link to="/register" class="btn btn-secondary" @click="toggleMenu"
+            <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu"
               >Registreren</router-link
             >
           </template>
@@ -148,6 +148,17 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </Transition>
+    <Transition
+      enter-active-class="transition-opacity duration-300 ease-in-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-300 ease-in-out"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="menuIsOpen" @click="toggleMenu" class="bg-black/50 w-screen h-screen fixed top-0 left-0 hidden max-lg:block"></div>
+    </Transition>
+
   </nav>
 </template>
 
