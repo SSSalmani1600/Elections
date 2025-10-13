@@ -100,7 +100,7 @@ window.addEventListener("resize", updatePageSize);
       <div class="flex justify-between items-baseline w-full mt-8">
         <div>
           <h1 class="text-[3rem] font-bold">Partijen</h1>
-          <p class="text-text-muted">Op deze pagina vind je een overzicht van alle bestaande
+          <p class="text-text-muted max-w-[600px]">Op deze pagina vind je een overzicht van alle bestaande
             partijen. Lees meer over hun visie en beleid door op 1 van de partijen de klikken</p>
         </div>
       </div>
