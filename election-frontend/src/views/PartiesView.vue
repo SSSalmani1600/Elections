@@ -6,6 +6,7 @@ import IconSpinner from "@/components/icons/IconSpinner.vue";
 
 const data = ref<string[]>([]);
 const loading = ref(false);
+const error = ref<string>("");
 
 onMounted(async () => {
   loading.value = true;
@@ -13,7 +14,8 @@ onMounted(async () => {
   try {
     data.value = await getParties();
   } catch (err: any) {
-    console.log(err.message)
+    console.error(err.message)
+    error.value = "Er konden geen partijen gevonden worden!"
   } finally {
     loading.value = false;
   }
@@ -70,7 +72,7 @@ const visibleParties = computed(() => {
 
 const selectPage = (page: number | string) => {
   if (typeof page === "number")
-  currentPage.value = page;
+    currentPage.value = page;
 }
 
 function updatePageSize() {
@@ -94,14 +96,19 @@ window.addEventListener("resize", updatePageSize);
 
 <template>
   <div class="w-full flex flex-col items-center">
-    <div class="flex flex-col items-center w-[70%] gap-10">
-      <div class="flex justify-between items-baseline w-full">
+    <div class="flex flex-col items-center w-[70%] gap-10 relative">
+      <div class="flex justify-between items-baseline w-full mt-8">
         <div>
           <h1 class="text-[3rem] font-bold">Partijen</h1>
-          <p class="text-text-muted">Hier vind je alle partijen die er op dit moment bestaan</p>
+          <p class="text-text-muted">Op deze pagina vind je een overzicht van alle bestaande
+            partijen. Lees meer over hun visie en beleid door op 1 van de partijen de klikken</p>
         </div>
       </div>
-      <div class="flex flex-col items-center gap-6 min-h-[542px] relative">
+      <span v-show="error !== ''"
+            class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
+          error
+        }}</span>
+      <div v-show="error === ''" class="flex flex-col items-center gap-6 min-h-[542px] relative w-full">
         <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
           <div v-for="party in visibleParties" :key="party"
                class="bg-primary w-full h-fit rounded-lg">
@@ -119,7 +126,7 @@ window.addEventListener("resize", updatePageSize);
             </a>
           </div>
         </div>
-        <div class="flex items-center gap-2 mt-auto">
+        <div v-show="error === ''" class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]">
           <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><i
             class="pi pi-arrow-left"></i> <span class="hidden md:block">Vorige</span>
           </button>
