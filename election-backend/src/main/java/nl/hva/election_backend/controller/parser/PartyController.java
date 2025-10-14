@@ -18,7 +18,7 @@ public class PartyController {
         this.electionService = electionService;
     }
 
-    @GetMapping("/names")
+    @GetMapping("/short-info")
     public Set<String> readAffiliations() {
         return electionService.getElection().getParties().stream().map(Party::getName).collect(Collectors.toSet());
     }
