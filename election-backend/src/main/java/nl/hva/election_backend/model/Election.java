@@ -32,4 +32,12 @@ public class Election {
         return parties.stream().filter(aff -> aff.getName().equals(affiliationId)).findFirst().orElse(null);
     }
 
+    public Candidate getCandidateByName(String fullName) {
+        return parties.stream()
+                .flatMap(party -> party.getCandidates().stream())
+                .filter(candidate -> candidate.getFullName().equalsIgnoreCase(fullName))
+                .findFirst()
+                .orElse(null);
+    }
+
 }
