@@ -5,8 +5,8 @@ import java.util.Set;
 
 public class Party {
     private String name;
-    private Set<Candidate> candidates = new HashSet<>();
-
+    private final Set<Candidate> candidates = new HashSet<>();
+    private Set<ElectedCandidates> electedCandidates = new HashSet<>();
     public Party(String name) {
         this.name = name;
     }
@@ -17,5 +17,16 @@ public class Party {
 
     public String getName() {
         return name;
+    }
+
+    public void setVotes(int votes) {
+    }
+
+    public Set<ElectedCandidates> getElectedCandidates() {
+        return electedCandidates;
+    }
+
+    public void setElectedCandidates(Set<ElectedCandidates> electedCandidates) {
+        this.electedCandidates = electedCandidates;
     }
 }
