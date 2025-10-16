@@ -1,6 +1,7 @@
 package nl.hva.election_backend.utils.xml;
 
 import nl.hva.election_backend.utils.xml.AbstractParserTests;
+import nl.hva.election_backend.utils.PathUtils;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
@@ -36,22 +37,7 @@ class ResultParserTests extends AbstractParserTests {
     }
 
     private static void createExpectedDataList(List<Map<String, String>> expectedDataList, String fileName) {
-        Map<String, String> baseData = new HashMap<>();
-        baseData.put("fileName", fileName);
-        baseData.put("EML-Id", "520");
-        baseData.put("EML-SchemaVersion", "5");
-        baseData.put("TransactionId", "1");
-        baseData.put("AuthorityIdentifier-Id", "CSB");
-        baseData.put("AuthorityIdentifier", "De Kiesraad");
-        baseData.put("CreationDateTime", "2023-12-03T14:22:26.741");
-        baseData.put("CanonicalizationMethod-Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments");
-        baseData.put("ElectionIdentifier-Id", "TK2023");
-        baseData.put("ElectionName", "Tweede Kamer der Staten-Generaal 2023");
-        baseData.put("ElectionCategory", "TK");
-        baseData.put("ElectionSubcategory", "TK");
-        baseData.put("ElectionDate", "2023-11-22");
-        baseData.put("ContestIdentifier-Id", "alle");
-        baseData.put("aggregated", "true");
+        Map<String, String> baseData = getStringStringMap(fileName);
 
         // 0
         Map<String, String> partyData = new HashMap<>(baseData);
@@ -106,6 +92,26 @@ class ResultParserTests extends AbstractParserTests {
         candidateData.put("LastName", "Podt");
         candidateData.put("LocalityName", "Utrecht");
         expectedDataList.add(Map.copyOf(candidateData));
+    }
+
+    private static Map<String, String> getStringStringMap(String fileName) {
+        Map<String, String> baseData = new HashMap<>();
+        baseData.put("fileName", fileName);
+        baseData.put("EML-Id", "520");
+        baseData.put("EML-SchemaVersion", "5");
+        baseData.put("TransactionId", "1");
+        baseData.put("AuthorityIdentifier-Id", "CSB");
+        baseData.put("AuthorityIdentifier", "De Kiesraad");
+        baseData.put("CreationDateTime", "2023-12-03T14:22:26.741");
+        baseData.put("CanonicalizationMethod-Algorithm", "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments");
+        baseData.put("ElectionIdentifier-Id", "TK2023");
+        baseData.put("ElectionName", "Tweede Kamer der Staten-Generaal 2023");
+        baseData.put("ElectionCategory", "TK");
+        baseData.put("ElectionSubcategory", "TK");
+        baseData.put("ElectionDate", "2023-11-22");
+        baseData.put("ContestIdentifier-Id", "alle");
+        baseData.put("aggregated", "true");
+        return baseData;
     }
 
 }
