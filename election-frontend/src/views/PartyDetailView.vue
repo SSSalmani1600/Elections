@@ -6,17 +6,23 @@ import { getParties } from '@/services/ElectionService.ts'
 const route = useRoute()
 const partyName = ref<string>('')
 const routeName = route.params.name as string
+const loading = ref(true)
+const errorMessage = ref('')
 
 onMounted(async () => {
   try {
     const data = await getParties(2023)
-    const foundParty = data.affiliations.find(
-      (p) => p.name.toLowerCase() === routeName.toLowerCase(),
-    )
-    partyName.value = foundParty?.name ?? routeName
+    const foundParty = data.parties.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
+    if (foundParty) {
+      partyName.value = foundParty.name
+    } else {
+      errorMessage.value = `De partij "${routeName}" bestaat niet.`
+    }
   } catch (err) {
     console.error('Kon partijen niet ophalen:', err)
-    partyName.value = routeName
+    errorMessage.value = 'Er is een fout opgetreden bij het ophalen van de partijen. Probeer het later opnieuw.'
+  } finally {
+    loading.value = false
   }
 })
 </script>
