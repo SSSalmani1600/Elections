@@ -27,3 +27,21 @@ export interface Candidate {
   votes: string;
 }
 
+export interface Candidate {
+  firstName: string;
+  lastName: string;
+  initials: string;
+  gender: string;
+  localityName: string;
+  electionName: string;
+  partiesId: string;
+  candidateId: string;
+  votes: string;
+}
+
+export interface Party {
+  name: string;
+  id: string;
+  votes: number;
+  candidates: Candidate[];
+}
