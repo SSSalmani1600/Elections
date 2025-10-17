@@ -70,6 +70,56 @@ onMounted(async () => {
           cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </p>
       </section>
+      <section class= "px-8 py-12 mt-8">
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
+          <div class="flex flex-col gap-6">
+            <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
+              <h4 class="text-xl font-semibold mb-2">Standpunt 1</h4>
+              <p class="text-gray-400 leading-relaxed">
+                Lorem ipsum dolor sit amet. Vel dignissimos nihil sit dignissimos.
+              </p>
+            </div>
+
+            <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
+              <h4 class="text-xl font-semibold mb-2">Standpunt 2</h4>
+              <p class="text-gray-400 leading-relaxed">
+                Quo ipsa provident sit autem soluta et earum distinctio. Aut exercitationem dolores ab
+                officia commodi et consequuntur animi.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30 flex flex-col justify-center"
+          >
+            <h4 class="text-xl font-semibold mb-2 flex items-center gap-2">
+              <span class="text-orange-400 text-2xl">⭐</span> Standpunt 3
+            </h4>
+            <p class="text-gray-400 leading-relaxed">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget odio quis lacus volutpat feugiat quis elementum nunc.
+              Pellentesque rhoncus ex justo. Integer interdum ullamcorper viverra. Ut ac felis tempor nisi aliquet suscipit.
+              Praesent eu libero justo. Duis scelerisque egestas condimentum.
+              Mauris elementum tellus eget turpis iaculis, vel ornare orci congue. Proin vel iaculis sapien, vel rhoncus risus.
+              Integer justo neque, blandit ut leo nec, euismod posuere nulla.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-8 gap-2 text-gray-400 items-center">
+          <button class="px-3 py-1 rounded-lg border border-gray-700 hover:border-gray-500">
+            ← Previous
+          </button>
+
+          <span class="px-3 py-1 bg-[#EF3054] text-white rounded-lg">1</span>
+
+          <button class="px-3 py-1 rounded-lg border border-gray-700 hover:border-gray-500">
+            Next →
+          </button>
+        </div>
+      </section>
+
+
     </div>
   </div>
 </template>
