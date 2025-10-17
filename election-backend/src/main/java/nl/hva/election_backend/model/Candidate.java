@@ -10,8 +10,10 @@ public class Candidate {
     private final String partiesId;
     private String shortCode = null;
     private boolean isElected = false;
+    private String candidateId;
+    private int votes;
 
-    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId) {
+    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.initials = initials;
@@ -19,6 +21,7 @@ public class Candidate {
         this.localityName = localityName;
         this.electionName = electionName;
         this.partiesId = affiliationId;
+        this.candidateId = candidateId;
     }
 
     public boolean isElected() {
@@ -69,10 +72,23 @@ public class Candidate {
         return null;
     }
 
-    public void setVotes(int votes) {
-    }
-
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public int getVotes() {
+        return votes;
+    }
+
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
+    public String getCandidateId() {
+        return candidateId;
+    }
+
+    public void setCandidateId(String candidateId) {
+        this.candidateId = candidateId;
     }
 }

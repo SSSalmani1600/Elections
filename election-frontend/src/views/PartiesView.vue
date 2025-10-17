@@ -104,12 +104,12 @@ window.addEventListener("resize", updatePageSize);
             partijen. Lees meer over hun visie en beleid door op 1 van de partijen de klikken</p>
         </div>
       </div>
-      <span v-show="error !== ''"
-            class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
-          error
-        }}</span>
-      <div v-show="error === ''" class="flex flex-col items-center gap-6 min-h-[542px] relative w-full">
-        <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
+      <div class="flex flex-col items-center gap-6 min-h-[542px] relative w-full">
+          <span v-show="error !== ''"
+                class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
+              error
+            }}</span>
+        <div v-show="error === ''" class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
           <div v-for="party in visibleParties" :key="party"
                class="bg-primary w-full h-fit rounded-lg">
             <a href="/"
