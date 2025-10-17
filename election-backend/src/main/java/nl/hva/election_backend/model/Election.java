@@ -11,13 +11,27 @@ import java.util.Set;
  *
  */
 public class Election {
-    private final String id;
+    private String id;
     private final List<Party> parties = new ArrayList<>();
     private Set<Constituency> constituencies = new HashSet<>();
+    private String type;
+    private String date;
+    private String status;
 
-    public Election(String id) {
+    public Election(String id, String type, String date, String status) {
+
         this.id = id;
+        this.type = type;
+        this.date = date;
+        this.status = status;
     }
+
+    public Election(String electionId) {
+    }
+
+    public String getType() { return type; }
+    public String getDate() { return date; }
+    public String getStatus() { return status; }
 
     @Override
     public String toString() {
