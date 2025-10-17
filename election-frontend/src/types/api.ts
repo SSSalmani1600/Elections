@@ -45,3 +45,8 @@ export interface Party {
   votes: number;
   candidates: Candidate[];
 }
+
+export interface Constituency {
+  name: string;
+  parties: Party[];
+}
