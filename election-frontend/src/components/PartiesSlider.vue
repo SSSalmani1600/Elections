@@ -117,11 +117,15 @@ onMounted(async () => {
 
 <template>
   <div class="flex gap-16 w-[80%] items-center justify-center max-lg:flex-col">
-    <div class="w-[60%] flex flex-col gap-4 max-lg:order-1 max-lg:w-full">
+    <div class="w-[60%] flex flex-col relative min-h-[200px] gap-4 max-lg:order-1 max-lg:w-full">
       <div class="flex justify-between items-center">
         <span class="text-2xl font-bold">Partijen</span>
         <router-link to="/partijen" class="text-primary link">Bekijk alles</router-link>
       </div>
+      <span v-show="error !== ''"
+            class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
+          error
+        }}</span>
       <div class="swiper">
         <div class="swiper-wrapper overflow-y-auto">
           <router-link to="/" v-for="(party, index) in data" :key="party"
