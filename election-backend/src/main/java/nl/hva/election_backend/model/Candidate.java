@@ -1,13 +1,15 @@
 package nl.hva.election_backend.model;
 
 public class Candidate {
-    private String firstName;
-    private String lastName;
-    private String initials;
-    private String gender;
-    private String localityName;
-    private String electionName;
-    private String partiesId;
+    private final String firstName;
+    private final String lastName;
+    private final String initials;
+    private final String gender;
+    private final String localityName;
+    private final String electionName;
+    private final String partiesId;
+    private String shortCode = null;
+    private boolean isElected = false;
     private String candidateId;
     private int votes;
 
@@ -20,6 +22,22 @@ public class Candidate {
         this.electionName = electionName;
         this.partiesId = affiliationId;
         this.candidateId = candidateId;
+    }
+
+    public boolean isElected() {
+        return isElected;
+    }
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
+
+    public void setElected(boolean elected) {
+        isElected = elected;
     }
 
     public String getFirstName() {
@@ -48,6 +66,14 @@ public class Candidate {
 
     public String getPartiesId() {
         return partiesId;
+    }
+
+    public String getNameLine() {
+        return null;
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 
     public int getVotes() {
