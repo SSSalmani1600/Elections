@@ -15,11 +15,15 @@ export interface ParserResponse {
   }[]
 }
 
-export interface Affiliation {
-  name: string;
+export interface Candidate {
+  firstName: string;
+  lastName: string;
+  initials: string;
+  gender: string;
+  localityName: string;
+  electionName: string;
+  partiesId: string;
+  candidateId: string;
+  votes: string;
 }
 
-export interface AffiliationResponse {
-  id: string;
-  affiliations: Affiliation[];
-}
