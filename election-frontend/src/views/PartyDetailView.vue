@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getParties } from '@/services/ElectionService.ts'
+import type { ParserResponse } from '@/types/api.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
@@ -11,8 +12,11 @@ const errorMessage = ref('')
 
 onMounted(async () => {
   try {
-    const data = await getParties(2023)
-    const foundParty = data.parties.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
+    const data = await getParties()
+    console.log(data)
+    const foundParty = data.find(
+      (p) => p.name.toLowerCase() === routeName.toLowerCase()
+    );
     if (foundParty) {
       partyName.value = foundParty.name
     } else {

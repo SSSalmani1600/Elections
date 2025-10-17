@@ -19,7 +19,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService = new JwtService();
     String[] whiteListURLs = {
             "/api/auth/",
-            "/api/parties/",
+            "/api/parties",
             "/api/elections/",
     };
 
