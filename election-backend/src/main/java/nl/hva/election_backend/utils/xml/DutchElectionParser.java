@@ -82,10 +82,10 @@ public class DutchElectionParser {
         parseFiles(folderName, "Verkiezingsdefinitie_%s".formatted(electionId), new EMLHandler(definitionTransformer));
 
         parseFiles(folderName, "Kandidatenlijsten_%s".formatted(electionId), new EMLHandler(candidateTransformer));
+        parseFiles(folderName, "Telling_%s_kieskring".formatted(electionId), new EMLHandler(constituencyVotesTransformer));
 
         parseFiles(folderName, "Resultaat_%s".formatted(electionId), new EMLHandler(resultTransformer));
         parseFiles(folderName, "Totaaltelling_%s".formatted(electionId), new EMLHandler(nationalVotesTransformer));
-        parseFiles(folderName, "Telling_%s_kieskring".formatted(electionId), new EMLHandler(constituencyVotesTransformer));
         parseFiles(folderName, "Telling_%s_gemeente".formatted(electionId), new EMLHandler(municipalityVotesTransformer));
     }
 
