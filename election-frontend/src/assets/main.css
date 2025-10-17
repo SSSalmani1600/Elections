@@ -41,6 +41,20 @@ strong {
   transition: ease-in-out 300ms;
 }
 
+.link {
+  position: relative;
+}
+
+.link:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #EF3054;
+  height: 2px;
+}
+
 .btn {
   padding: 8px 12px;
   border-radius: 5px;
