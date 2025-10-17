@@ -14,3 +14,24 @@ export async function getParties(electionYear: number): Promise<ParserResponse> 
 
   return (await res.json()) as ParserResponse
 }
+export interface Election {
+  id: string
+  type: string
+  date: string
+  status: string
+}
+
+export async function getUpcomingElections(): Promise<Election[]> {
+  const res = await fetch('http://localhost:8080/api/next-elections', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch upcoming elections: ${res.statusText}`)
+  }
+
+  return (await res.json()) as Election[]
+}
