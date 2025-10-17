@@ -123,20 +123,20 @@ onMounted(async () => {
         <router-link to="/partijen" class="text-primary link">Bekijk alles</router-link>
       </div>
       <div class="swiper">
-        <div class="swiper-wrapper">
-          <router-link to="/" v-for="party in data" :key="party"
-                       class="swiper-slide p-2 h-fit flex items-center justify-center bg-[#0C1532] text-white rounded-xl">
-            <div class="flex justify-center items-center gap-4 overflow-hidden">
-              <div class="w-[60px] h-[60px]">
-                <img v-if="party % 2 == 0" src="../assets/fvd-logo.png" class="w-full h-full" alt="">
-                <img v-if="party % 2 !== 0" src="../assets/d66-logo.png"
+        <div class="swiper-wrapper overflow-y-auto">
+          <router-link to="/" v-for="(party, index) in data" :key="party"
+                       class="swiper-slide p-4 px-10 h-fit w-full flex items-center justify-between bg-background text-white rounded-xl z-20">
+            <div class="flex items-center gap-4 overflow-hidden w-full">
+              <div class="w-[60px] h-[60px] shrink-0">
+                <img v-if="index % 2 == 0" src="../assets/fvd-logo.png" class="w-full h-full object-contain" alt="">
+                <img v-if="index % 2 !== 0" src="../assets/d66-logo.png"
                      class="w-full h-full object-contain" alt="">
               </div>
-              <span class="font-semibold truncate text-white">PvDA {{ party }}</span>
+              <span class="font-semibold truncate text-white">{{ party }}</span>
             </div>
           </router-link>
         </div>
-        <div class="swiper-pagination flex gap-2! w-full items-center justify-center mt-4"></div>
+        <div class="swiper-pagination"></div>
       </div>
     </div>
     <img src="../assets/party-slide-img.svg" width="400" alt="">
@@ -149,10 +149,16 @@ onMounted(async () => {
   padding-bottom: 2rem;
 }
 
+:deep(.swiper-pagination) {
+  display: flex;
+  gap: 4px;
+}
+
 :deep(.swiper-pagination-bullet) {
   background: white;
   opacity: 0.5;
   transition-duration: 1000ms;
+  padding: 3px;
 }
 
 :deep(.swiper-pagination-bullet-active) {
