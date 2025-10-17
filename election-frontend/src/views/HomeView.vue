@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useRouter} from 'vue-router'
+import PartiesSlider from "@/components/PartiesSlider.vue";
 
 const router = useRouter()
 
@@ -21,6 +22,8 @@ const goToForum = () => router.push('/forum')
         <button class="btn btn-secondary">Doe de match quiz</button>
       </div>
     </div>
+
+    <PartiesSlider/>
 
     <footer
       class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12 max-lg:flex-col">
