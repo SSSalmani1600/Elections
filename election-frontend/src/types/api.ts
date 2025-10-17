@@ -10,7 +10,7 @@ export interface RegisterResponse {
 }
 
 export interface ParserResponse {
-  affiliations: {
+  parties: {
     name: string
   }[]
 }
