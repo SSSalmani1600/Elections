@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted, onUnmounted} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import Swiper from 'swiper';
 
 // Import Swiper styles
@@ -10,8 +10,23 @@ import 'swiper/css/navigation';
 import 'swiper/css/autoplay';
 
 import {Autoplay, Grid, Navigation, Pagination} from "swiper/modules";
+import {getParties} from "@/services/PartyService.ts";
 
-onMounted(() => {
+const data = ref<string[]>([]);
+const loading = ref(false);
+const error = ref<string>("");
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    data.value = await getParties();
+    loading.value = false;
+  } catch (err: any) {
+    console.error(err.message)
+    error.value = "Er konden geen partijen gevonden worden!";
+  } finally {
+    loading.value = false;
+  }
   new Swiper('.swiper', {
     modules: [Grid, Pagination, Navigation, Autoplay],
     slidesPerView: 1,
@@ -109,15 +124,15 @@ onMounted(() => {
       </div>
       <div class="swiper">
         <div class="swiper-wrapper">
-          <router-link to="/" v-for="n in 18" :key="n"
+          <router-link to="/" v-for="party in data" :key="party"
                        class="swiper-slide p-2 h-fit flex items-center justify-center bg-[#0C1532] text-white rounded-xl">
             <div class="flex justify-center items-center gap-4 overflow-hidden">
               <div class="w-[60px] h-[60px]">
-                <img v-if="n % 2 == 0" src="../assets/fvd-logo.png" class="w-full h-full" alt="">
-                <img v-if="n % 2 !== 0" src="../assets/d66-logo.png"
+                <img v-if="party % 2 == 0" src="../assets/fvd-logo.png" class="w-full h-full" alt="">
+                <img v-if="party % 2 !== 0" src="../assets/d66-logo.png"
                      class="w-full h-full object-contain" alt="">
               </div>
-              <span class="font-semibold truncate text-white">PvDA {{ n }}</span>
+              <span class="font-semibold truncate text-white">PvDA {{ party }}</span>
             </div>
           </router-link>
         </div>
