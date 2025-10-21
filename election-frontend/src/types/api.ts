@@ -8,12 +8,7 @@ export interface RegisterResponse {
   password: string;
   username: string;
 }
-
-export interface ParserResponse {
-  parties: {
-    name: string
-  }[]
-}
+export type ParserResponse = { parties: { name: string }[] }
 
 export interface Affiliation {
   name: string;
