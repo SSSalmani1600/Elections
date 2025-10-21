@@ -11,8 +11,12 @@ const errorMessage = ref('')
 
 onMounted(async () => {
   try {
-    const data = await getParties(2023)
-    const foundParty = data.parties.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
+    const data = await getParties()
+    console.log('Fetched data:', data)
+    const partiesArray = data.parties ?? data
+    const foundParty = partiesArray.find(
+      (p) => p.name.toLowerCase() === routeName.toLowerCase()
+    )
     if (foundParty) {
       partyName.value = foundParty.name
     } else {
@@ -26,7 +30,6 @@ onMounted(async () => {
   }
 })
 </script>
-
 <template>
   <div class="min-h-screen text-white">
     <div v-if="loading" class="text-center text-gray-400 text-2xl py-20">
@@ -64,14 +67,14 @@ onMounted(async () => {
         <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
         <p class="text-gray-300 max-w-4xl leading-relaxed">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-          voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-          cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+          ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
+          sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+          est laborum.
         </p>
       </section>
-      <section class= "px-8 py-12 mt-8">
-
+      <section class="px-8 py-12 mt-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
           <div class="flex flex-col gap-6">
             <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
@@ -84,8 +87,8 @@ onMounted(async () => {
             <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
               <h4 class="text-xl font-semibold mb-2">Standpunt 2</h4>
               <p class="text-gray-400 leading-relaxed">
-                Quo ipsa provident sit autem soluta et earum distinctio. Aut exercitationem dolores ab
-                officia commodi et consequuntur animi.
+                Quo ipsa provident sit autem soluta et earum distinctio. Aut exercitationem dolores
+                ab officia commodi et consequuntur animi.
               </p>
             </div>
           </div>
@@ -97,11 +100,12 @@ onMounted(async () => {
               <span class="text-orange-400 text-2xl">⭐</span> Standpunt 3
             </h4>
             <p class="text-gray-400 leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget odio quis lacus volutpat feugiat quis elementum nunc.
-              Pellentesque rhoncus ex justo. Integer interdum ullamcorper viverra. Ut ac felis tempor nisi aliquet suscipit.
-              Praesent eu libero justo. Duis scelerisque egestas condimentum.
-              Mauris elementum tellus eget turpis iaculis, vel ornare orci congue. Proin vel iaculis sapien, vel rhoncus risus.
-              Integer justo neque, blandit ut leo nec, euismod posuere nulla.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget odio quis lacus
+              volutpat feugiat quis elementum nunc. Pellentesque rhoncus ex justo. Integer interdum
+              ullamcorper viverra. Ut ac felis tempor nisi aliquet suscipit. Praesent eu libero
+              justo. Duis scelerisque egestas condimentum. Mauris elementum tellus eget turpis
+              iaculis, vel ornare orci congue. Proin vel iaculis sapien, vel rhoncus risus. Integer
+              justo neque, blandit ut leo nec, euismod posuere nulla.
             </p>
           </div>
         </div>
@@ -118,8 +122,6 @@ onMounted(async () => {
           </button>
         </div>
       </section>
-
-
     </div>
   </div>
 </template>
