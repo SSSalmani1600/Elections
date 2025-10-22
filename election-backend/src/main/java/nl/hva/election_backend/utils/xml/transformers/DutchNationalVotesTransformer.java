@@ -41,6 +41,14 @@ public class DutchNationalVotesTransformer implements VotesTransformer {
 
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
+        String affiliationId = electionData.get(AFFILIATION_IDENTIFIER_ID);
+        String candidateShortCode = electionData.get(SHORT_CODE);
+        String validVotes = electionData.get(VALID_VOTES);
+
+        election.getParties().stream().filter(party -> Objects.equals(party.getId(), affiliationId))
+                .findFirst().flatMap(party -> party.getCandidates().stream()
+                        .filter(candidate -> Objects.equals(candidate.getShortCode(), candidateShortCode))
+                        .findFirst()).ifPresent(candidate -> candidate.setVotes(Integer.parseInt(validVotes)));
         System.out.printf("%s candidate votes: %s\n", aggregated ? "National" : "Constituency", electionData);
     }
 
