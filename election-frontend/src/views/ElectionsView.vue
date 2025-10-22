@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { getConstituencies, getParties } from '@/services/ElectionService'
 import type { Constituency, ParserResponse } from '@/types/api'
-import { ref, watch } from 'vue'
+import { BarChart } from '@/components/ui/chart-bar'
+import { computed, ref, watch } from 'vue'
+import CustomToolTip from '@/components/CustomToolTip.vue'
 
 const parties = ref<ParserResponse | null>(null)
 const loading = ref<boolean>(false)
@@ -18,6 +20,25 @@ function scrollToSection(id: string) {
     el.scrollIntoView({ behavior: 'smooth' })
   }
 }
+
+function getConstituencyByName(name: string): Constituency | null {
+  for (const constituency of constituencies.value) {
+    if (constituency.name === name) return constituency
+  }
+  return null
+}
+
+const amsChartData = computed(() => {
+  const cons = getConstituencyByName('Amsterdam')
+  if (!cons) return []
+
+  return [...cons.parties] // copy so we don't mutate original
+    .map((p) => ({
+      name: p.name,
+      votes: Number(p.votes) || 0,
+    }))
+    .sort((a, b) => b.votes - a.votes) // highest first
+})
 
 // fetch constituencies
 const fetchConstituencies = async () => {
@@ -126,13 +147,27 @@ watch(selectedYear, fetchParties, { immediate: true })
 
   <section>
     <div class="flex gap-8 justify-center p-8">
-      <div
-        class="flex flex-row gap-8 cursor-pointer"
-        v-for="cons in constituencies"
-        :key="cons.name"
-      >
-        <h2>{{ cons.name }}</h2>
-      </div>
+      <BarChart
+        :data="amsChartData"
+        index="name"
+        :categories="['votes']"
+        :custom-tooltip="CustomToolTip"
+        :x-formatter="
+          (tick) => {
+            return typeof tick === 'number'
+              ? `€ ${new Intl.NumberFormat('nl-NL').format(tick)}`
+              : ''
+          }
+        "
+        :y-formatter="
+          (tick) => {
+            return typeof tick === 'number'
+              ? `€ ${new Intl.NumberFormat('nl-NL').format(tick)}`
+              : ''
+          }
+        "
+        :rounded-corners="4"
+      />
     </div>
   </section>
 
