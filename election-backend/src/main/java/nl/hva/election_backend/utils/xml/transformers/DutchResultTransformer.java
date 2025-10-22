@@ -12,13 +12,8 @@ import java.util.Objects;
  * Just prints the content of electionData to the standard output.<br/>
  * <b>This class needs heavy modification!</b>
  */
-public record DutchResultTransformer(Election election) implements VotesTransformer, TagAndAttributeNames {
-
-    private static final String NUMBER_OF_VOTES;
-
-    static {
-        NUMBER_OF_VOTES = "NumberOfVotes";
-    }
+public class DutchResultTransformer implements VotesTransformer, TagAndAttributeNames {
+    private final Election election;
 
     /**
      * Creates a new transformer for handling the votes at the results. It expects an instance of
@@ -27,8 +22,7 @@ public record DutchResultTransformer(Election election) implements VotesTransfor
      *
      * @param election the election in which the votes will be stored.
      */
-    public DutchResultTransformer {
-    }
+    public DutchResultTransformer(Election election) { this.election = election; }
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
@@ -37,6 +31,7 @@ public record DutchResultTransformer(Election election) implements VotesTransfor
 
 
         String partyName = electionData.get(REGISTERED_NAME);
+        String NUMBER_OF_VOTES = "NumberOfVotes";
         String votesStr = electionData.get(NUMBER_OF_VOTES);
 
         if (partyName == null || votesStr == null) {
