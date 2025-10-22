@@ -1,18 +1,54 @@
 <script setup lang="ts">
-import { getConstituencies, getParties } from '@/services/ElectionService'
-import type { Constituency, ParserResponse } from '@/types/api'
-import { BarChart } from '@/components/ui/chart-bar'
-import { computed, ref, watch } from 'vue'
-import CustomToolTip from '@/components/CustomToolTip.vue'
+import { getConstituencies } from '@/services/ElectionService'
+import type { Constituency, Party } from '@/types/api'
+import { ref, onMounted, watch } from 'vue'
+import Select from 'primevue/select'
+import Chart from 'primevue/chart'
 
-const parties = ref<ParserResponse | null>(null)
-const loading = ref<boolean>(false)
 const constituencies = ref<Constituency[]>([])
 
+const chartData = ref()
+const chartOptions = ref()
+
+const selectedConstituency = ref<string | null>(null)
+const setChartData = () => {
+  const currentConstituency: Constituency | null = getConstituencyByName(
+    selectedConstituency.value ?? 'Amsterdam',
+  )!
+
+  const sorted: Party[] = [...currentConstituency.parties].sort((a, b) => b.votes - a.votes)
+
+  return {
+    labels: sorted.map((p) => p.name),
+    datasets: [
+      {
+        label: 'Votes',
+        labelBackground: '#EF3054',
+        barThickness: 12,
+        data: sorted.map((p) => p.votes),
+      },
+    ],
+  }
+}
+
+const setChartOptions = () => ({
+  indexAxis: 'y',
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: 'white' } } },
+  scales: {
+    x: {
+      ticks: { color: 'white', font: { weight: 500 } },
+      grid: { display: false, drawBorder: false },
+    },
+    y: { ticks: { color: 'white' }, grid: { display: false } },
+  },
+})
+
 // years to pick from
-const years = [2023, 2021, 2019] as const
-type Year = (typeof years)[number]
-const selectedYear = ref<Year>(2023)
+// const years = [2023, 2021, 2019] as const
+// type Year = (typeof years)[number]
+// const selectedYear = ref<Year>(2023)
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
@@ -28,18 +64,6 @@ function getConstituencyByName(name: string): Constituency | null {
   return null
 }
 
-const amsChartData = computed(() => {
-  const cons = getConstituencyByName('Amsterdam')
-  if (!cons) return []
-
-  return [...cons.parties]
-    .map((p) => ({
-      name: p.name,
-      votes: Number(p.votes) || 0,
-    }))
-    .sort((a, b) => b.votes - a.votes)
-})
-
 // fetch constituencies
 const fetchConstituencies = async () => {
   try {
@@ -49,21 +73,18 @@ const fetchConstituencies = async () => {
   }
 }
 
-// fetch when year changes (and immediately on mount)
-const fetchParties = async () => {
-  loading.value = true
-  try {
-    parties.value = await getParties(selectedYear.value)
-  } catch (e) {
-    console.error('Failed to fetch parties:', e)
-    parties.value = null
-  } finally {
-    loading.value = false
-  }
-}
+onMounted(async () => {
+  await fetchConstituencies()
 
-fetchConstituencies()
-watch(selectedYear, fetchParties, { immediate: true })
+  chartOptions.value = setChartOptions()
+  chartData.value = setChartData()
+})
+
+// Update chart when user changes selection
+watch(selectedConstituency, () => {
+  if (!constituencies.value.length) return
+  chartData.value = setChartData()
+})
 </script>
 
 <template>
@@ -148,36 +169,27 @@ watch(selectedYear, fetchParties, { immediate: true })
   <!--- Graph Section --->
   <section>
     <!-- Filter -->
-    <div></div>
-
+    <div class="flex justify-center">
+      <div class="flex flex-col gap-1">
+        <Select
+          v-model="selectedConstituency"
+          name="Kieskringen"
+          :options="constituencies"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="Selecteer een kieskring"
+          fluid
+        />
+      </div>
+    </div>
     <!-- Graph -->
-    <div class="flex gap-8 justify-center p-8">
-      <BarChart
-        :data="amsChartData"
-        index="name"
-        :categories="['votes']"
-        :custom-tooltip="CustomToolTip"
-        :x-formatter="
-          (tick) => {
-            return typeof tick === 'number'
-              ? `€ ${new Intl.NumberFormat('nl-NL').format(tick)}`
-              : ''
-          }
-        "
-        :y-formatter="
-          (tick) => {
-            return typeof tick === 'number'
-              ? `€ ${new Intl.NumberFormat('nl-NL').format(tick)}`
-              : ''
-          }
-        "
-        :rounded-corners="4"
-      />
+    <div class="w-full max-w-4xl mx-auto h-[70vh] sm:h-[65vh] min-h-[65vh]">
+      <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
     </div>
   </section>
 
   <!-- Parties with year selector -->
-  <section class="px-6 py-16 text-white">
+  <!-- <section class="px-6 py-16 text-white">
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div class="flex items-end gap-3">
@@ -187,7 +199,7 @@ watch(selectedYear, fetchParties, { immediate: true })
           </span>
         </div>
 
-        <!-- Year selector -->
+         Year selector
         <div class="flex items-center gap-2">
           <label for="year" class="text-sm text-white/70">Jaar</label>
           <select
@@ -200,7 +212,7 @@ watch(selectedYear, fetchParties, { immediate: true })
         </div>
       </div>
 
-      <!-- Loading skeleton -->
+      Loading skeleton
       <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div
           v-for="i in 8"
@@ -217,7 +229,7 @@ watch(selectedYear, fetchParties, { immediate: true })
         </div>
       </div>
 
-      <!-- List -->
+      List
       <div v-else-if="parties" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <article
           v-for="aff in parties.affiliations"
@@ -256,5 +268,5 @@ watch(selectedYear, fetchParties, { immediate: true })
 
       <p v-else class="text-white/70">Geen partijen gevonden.</p>
     </div>
-  </section>
+  </section> -->
 </template>
