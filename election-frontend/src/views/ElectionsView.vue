@@ -32,12 +32,12 @@ const amsChartData = computed(() => {
   const cons = getConstituencyByName('Amsterdam')
   if (!cons) return []
 
-  return [...cons.parties] // copy so we don't mutate original
+  return [...cons.parties]
     .map((p) => ({
       name: p.name,
       votes: Number(p.votes) || 0,
     }))
-    .sort((a, b) => b.votes - a.votes) // highest first
+    .sort((a, b) => b.votes - a.votes)
 })
 
 // fetch constituencies
@@ -145,7 +145,12 @@ watch(selectedYear, fetchParties, { immediate: true })
     </div>
   </section>
 
+  <!--- Graph Section --->
   <section>
+    <!-- Filter -->
+    <div></div>
+
+    <!-- Graph -->
     <div class="flex gap-8 justify-center p-8">
       <BarChart
         :data="amsChartData"
