@@ -17,15 +17,19 @@ public class ElectionService {
 
     public List<Election> fetchUpcomingElections() throws IOException {
         String url = "https://www.kiesraad.nl/actueel/activiteiten";
+        System.out.println(" [ElectionService] Ophalen van: " + url);
+
         Document doc = Jsoup.connect(url).get();
+        System.out.println(" [ElectionService] Pagina succesvol geladen");
 
         List<Election> elections = new ArrayList<>();
-        Elements activities = doc.select(".activity");
+        Elements activities = doc.select(".activity, .views-row");
+        System.out.println(" [ElectionService] Gevonden activiteiten: " + activities.size());
 
         for (Element el : activities) {
 
             String title = el.select("h3 a, h3").text().trim();
-            if (title.isEmpty()) continue; // skip lege blokken
+            if (title.isEmpty()) continue;
 
             Element timeElement = el.selectFirst("time");
             String dateAttr = "";
@@ -46,6 +50,7 @@ public class ElectionService {
                     .trim();
 
             if (cleanTitle.toLowerCase().contains("verkiezing")) {
+                System.out.println("🗳️ [ElectionService] Verkiezing gevonden: " + cleanTitle + " (" + dateAttr + ")");
                 elections.add(new Election(
                         UUID.randomUUID().toString(),
                         capitalize(cleanTitle),
@@ -55,13 +60,14 @@ public class ElectionService {
             }
         }
 
-
-
-        // 🔢 Sorteer op datum
         elections.sort(Comparator.comparing(Election::getDate, Comparator.nullsLast(String::compareTo)));
+        System.out.println("✅ [ElectionService] Aantal gevonden verkiezingen: " + elections.size());
 
         return elections;
     }
+
+
+
 
     // 🧠 Datum uit zichtbare tekst halen (zoals "29 oktober 2025")
     private String extractDateFromTitle(String text) {
