@@ -22,10 +22,13 @@ export interface Election {
 }
 
 export async function getUpcomingElections(): Promise<Election[]> {
+  const token = localStorage.getItem('token')
+
   const res = await fetch('http://localhost:8080/api/next-elections', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`, // ✅ belangrijk
     },
   })
 
@@ -35,3 +38,4 @@ export async function getUpcomingElections(): Promise<Election[]> {
 
   return (await res.json()) as Election[]
 }
+
