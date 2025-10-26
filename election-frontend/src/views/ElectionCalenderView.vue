@@ -19,7 +19,7 @@
         <div class="details">
           <h2 class="type">{{ translateType(election.type) }}</h2>
           <p class="date-line">
-            📅 {{ formatFullDate(election.date) }}
+             {{ formatFullDate(election.date) }}
             <br />
             📍 Nederland
           </p>
