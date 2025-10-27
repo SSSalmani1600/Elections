@@ -54,10 +54,13 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
         });
 
         int votes = Integer.parseInt(electionData.get(VALID_VOTES));
-        election.getConstituencies().forEach(constituency -> constituency.getParties()
-                .stream().filter(party -> Objects.equals(party.getId(), affiliationId))
-                .findFirst()
-                .ifPresent(party -> party.setVotes(votes)));
+        election.getConstituencies()
+                .stream()
+                .filter(constituency -> Objects.equals(constituency.getName(), constituencyName))
+                .findFirst().flatMap(constituency -> constituency.getParties()
+                        .stream()
+                        .filter(party -> Objects.equals(party.getId(), affiliationId))
+                        .findFirst()).ifPresent(party -> party.setVotes(votes));
     }
 
     @Override
