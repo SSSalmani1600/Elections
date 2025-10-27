@@ -34,6 +34,8 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
+        if (!aggregated) return;
+
         String affiliationId = electionData.get(AFFILIATION_IDENTIFIER_ID);
         String partyName = electionData.get(REGISTERED_NAME);
         String contestId = electionData.get(CONTEST_IDENTIFIER);
