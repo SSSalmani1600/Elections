@@ -8,11 +8,9 @@ import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.utils.xml.TagAndAttributeNames;
 import nl.hva.election_backend.utils.xml.VotesTransformer;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Just prints to content of electionData to the standard output.>br/>
@@ -22,6 +20,7 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
     private final Election election;
     private String currentAffiliationId = null;
     private String currentPartyName = null;
+    private String currentConstituency = null;
 
     /**
      * Creates a new transformer for handling the votes at the constituency level. It expects an instance of
@@ -48,6 +47,7 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
                 .ifPresent(party -> party.setId(affiliationId));
 
         String constituencyName = electionData.get(CONTEST_NAME);
+        this.currentConstituency = constituencyName;
         election.getConstituencies().add(new Constituency(constituencyName, contestId));
         election.getConstituencies().forEach(constituency -> {
             Party party = new Party(partyName);
@@ -65,6 +65,12 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
                         .findFirst()).ifPresent(party -> party.setVotes(votes));
     }
 
+    private Set<Candidate> cloneCandidates(Set<Candidate> src) {
+        return src.stream()
+                .map(Candidate::new) // uses copy constructor
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
         if (this.currentPartyName == null || this.currentAffiliationId == null) {
@@ -77,28 +83,29 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
                 .map(Party::getCandidates)
                 .orElseGet(HashSet::new);
 
-        election.getConstituencies().forEach(constituency ->
-                constituency.getParties().stream()
-                        .filter(p -> Objects.equals(p.getName(), this.currentPartyName) || Objects.equals(p.getId(), this.currentAffiliationId))
-                        .findFirst()
-                        .ifPresent(p -> {
-                            if (p.getCandidates() == null || p.getCandidates().isEmpty()) {
-                                p.setCandidates(new HashSet<>(sourceCandidates));
-                            }
-                        })
-        );
+        election.getConstituencies().stream()
+                .filter(c -> Objects.equals(c.getName(), currentConstituency))
+                .flatMap(c -> c.getParties().stream())
+                .filter(p -> Objects.equals(p.getName(), this.currentPartyName)
+                        || Objects.equals(p.getId(), this.currentAffiliationId))
+                .forEach(p -> {
+                    if (p.getCandidates() == null || p.getCandidates().isEmpty()) {
+                        p.setCandidates(cloneCandidates(sourceCandidates));
+                    }
+                });
 
-        // Update the votes for the specific candidate (candidate ids are only unique *within* affiliation)
+        // Update the votes for the specific candidate
         String candidateId = electionData.get(CANDIDATE_IDENTIFIER_ID);
         int votes = Integer.parseInt(electionData.get(VALID_VOTES));
 
-        election.getConstituencies().forEach(constituency ->
-                constituency.getParties().stream()
-                        .filter(p -> Objects.equals(p.getName(), this.currentPartyName) || Objects.equals(p.getId(), this.currentAffiliationId))
-                        .findFirst().flatMap(p -> p.getCandidates().stream()
-                                .filter(c -> Objects.equals(c.getCandidateId(), candidateId))
-                                .findFirst()).ifPresent(c -> c.setVotes(votes))
-        );
+        election.getConstituencies().stream()
+                .filter(c -> Objects.equals(c.getName(), currentConstituency))
+                .flatMap(c -> c.getParties().stream())
+                .filter(p -> Objects.equals(p.getId(), currentAffiliationId))
+                .flatMap(p -> p.getCandidates().stream())
+                .filter(cd -> Objects.equals(cd.getCandidateId(), candidateId))
+                .findFirst()
+                .ifPresent(cd -> cd.setVotes(votes));
     }
 
     @Override
