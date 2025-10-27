@@ -10,6 +10,7 @@ const constituencies = ref<Constituency[]>([])
 const chartData = ref()
 const chartOptions = ref()
 
+//
 const selectedConstituency = ref<string | null>(null)
 const setChartData = () => {
   const currentConstituency: Constituency | null = getConstituencyByName(
@@ -75,6 +76,10 @@ const fetchConstituencies = async () => {
 
 onMounted(async () => {
   await fetchConstituencies()
+
+  if (!selectedConstituency.value && constituencies.value.length) {
+    selectedConstituency.value = constituencies.value[0].name
+  }
 
   chartOptions.value = setChartOptions()
   chartData.value = setChartData()
@@ -169,8 +174,8 @@ watch(selectedConstituency, () => {
   <!--- Graph Section --->
   <section>
     <!-- Filter -->
-    <div class="flex justify-center">
-      <div class="flex flex-col gap-1">
+    <div class="flex justify-center p-8">
+      <div class="flex gap-4">
         <Select
           v-model="selectedConstituency"
           name="Kieskringen"
@@ -180,6 +185,7 @@ watch(selectedConstituency, () => {
           placeholder="Selecteer een kieskring"
           fluid
         />
+        <Select name="Partijen" :options="years" optionLabel="" placeholder="Partij" fluid />
       </div>
     </div>
     <!-- Graph -->
