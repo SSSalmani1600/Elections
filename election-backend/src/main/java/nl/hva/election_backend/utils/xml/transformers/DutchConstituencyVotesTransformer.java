@@ -36,6 +36,7 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
     public void registerPartyVotes(boolean aggregated, Map<String, String> electionData) {
         String affiliationId = electionData.get(AFFILIATION_IDENTIFIER_ID);
         String partyName = electionData.get(REGISTERED_NAME);
+        String contestId = electionData.get(CONTEST_IDENTIFIER);
 
         this.currentAffiliationId = affiliationId;
         this.currentPartyName = partyName;
@@ -45,7 +46,7 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
                 .ifPresent(party -> party.setId(affiliationId));
 
         String constituencyName = electionData.get(CONTEST_NAME);
-        election.getConstituencies().add(new Constituency(constituencyName));
+        election.getConstituencies().add(new Constituency(constituencyName, contestId));
         election.getConstituencies().forEach(constituency -> constituency.getParties().add(new Party(partyName)));
         election.getConstituencies().forEach(constituency -> constituency.getParties()
                 .stream().filter(party -> Objects.equals(party.getName(), partyName))
@@ -56,7 +57,7 @@ public class DutchConstituencyVotesTransformer implements VotesTransformer, TagA
         election.getConstituencies().forEach(constituency -> constituency.getParties()
                 .stream().filter(party -> Objects.equals(party.getId(), affiliationId))
                 .findFirst()
-                .ifPresent(party -> party.setVotes(party.getVotes() + votes)));
+                .ifPresent(party -> party.setVotes(votes)));
     }
 
     @Override
