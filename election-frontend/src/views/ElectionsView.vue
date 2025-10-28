@@ -24,7 +24,6 @@ const palette: string[] = [
   '#F87171', // red-400
 ]
 
-
 const selectedConstituency = ref<string | null>(null)
 const setChartData = () => {
   const currentConstituency: Constituency | null = getConstituencyByName(
@@ -33,9 +32,8 @@ const setChartData = () => {
 
   const sorted: Party[] = [...currentConstituency.parties].sort((a, b) => b.votes - a.votes)
 
-  const labels = sorted.map(p => p.name)
-  console.log(labels.length);
-  const values = sorted.map(p => p.votes)
+  const labels = sorted.map((p) => p.name)
+  const values = sorted.map((p) => p.votes)
 
   // color per bar (cycles through palette)
   const colors = labels.map((_, i) => palette[i % palette.length])
@@ -49,16 +47,15 @@ const setChartData = () => {
         backgroundColor: colors,
         hoverBackgroundColor: colors,
         // bar styling
-        borderRadius: 8,            // rounded ends
-        borderSkipped: false,       // fully rounded
-        barThickness: 14,           // clean, even bars
+        borderRadius: 8, // rounded ends
+        borderSkipped: false, // fully rounded
+        barThickness: 14, // clean, even bars
         maxBarThickness: 18,
-        minBarLength: 2,            // ensures tiny values are still visible
+        minBarLength: 2, // ensures tiny values are still visible
       },
     ],
   }
 }
-
 
 const setChartOptions = () => ({
   indexAxis: 'y',
@@ -66,24 +63,24 @@ const setChartOptions = () => ({
   maintainAspectRatio: false,
   animation: {
     duration: 500,
-    easing: 'easeOutQuart'
+    easing: 'easeOutQuart',
   },
   layout: {
-    padding: { left: 4, right: 8, top: 4, bottom: 4 }
+    padding: { left: 4, right: 8, top: 4, bottom: 4 },
   },
   plugins: {
     legend: {
-      display: false
+      display: false,
     },
     tooltip: {
-      backgroundColor: '#e2e8f0',     // slate-200
+      backgroundColor: '#e2e8f0', // slate-200
       titleColor: '#0B132B',
       bodyColor: '#0B132B',
       borderColor: 'rgba(0,0,0,0.08)',
       borderWidth: 1,
       padding: 10,
       displayColors: false,
-    }
+    },
   },
   scales: {
     x: {
@@ -91,16 +88,16 @@ const setChartOptions = () => ({
       ticks: {
         color: '#e2e8f0',
         font: { weight: 500 },
-      }
+      },
     },
     y: {
       grid: { display: false, drawBorder: false },
       ticks: {
         autoSkip: false,
         color: '#cbd5e1',
-        padding: 6
-      }
-    }
+        padding: 6,
+      },
+    },
   },
   // tighten category spacing
   categoryPercentage: 0.85,
@@ -141,6 +138,10 @@ onMounted(async () => {
   chartData.value = setChartData()
 })
 
+function sortConstituenciesByName(constituencies: Constituency[]): Constituency[] {
+  return constituencies.slice().sort((a, b) => a.name.localeCompare(b.name))
+}
+
 // Update chart when user changes selection
 watch(selectedConstituency, () => {
   if (!constituencies.value.length) return
@@ -152,7 +153,9 @@ watch(selectedConstituency, () => {
   <section class="text-white px-6 py-16 md:py-24">
     <div class="max-w-[100rem] mx-auto grid md:grid-cols-2 items-center gap-12 lg:gap-20">
       <div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight">
+        <h1
+          class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight"
+        >
           Ontdek de verkiezingen<br />
           in Nederland
         </h1>
@@ -163,20 +166,28 @@ watch(selectedConstituency, () => {
         </p>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button type="button" @click="scrollToSection('komende-verkiezingen')"
-            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition">
+          <button
+            type="button"
+            @click="scrollToSection('komende-verkiezingen')"
+            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition"
+          >
             Komende verkiezingen
           </button>
-          <button type="button"
-            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition">
+          <button
+            type="button"
+            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition"
+          >
             Uitslagen voorgaande jaren
           </button>
         </div>
       </div>
 
       <div class="flex justify-center md:justify-end">
-        <img src="/src/assets/img/elections-image.png" alt="Illustratie van verkiezingen"
-          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl" />
+        <img
+          src="/src/assets/img/elections-image.png"
+          alt="Illustratie van verkiezingen"
+          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+        />
       </div>
     </div>
   </section>
@@ -219,16 +230,21 @@ watch(selectedConstituency, () => {
   <!--- Graph Section --->
   <section class="px-6 py-12 text-white bg-[#0B132B]">
     <div class="max-w-7xl mx-auto space-y-8">
-
       <!-- Filter row -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencies" optionLabel="name"
-          optionValue="name" placeholder="Selecteer een kieskring" class="w-full sm:max-w-md" />
+        <Select
+          v-model="selectedConstituency"
+          name="Kieskringen"
+          :options="sortConstituenciesByName(constituencies)"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="Selecteer een kieskring"
+          class="w-full sm:max-w-md"
+        />
       </div>
 
       <!-- Content grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-
         <!-- Map -->
         <div class="order-2 lg:order-1 h-full">
           <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
@@ -236,7 +252,9 @@ watch(selectedConstituency, () => {
 
         <!-- Chart card -->
         <div class="order-1 lg:order-2 h-full">
-          <div class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
+          <div
+            class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg"
+          >
             <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-white/90">
                 Uitslag per partij: {{ selectedConstituency || '—' }}
@@ -248,7 +266,6 @@ watch(selectedConstituency, () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </section>

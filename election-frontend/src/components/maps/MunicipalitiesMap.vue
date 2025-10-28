@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import L, { Layer, type LeafletMouseEvent } from 'leaflet'
-import type { Feature, GeoJsonProperties, Geometry } from 'geojson';
+import type { Feature, GeoJsonProperties, Geometry } from 'geojson'
 
-const mapEl = ref<string | HTMLElement>("")
+const mapEl = ref<string | HTMLElement>('')
 
-let geojsonLayer: L.GeoJSON;
-let map: L.Map;
+let geojsonLayer: L.GeoJSON
+let map: L.Map
 
-const DATA_URL = "https://cartomap.github.io/nl/wgs84/gemeente_2025.geojson"
+const DATA_URL = 'https://cartomap.github.io/nl/wgs84/gemeente_2025.geojson'
 
 function baseStyle() {
   return {
     weight: 0.8,
-    color: '#93a4bf',     // softer outline on dark bg
+    color: '#93a4bf', // softer outline on dark bg
     fillColor: '#5aa9e6', // calm blue
-    fillOpacity: 0.12
+    fillOpacity: 0.12,
   }
 }
 
@@ -26,7 +26,7 @@ function changeConstituency(constituencyName: string): void {
 }
 
 function getName(props: GeoJsonProperties) {
-  const candidates = ['statnaam',]
+  const candidates = ['statnaam']
   for (const k of candidates) if (props?.[k]) return props[k]
   return 'Gemeente'
 }
@@ -39,43 +39,43 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
     direction: 'auto',
     opacity: 0.95,
     offset: [0, -4],
-    className: 'muni-tooltip' // custom class (styled below)
+    className: 'muni-tooltip', // custom class (styled below)
   })
 
   layer.on({
     mouseover: (e: LeafletMouseEvent) => {
-      const l = e.target;
+      const l = e.target
       l.setStyle({
         weight: 1.6,
-        color: '#e2e8f0',   // brighter outline on hover
-        fillOpacity: 0.28
+        color: '#e2e8f0', // brighter outline on hover
+        fillOpacity: 0.28,
       })
       if (l._path) l._path.classList.add('hovered-muni')
       // l.bringToFront(); // optional: usually not needed anymore
     },
     mouseout: (e: LeafletMouseEvent) => {
-      geojsonLayer.resetStyle(e.target);
-      const l = e.target;
+      geojsonLayer.resetStyle(e.target)
+      const l = e.target
       if (l._path) l._path.classList.remove('hovered-muni')
     },
     click: () => {
-      changeConstituency(name);
-    }
+      changeConstituency(name)
+    },
   })
 }
 
 async function load_shapefile() {
   const response = await fetch(DATA_URL)
-  const shape_obj = await response.json();
-  console.log(shape_obj);
-  return shape_obj;
+  const shape_obj = await response.json()
+  console.log(shape_obj)
+  return shape_obj
 }
 
 async function main() {
-  const json = await load_shapefile();
+  const json = await load_shapefile()
   geojsonLayer = L.geoJSON(json, {
     style: baseStyle,
-    onEachFeature
+    onEachFeature,
   }).addTo(map)
 }
 
@@ -89,16 +89,16 @@ onMounted(async () => {
     doubleClickZoom: false,
     boxZoom: false,
     keyboard: false,
-    tap: false,           // mobile tap-zoom
+    tap: false, // mobile tap-zoom
     touchZoom: false,
-    preferCanvas: false,  // keep SVG so your CSS scale works
+    preferCanvas: false, // keep SVG so your CSS scale works
   }).setView([52.2, 5.3], 7)
 
   // Basemap
   try {
     main()
   } catch (err: unknown) {
-    console.error("Failed to load GeoJSON", err);
+    console.error('Failed to load GeoJSON', err)
   }
 })
 
@@ -118,7 +118,10 @@ onUnmounted(() => {
     <!-- Map container -->
     <div class="p-3">
       <!-- responsive height by breakpoint; full width -->
-      <div ref="mapEl" class="w-full h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-xl overflow-hidden" />
+      <div
+        ref="mapEl"
+        class="w-full h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-xl overflow-hidden"
+      />
     </div>
   </div>
 </template>
@@ -132,7 +135,10 @@ onUnmounted(() => {
 /* Pointer + smooth transforms */
 :deep(path.leaflet-interactive) {
   cursor: pointer;
-  transition: transform 140ms ease, fill-opacity 140ms ease, stroke 140ms ease;
+  transition:
+    transform 140ms ease,
+    fill-opacity 140ms ease,
+    stroke 140ms ease;
   transform-box: fill-box;
   transform-origin: center;
 }
