@@ -68,6 +68,7 @@ const pages = computed(() => {
 });
 
 const filteredList = computed(() => {
+  currentPage.value = 1;
   return inputText.value.trim() === ""
     ? data.value
     : results.value.map(r => r.item)
@@ -90,12 +91,15 @@ function updatePageSize() {
   if (width >= 1280) {
     pageSize.value = 9;
     maxVisiblePages.value = 3;
+    currentPage.value = 1;
   } else if (width >= 768) {
     pageSize.value = 6;
     maxVisiblePages.value = 3;
+    currentPage.value = 1;
   } else {
     pageSize.value = 3;
     maxVisiblePages.value = 1;
+    currentPage.value = 1;
   }
 }
 
