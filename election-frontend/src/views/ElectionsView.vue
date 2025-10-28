@@ -4,6 +4,7 @@ import type { Constituency, Party } from '@/types/api'
 import { ref, onMounted, watch } from 'vue'
 import Select from 'primevue/select'
 import Chart from 'primevue/chart'
+import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 
 const constituencies = ref<Constituency[]>([])
 
@@ -96,9 +97,7 @@ watch(selectedConstituency, () => {
   <section class="text-white px-6 py-16 md:py-24">
     <div class="max-w-[100rem] mx-auto grid md:grid-cols-2 items-center gap-12 lg:gap-20">
       <div>
-        <h1
-          class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight"
-        >
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight">
           Ontdek de verkiezingen<br />
           in Nederland
         </h1>
@@ -109,28 +108,20 @@ watch(selectedConstituency, () => {
         </p>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button
-            type="button"
-            @click="scrollToSection('komende-verkiezingen')"
-            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition"
-          >
+          <button type="button" @click="scrollToSection('komende-verkiezingen')"
+            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition">
             Komende verkiezingen
           </button>
-          <button
-            type="button"
-            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition"
-          >
+          <button type="button"
+            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition">
             Uitslagen voorgaande jaren
           </button>
         </div>
       </div>
 
       <div class="flex justify-center md:justify-end">
-        <img
-          src="/src/assets/img/elections-image.png"
-          alt="Illustratie van verkiezingen"
-          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
-        />
+        <img src="/src/assets/img/elections-image.png" alt="Illustratie van verkiezingen"
+          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl" />
       </div>
     </div>
   </section>
@@ -170,27 +161,27 @@ watch(selectedConstituency, () => {
       </div>
     </div>
   </section>
-
   <!--- Graph Section --->
-  <section>
+  <section class="px-6 py-12 text-white bg-[#0B132B]">
+
     <!-- Filter -->
     <div class="flex justify-center p-8">
       <div class="flex gap-4">
-        <Select
-          v-model="selectedConstituency"
-          name="Kieskringen"
-          :options="constituencies"
-          optionLabel="name"
-          optionValue="name"
-          placeholder="Selecteer een kieskring"
-          fluid
-        />
-        <Select name="Partijen" :options="years" optionLabel="" placeholder="Partij" fluid />
+        <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencies" optionLabel="name"
+          optionValue="name" placeholder="Selecteer een kieskring" fluid />
+        <!-- <Select name="Partijen" :options="years" optionLabel="" placeholder="Partij" fluid /> -->
       </div>
     </div>
-    <!-- Graph -->
-    <div class="w-full max-w-4xl mx-auto h-[70vh] sm:h-[65vh] min-h-[65vh]">
-      <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+
+    <div class="flex flex-row-reverse">
+      <!-- Municipalities Map -->
+      <div>
+        <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
+      </div>
+      <!-- Graph -->
+      <div class="mb-16 w-full max-w-4xl mx-auto h-[70vh] sm:h-[65vh] min-h-[65vh]">
+        <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+      </div>
     </div>
   </section>
 
