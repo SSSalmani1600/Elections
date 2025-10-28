@@ -9,7 +9,7 @@ import IconSpinner from "@/components/icons/IconSpinner.vue";
 
 const data = ref<string[]>([]);
 const loading = ref(false);
-const error = ref<string>("");
+const hasError = ref<boolean>(false);
 const inputText = ref<string>("");
 const { results } = useFuse(inputText, data);
 
@@ -20,7 +20,8 @@ onMounted(async () => {
     data.value = await getParties() as unknown as string[];
   } catch (err: any) {
     console.error(err.message)
-    error.value = "Er konden geen partijen gevonden worden!"
+    hasError.value;
+
   } finally {
     loading.value = false;
   }
@@ -125,11 +126,9 @@ window.addEventListener("resize", updatePageSize);
         </div>
       </div>
       <div class="flex flex-col items-center gap-6 min-h-[542px] relative w-full">
-          <span v-show="error !== ''"
-                class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
-              error
-            }}</span>
-        <div v-show="error === ''"
+          <span v-show="hasError || visibleParties.length === 0"
+                class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">Er konden geen partijen gevonden worden!</span>
+        <div v-show="!hasError || visibleParties.length !== 0"
              class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
           <div v-for="party in visibleParties" :key="party"
                class="bg-primary w-full h-fit rounded-lg">
@@ -147,7 +146,7 @@ window.addEventListener("resize", updatePageSize);
             </a>
           </div>
         </div>
-        <div v-show="error === ''"
+        <div v-show="!hasError"
              class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]">
           <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><i
             class="pi pi-arrow-left"></i> <span class="hidden md:block">Vorige</span>
