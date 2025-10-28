@@ -1,77 +1,200 @@
 <script setup lang="ts">
-import { getParties } from '@/services/ElectionService';
-import type { ParserResponse } from '@/types/api';
-import { ref, watch } from 'vue';
+import { getConstituencies } from '@/services/ElectionService'
+import type { Constituency, Party } from '@/types/api'
+import { ref, onMounted, watch } from 'vue'
+import Select from 'primevue/select'
+import Chart from 'primevue/chart'
+import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 
-const parties = ref<ParserResponse | null>(null);
-const loading = ref<boolean>(false);
+const constituencies = ref<Constituency[]>([])
 
-// years to pick from
-const years = [2023, 2021, 2019] as const;
-type Year = typeof years[number];
-const selectedYear = ref<Year>(2023);
+const chartData = ref()
+const chartOptions = ref()
 
-function scrollToSection(id: string) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
+const palette: string[] = [
+  '#60A5FA', // blue-400
+  '#A78BFA', // violet-400
+  '#34D399', // emerald-400
+  '#FBBF24', // amber-400
+  '#F472B6', // pink-400
+  '#38BDF8', // sky-400
+  '#F59E0B', // amber-500
+  '#4ADE80', // green-400
+  '#C084FC', // violet-300
+  '#F87171', // red-400
+]
+
+const selectedConstituency = ref<string | null>(null)
+const setChartData = () => {
+  const currentConstituency: Constituency | null = getConstituencyByName(
+    selectedConstituency.value ?? 'Amsterdam',
+  )!
+
+  const sorted: Party[] = [...currentConstituency.parties].sort((a, b) => b.votes - a.votes)
+
+  const labels = sorted.map((p) => p.name)
+  const values = sorted.map((p) => p.votes)
+
+  // color per bar (cycles through palette)
+  const colors = labels.map((_, i) => palette[i % palette.length])
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Stemmen',
+        data: values,
+        backgroundColor: colors,
+        hoverBackgroundColor: colors,
+        // bar styling
+        borderRadius: 8, // rounded ends
+        borderSkipped: false, // fully rounded
+        barThickness: 14, // clean, even bars
+        maxBarThickness: 18,
+        minBarLength: 2, // ensures tiny values are still visible
+      },
+    ],
   }
 }
 
-// fetch when year changes (and immediately on mount)
-const fetchParties = async () => {
-  loading.value = true;
-  try {
-    parties.value = await getParties(selectedYear.value);
-  } catch (e) {
-    console.error('Failed to fetch parties:', e);
-    parties.value = null;
-  } finally {
-    loading.value = false;
-  }
-};
+const setChartOptions = () => ({
+  indexAxis: 'y',
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: {
+    duration: 500,
+    easing: 'easeOutQuart',
+  },
+  layout: {
+    padding: { left: 4, right: 8, top: 4, bottom: 4 },
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      backgroundColor: '#e2e8f0', // slate-200
+      titleColor: '#0B132B',
+      bodyColor: '#0B132B',
+      borderColor: 'rgba(0,0,0,0.08)',
+      borderWidth: 1,
+      padding: 10,
+      displayColors: false,
+    },
+  },
+  scales: {
+    x: {
+      grid: { display: false, drawBorder: false },
+      ticks: {
+        color: '#e2e8f0',
+        font: { weight: 500 },
+      },
+    },
+    y: {
+      grid: { display: false, drawBorder: false },
+      ticks: {
+        autoSkip: false,
+        color: '#cbd5e1',
+        padding: 6,
+      },
+    },
+  },
+  // tighten category spacing
+  categoryPercentage: 0.85,
+  barPercentage: 0.9,
+})
 
-watch(selectedYear, fetchParties, { immediate: true });
+function scrollToSection(id: string) {
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+function getConstituencyByName(name: string): Constituency | null {
+  for (const constituency of constituencies.value) {
+    if (constituency.name === name) return constituency
+  }
+  return null
+}
+
+// fetch constituencies
+const fetchConstituencies = async () => {
+  try {
+    constituencies.value = await getConstituencies()
+  } catch (e) {
+    console.error('Failed to fetch constituencies', e)
+  }
+}
+
+onMounted(async () => {
+  await fetchConstituencies()
+
+  if (!selectedConstituency.value && constituencies.value.length) {
+    selectedConstituency.value = constituencies.value[0].name
+  }
+
+  chartOptions.value = setChartOptions()
+  chartData.value = setChartData()
+})
+
+function sortConstituenciesByName(constituencies: Constituency[]): Constituency[] {
+  return constituencies.slice().sort((a, b) => a.name.localeCompare(b.name))
+}
+
+// Update chart when user changes selection
+watch(selectedConstituency, () => {
+  if (!constituencies.value.length) return
+  chartData.value = setChartData()
+})
 </script>
 
 <template>
   <section class="text-white px-6 py-16 md:py-24">
     <div class="max-w-[100rem] mx-auto grid md:grid-cols-2 items-center gap-12 lg:gap-20">
       <div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight">
+        <h1
+          class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight"
+        >
           Ontdek de verkiezingen<br />
           in Nederland
         </h1>
 
         <p class="mt-6 text-lg sm:text-xl lg:text-2xl text-white/85 max-w-xl leading-relaxed">
-          Bekijk wanneer verkiezingen plaatsvinden, leer over de thema’s en
-          zie de resultaten van eerdere verkiezingen.
+          Bekijk wanneer verkiezingen plaatsvinden, leer over de thema’s en zie de resultaten van
+          eerdere verkiezingen.
         </p>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button type="button" @click="scrollToSection('komende-verkiezingen')"
-            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition">
+          <button
+            type="button"
+            @click="scrollToSection('komende-verkiezingen')"
+            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition"
+          >
             Komende verkiezingen
           </button>
-          <button type="button"
-            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition">
+          <button
+            type="button"
+            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition"
+          >
             Uitslagen voorgaande jaren
           </button>
         </div>
       </div>
 
       <div class="flex justify-center md:justify-end">
-        <img src="/src/assets/img/elections-image.png" alt="Illustratie van verkiezingen"
-          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl" />
+        <img
+          src="/src/assets/img/elections-image.png"
+          alt="Illustratie van verkiezingen"
+          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+        />
       </div>
     </div>
   </section>
 
   <section id="komende-verkiezingen" class="px-6 py-16 md:py-20 text-white bg-[#0B132B]">
     <div class="max-w-7xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-semibold mb-10">
-        Komende verkiezingen
-      </h2>
+      <h2 class="text-2xl sm:text-3xl font-semibold mb-10">Komende verkiezingen</h2>
 
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div class="bg-white/5 border border-white/10 rounded-lg p-6 hover:bg-white/10 transition">
@@ -104,9 +227,51 @@ watch(selectedYear, fetchParties, { immediate: true });
       </div>
     </div>
   </section>
+  <!--- Graph Section --->
+  <section class="px-6 py-12 text-white bg-[#0B132B]">
+    <div class="max-w-7xl mx-auto space-y-8">
+      <!-- Filter row -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <Select
+          v-model="selectedConstituency"
+          name="Kieskringen"
+          :options="sortConstituenciesByName(constituencies)"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="Selecteer een kieskring"
+          class="w-full sm:max-w-md"
+        />
+      </div>
+
+      <!-- Content grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <!-- Map -->
+        <div class="order-2 lg:order-1 h-full">
+          <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
+        </div>
+
+        <!-- Chart card -->
+        <div class="order-1 lg:order-2 h-full">
+          <div
+            class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg"
+          >
+            <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-white/90">
+                Uitslag per partij: {{ selectedConstituency || '—' }}
+              </h3>
+              <span class="text-xs text-white/60">stemmen</span>
+            </div>
+            <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
+              <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Parties with year selector -->
-  <section class="px-6 py-16 text-white">
+  <!-- <section class="px-6 py-16 text-white">
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div class="flex items-end gap-3">
@@ -116,19 +281,26 @@ watch(selectedYear, fetchParties, { immediate: true });
           </span>
         </div>
 
-        <!-- Year selector -->
+         Year selector
         <div class="flex items-center gap-2">
           <label for="year" class="text-sm text-white/70">Jaar</label>
-          <select id="year" v-model.number="selectedYear"
-            class="bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/30">
+          <select
+            id="year"
+            v-model.number="selectedYear"
+            class="bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/30"
+          >
             <option class="text-black" v-for="y in years" :key="y" :value="y">{{ y }}</option>
           </select>
         </div>
       </div>
 
-      <!-- Loading skeleton -->
+      Loading skeleton
       <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="bg-white/5 border border-white/10 rounded-xl p-5 animate-pulse">
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="bg-white/5 border border-white/10 rounded-xl p-5 animate-pulse"
+        >
           <div class="flex items-center gap-4">
             <div class="h-10 w-10 rounded-full bg-white/10"></div>
             <div class="flex-1 space-y-2">
@@ -139,13 +311,19 @@ watch(selectedYear, fetchParties, { immediate: true });
         </div>
       </div>
 
-      <!-- List -->
+      List
       <div v-else-if="parties" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <article v-for="aff in parties.affiliations" :key="aff.name"
-          class="group bg-white/5 border border-white/10 rounded-xl p-5 transition hover:bg-white/10 hover:border-white/20">
+        <article
+          v-for="aff in parties.affiliations"
+          :key="aff.name"
+          class="group bg-white/5 border border-white/10 rounded-xl p-5 transition hover:bg-white/10 hover:border-white/20"
+        >
           <div class="flex items-center gap-4">
-            <div class="shrink-0 h-10 w-10 rounded-full bg-white/10 grid place-items-center font-semibold"
-              aria-hidden="true" :title="aff.name">
+            <div
+              class="shrink-0 h-10 w-10 rounded-full bg-white/10 grid place-items-center font-semibold"
+              aria-hidden="true"
+              :title="aff.name"
+            >
               {{ aff.name?.charAt(0)?.toUpperCase() }}
             </div>
 
@@ -154,11 +332,17 @@ watch(selectedYear, fetchParties, { immediate: true });
               <p class="text-xs text-white/60">Politieke partij</p>
             </div>
 
-            <svg class="ml-auto opacity-0 group-hover:opacity-100 transition h-5 w-5 text-white/60" viewBox="0 0 20 20"
-              fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd"
+            <svg
+              class="ml-auto opacity-0 group-hover:opacity-100 transition h-5 w-5 text-white/60"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
                 d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z"
-                clip-rule="evenodd" />
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
         </article>
@@ -166,5 +350,5 @@ watch(selectedYear, fetchParties, { immediate: true });
 
       <p v-else class="text-white/70">Geen partijen gevonden.</p>
     </div>
-  </section>
+  </section> -->
 </template>
