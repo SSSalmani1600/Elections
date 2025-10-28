@@ -132,6 +132,10 @@ onUnmounted(() => {
   background: transparent !important;
 }
 
+:deep(.leaflet-container .leaflet-interactive:focus) {
+  outline: none;
+}
+
 /* Pointer + smooth transforms */
 :deep(path.leaflet-interactive) {
   cursor: pointer;
