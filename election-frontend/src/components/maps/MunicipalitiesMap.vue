@@ -19,6 +19,12 @@ function baseStyle() {
   }
 }
 
+const emit = defineEmits(['update:selectedConstituency'])
+
+function changeConstituency(constituencyName: string): void {
+  emit('update:selectedConstituency', constituencyName)
+}
+
 function getName(props: GeoJsonProperties) {
   const candidates = ['statnaam',]
   for (const k of candidates) if (props?.[k]) return props[k]
@@ -51,6 +57,9 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
       geojsonLayer.resetStyle(e.target)
       if (e.target._path) e.target._path.classList.remove('hovered-muni')
     },
+    click: () => {
+      changeConstituency(name);
+    }
   })
 }
 
