@@ -118,8 +118,7 @@ onUnmounted(() => {
     <!-- Map container -->
     <div class="p-3">
       <!-- responsive height by breakpoint; full width -->
-      <div ref="mapEl"
-        class="w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[460px] xl:h-[520px] rounded-xl overflow-hidden" />
+      <div ref="mapEl" class="w-full h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-xl overflow-hidden" />
     </div>
   </div>
 </template>

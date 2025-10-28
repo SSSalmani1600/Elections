@@ -11,7 +11,20 @@ const constituencies = ref<Constituency[]>([])
 const chartData = ref()
 const chartOptions = ref()
 
-//
+const palette: string[] = [
+  '#60A5FA', // blue-400
+  '#A78BFA', // violet-400
+  '#34D399', // emerald-400
+  '#FBBF24', // amber-400
+  '#F472B6', // pink-400
+  '#38BDF8', // sky-400
+  '#F59E0B', // amber-500
+  '#4ADE80', // green-400
+  '#C084FC', // violet-300
+  '#F87171', // red-400
+]
+
+
 const selectedConstituency = ref<string | null>(null)
 const setChartData = () => {
   const currentConstituency: Constituency | null = getConstituencyByName(
@@ -20,41 +33,78 @@ const setChartData = () => {
 
   const sorted: Party[] = [...currentConstituency.parties].sort((a, b) => b.votes - a.votes)
 
+  const labels = sorted.map(p => p.name)
+  console.log(labels.length);
+  const values = sorted.map(p => p.votes)
+
+  // color per bar (cycles through palette)
+  const colors = labels.map((_, i) => palette[i % palette.length])
+
   return {
-    labels: sorted.map((p) => p.name),
+    labels,
     datasets: [
       {
-        label: 'Votes',
-        labelBackground: '#EF3054',
-        barThickness: 12,
-        data: sorted.map((p) => p.votes),
+        label: 'Stemmen',
+        data: values,
+        backgroundColor: colors,
+        hoverBackgroundColor: colors,
+        // bar styling
+        borderRadius: 8,            // rounded ends
+        borderSkipped: false,       // fully rounded
+        barThickness: 14,           // clean, even bars
+        maxBarThickness: 18,
+        minBarLength: 2,            // ensures tiny values are still visible
       },
     ],
   }
 }
 
+
 const setChartOptions = () => ({
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
+  animation: {
+    duration: 500,
+    easing: 'easeOutQuart'
+  },
+  layout: {
+    padding: { left: 4, right: 8, top: 4, bottom: 4 }
+  },
   plugins: {
-    legend: { labels: { color: '#e2e8f0' } },
+    legend: {
+      display: false
+    },
     tooltip: {
+      backgroundColor: '#e2e8f0',     // slate-200
       titleColor: '#0B132B',
       bodyColor: '#0B132B',
-      backgroundColor: '#e2e8f0'
+      borderColor: 'rgba(0,0,0,0.08)',
+      borderWidth: 1,
+      padding: 10,
+      displayColors: false,
     }
   },
   scales: {
     x: {
-      ticks: { color: '#e2e8f0', font: { weight: 500 } },
-      grid: { display: false, drawBorder: false }
+      grid: { display: false, drawBorder: false },
+      ticks: {
+        color: '#e2e8f0',
+        font: { weight: 500 },
+      }
     },
     y: {
-      ticks: { color: '#cbd5e1' },
-      grid: { display: false }
+      grid: { display: false, drawBorder: false },
+      ticks: {
+        autoSkip: false,
+        color: '#cbd5e1',
+        padding: 6
+      }
     }
-  }
+  },
+  // tighten category spacing
+  categoryPercentage: 0.85,
+  barPercentage: 0.9,
 })
 
 function scrollToSection(id: string) {
@@ -180,13 +230,13 @@ watch(selectedConstituency, () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
         <!-- Map -->
-        <div class="order-2 lg:order-1">
+        <div class="order-2 lg:order-1 h-full">
           <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
         </div>
 
         <!-- Chart card -->
-        <div class="order-1 lg:order-2">
-          <div class="w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
+        <div class="order-1 lg:order-2 h-full">
+          <div class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
             <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-white/90">
                 Uitslag per partij: {{ selectedConstituency || '—' }}
