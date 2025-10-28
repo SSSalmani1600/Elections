@@ -37,20 +37,25 @@ const setChartOptions = () => ({
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { labels: { color: 'white' } } },
+  plugins: {
+    legend: { labels: { color: '#e2e8f0' } },
+    tooltip: {
+      titleColor: '#0B132B',
+      bodyColor: '#0B132B',
+      backgroundColor: '#e2e8f0'
+    }
+  },
   scales: {
     x: {
-      ticks: { color: 'white', font: { weight: 500 } },
-      grid: { display: false, drawBorder: false },
+      ticks: { color: '#e2e8f0', font: { weight: 500 } },
+      grid: { display: false, drawBorder: false }
     },
-    y: { ticks: { color: 'white' }, grid: { display: false } },
-  },
+    y: {
+      ticks: { color: '#cbd5e1' },
+      grid: { display: false }
+    }
+  }
 })
-
-// years to pick from
-// const years = [2023, 2021, 2019] as const
-// type Year = (typeof years)[number]
-// const selectedYear = ref<Year>(2023)
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
@@ -163,24 +168,37 @@ watch(selectedConstituency, () => {
   </section>
   <!--- Graph Section --->
   <section class="px-6 py-12 text-white bg-[#0B132B]">
+    <div class="max-w-7xl mx-auto space-y-8">
 
-    <!-- Filter -->
-    <div class="flex justify-center p-8">
-      <div class="flex gap-4">
+      <!-- Filter row -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencies" optionLabel="name"
-          optionValue="name" placeholder="Selecteer een kieskring" fluid />
-        <!-- <Select name="Partijen" :options="years" optionLabel="" placeholder="Partij" fluid /> -->
+          optionValue="name" placeholder="Selecteer een kieskring" class="w-full sm:max-w-md" />
       </div>
-    </div>
 
-    <div class="flex flex-row-reverse">
-      <!-- Municipalities Map -->
-      <div>
-        <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
-      </div>
-      <!-- Graph -->
-      <div class="mb-16 w-full max-w-4xl mx-auto h-[70vh] sm:h-[65vh] min-h-[65vh]">
-        <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+      <!-- Content grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+        <!-- Map -->
+        <div class="order-2 lg:order-1">
+          <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
+        </div>
+
+        <!-- Chart card -->
+        <div class="order-1 lg:order-2">
+          <div class="w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
+            <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-white/90">
+                Uitslag per partij: {{ selectedConstituency || '—' }}
+              </h3>
+              <span class="text-xs text-white/60">stemmen</span>
+            </div>
+            <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
+              <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
