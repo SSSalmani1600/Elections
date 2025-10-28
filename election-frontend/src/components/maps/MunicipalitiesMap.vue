@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import L, { Layer, type LeafletMouseEvent } from 'leaflet'
-import type { Feature, Geometry } from 'geojson';
+import type { Feature, GeoJsonProperties, Geometry } from 'geojson';
 
 const mapEl = ref<string | HTMLElement>("")
 
@@ -19,7 +19,21 @@ function baseStyle() {
   }
 }
 
+function getName(props: GeoJsonProperties) {
+  const candidates = ['statnaam',]
+  for (const k of candidates) if (props?.[k]) return props[k]
+  return 'Gemeente'
+}
+
 function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
+  const name = getName(feature.properties)
+
+  layer.bindTooltip(name, {
+    sticky: true,
+    direction: 'center',
+    opacity: 0.95,
+  })
+
   layer.on({
     mouseover: (e: LeafletMouseEvent) => {
       const l = e.target
