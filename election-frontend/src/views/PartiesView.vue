@@ -106,7 +106,7 @@ window.addEventListener("resize", updatePageSize);
 <template>
   <div class="w-full flex flex-col items-center">
     <div class="flex flex-col items-center w-[70%] gap-10 relative">
-      <div class="flex justify-between items-end w-full mt-8">
+      <div class="flex flex-col justify-between w-full mt-8 gap-4 xl:items-end xl:flex-row">
         <div>
           <h1 class="text-[3rem] font-bold">Partijen</h1>
           <p class="text-text-muted max-w-[600px]">Op deze pagina vind je een overzicht van alle
