@@ -13,9 +13,9 @@ const DATA_URL = "https://cartomap.github.io/nl/wgs84/gemeente_2025.geojson"
 function baseStyle() {
   return {
     weight: 0.8,
-    color: '#555',
-    fillColor: '#4f7dc5',
-    fillOpacity: 0.15
+    color: '#93a4bf',     // softer outline on dark bg
+    fillColor: '#5aa9e6', // calm blue
+    fillOpacity: 0.12
   }
 }
 
@@ -36,26 +36,27 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
 
   layer.bindTooltip(name, {
     sticky: true,
-    direction: 'center',
+    direction: 'auto',
     opacity: 0.95,
+    offset: [0, -4],
+    className: 'muni-tooltip' // custom class (styled below)
   })
 
   layer.on({
     mouseover: (e: LeafletMouseEvent) => {
-      const l = e.target
+      const l = e.target;
       l.setStyle({
         weight: 1.6,
-        color: '#222',
-        fillOpacity: 0.35
+        color: '#e2e8f0',   // brighter outline on hover
+        fillOpacity: 0.28
       })
-
       if (l._path) l._path.classList.add('hovered-muni')
-
-      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) l.bringToFront()
+      // l.bringToFront(); // optional: usually not needed anymore
     },
     mouseout: (e: LeafletMouseEvent) => {
-      geojsonLayer.resetStyle(e.target)
-      if (e.target._path) e.target._path.classList.remove('hovered-muni')
+      geojsonLayer.resetStyle(e.target);
+      const l = e.target;
+      if (l._path) l._path.classList.remove('hovered-muni')
     },
     click: () => {
       changeConstituency(name);
@@ -76,24 +77,24 @@ async function main() {
     style: baseStyle,
     onEachFeature
   }).addTo(map)
-
-  map.fitBounds(geojsonLayer.getBounds(), { padding: [20, 20] })
 }
 
 onMounted(async () => {
   // Initialize map
   map = L.map(mapEl.value, {
-    minZoom: 5,
-    maxZoom: 14,
-    zoomControl: true,
-    preferCanvas: false,
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    tap: false,           // mobile tap-zoom
+    touchZoom: false,
+    preferCanvas: false,  // keep SVG so your CSS scale works
   }).setView([52.2, 5.3], 7)
 
   // Basemap
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map)
-
   try {
     main()
   } catch (err: unknown) {
@@ -102,22 +103,55 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (map) {
-    map.remove()
-  }
+  if (map) map.remove()
 })
 </script>
 
 <template>
-  <div class="w-full h-[70vh] relative">
+  <div class="w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-white/90">Gemeentenkaart</h3>
+      <span class="text-xs text-white/60">2025</span>
+    </div>
 
     <!-- Map container -->
-    <div ref="mapEl" id="map" class="w-full h-full rounded-xl overflow-hidden"></div>
+    <div class="p-3">
+      <!-- responsive height by breakpoint; full width -->
+      <div ref="mapEl"
+        class="w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[460px] xl:h-[520px] rounded-xl overflow-hidden" />
+    </div>
   </div>
 </template>
 
 <style scoped>
-.leaflet-interactive {
+/* Make Leaflet canvas transparent, consistently */
+:deep(.leaflet-container) {
+  background: transparent !important;
+}
+
+/* Pointer + smooth transforms */
+:deep(path.leaflet-interactive) {
   cursor: pointer;
+  transition: transform 140ms ease, fill-opacity 140ms ease, stroke 140ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Subtle scale on hover */
+:deep(.hovered-muni) {
+  transform: scale(1.02);
+}
+
+/* Tooltip styling (Leaflet’s .leaflet-tooltip + our class) */
+:deep(.leaflet-tooltip.muni-tooltip) {
+  background: rgba(15, 23, 42, 0.9);
+  /* slate-900/90 */
+  color: #e2e8f0;
+  /* slate-200 */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 8px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 </style>

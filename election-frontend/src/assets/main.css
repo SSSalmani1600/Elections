@@ -1,8 +1,7 @@
-@import './base.css';
-@import 'tailwindcss';
-@import 'primeicons/primeicons.css';
-
 @import "leaflet/dist/leaflet.css";
+@import './base.css';
+@import 'primeicons/primeicons.css';
+@import 'tailwindcss';
 
 #app {
 font-family: "Inter", sans-serif;
