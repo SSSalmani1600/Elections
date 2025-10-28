@@ -8,25 +8,14 @@ public class Party {
     private String id;
     private int votes;
     private Set<Candidate> candidates = new HashSet<>();
+    private Set<ElectedCandidates> electedCandidates = new HashSet<>();
 
     public Party(String name) {
         this.name = name;
     }
 
-    public Set<Candidate> getCandidates() {
-        return candidates;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public int getVotes() {
@@ -37,8 +26,28 @@ public class Party {
         this.votes = votes;
     }
 
+    public Set<ElectedCandidates> getElectedCandidates() {
+        return electedCandidates;
+    }
+
+    public void setElectedCandidates(Set<ElectedCandidates> electedCandidates) {
+        this.electedCandidates = electedCandidates;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public void setCandidates(Set<Candidate> candidates) {
         this.candidates = candidates;
+    }
+
+    public Set<Candidate> getCandidates() {
+        return candidates;
     }
 
     public boolean equals(Object o) {

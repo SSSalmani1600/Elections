@@ -4,38 +4,38 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --color-primary: #EF3054;
-    --color-secondary: #FFFFFF;
-    --color-background: #0B132B;
-    --color-surface: #1C2541;
+  --color-primary: #EF3054;
+  --color-secondary: #FFFFFF;
+  --color-background: #0B132B;
+  --color-surface: #1C2541;
 
-    --color-text-base: #FFFFFF;
-    --color-text-muted: #c0c0c0;
-    --color-link: #EF3054;
+  --color-text-base: #FFFFFF;
+  --color-text-muted: #c0c0c0;
+  --color-link: #EF3054;
 }
 
 /* Basis reset */
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /* Globale body-styling */
 body {
-    min-height: 100vh;
-    color: var(--color-text-base);
-    background: var(--color-surface);
-    overflow-x: hidden;
-    transition: color 0.5s, background-color 0.5s;
-    line-height: 1.6;
-    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  min-height: 100vh;
+  color: var(--color-text-base);
+  background: var(--color-surface);
+  overflow-x: hidden;
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-    font-size: 15px;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @theme inline {
