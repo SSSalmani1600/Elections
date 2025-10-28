@@ -13,12 +13,11 @@ const error = ref<string>("");
 const inputText = ref<string>("");
 const { results } = useFuse(inputText, data);
 
-
 onMounted(async () => {
   loading.value = true;
   updatePageSize();
   try {
-    data.value = await getParties();
+    data.value = await getParties() as unknown as string[];
   } catch (err: any) {
     console.error(err.message)
     error.value = "Er konden geen partijen gevonden worden!"
@@ -30,14 +29,13 @@ onMounted(async () => {
 const pageSize = ref(9);
 const currentPage = ref(1);
 
-const totalPages = computed(() => Math.ceil(data.value.length / pageSize.value));
+const totalPages = computed(() => Math.ceil(filteredList.value.length / pageSize.value));
 const maxVisiblePages = ref(3);
 
 const pages = computed(() => {
-  const total = totalPages.value;
   const current = currentPage.value;
   const result: (number | string)[] = [];
-
+  const total = totalPages.value;
   if (total <= maxVisiblePages.value) {
     for (let i = 1; i <= total; i++) result.push(i);
     return result;
@@ -69,14 +67,16 @@ const pages = computed(() => {
   return result;
 });
 
-const visibleParties = computed(() => {
-  const list = inputText.value.trim() === ""
+const filteredList = computed(() => {
+  return inputText.value.trim() === ""
     ? data.value
-    : results.value.map((r: any) => r.item)
+    : results.value.map(r => r.item)
+})
 
+const visibleParties = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   const end = currentPage.value * pageSize.value;
-  return list.slice(start, end);
+  return filteredList.value.slice(start, end);
 });
 
 const selectPage = (page: number | string) => {
