@@ -50,8 +50,34 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     }
 
     @Override
-    public void registerCandidateVotes(boolean aggregated, Map<String, String> electionData) {
-        System.out.printf("%s candidate votes: %s\n", aggregated ? "Municipality" : "Polling station", electionData);
+    public void registerCandidateVotes(boolean aggregated, Map<String, String> data) {
+        String partyId = data.get(TagAndAttributeNames.AFFILIATION_IDENTIFIER_ID);
+        String candidateKey = firstNonNull(
+                data.get(TagAndAttributeNames.CANDIDATE_IDENTIFIER_SHORT_CODE),
+                data.get(TagAndAttributeNames.CANDIDATE_IDENTIFIER_ID)
+        );
+        String votesStr = data.get(TagAndAttributeNames.VALID_VOTES);
+        if (partyId == null || candidateKey == null || votesStr == null) return;
+
+        int votes = safeInt(votesStr);
+
+        String municipalityId = data.get(TagAndAttributeNames.SUPERIOR_REGION_NUMBER);
+        String municipalityName = data.get(TagAndAttributeNames.REGION_NAME);
+        String stationId = data.get(TagAndAttributeNames.REPORTING_UNIT_IDENTIFIER_ID);
+
+        Party party = election.findPartyById(partyId);
+        if (party == null) return;
+
+        Candidate candidate = election.findCandidateByPartyAndKey(party, candidateKey);
+        if (candidate == null) return;
+
+        if (aggregated) {
+            String key = safeKey(municipalityId, municipalityName);
+            candidate.getVotesByMunicipality().merge(key, votes, Integer::sum);
+        } else {
+            String key = safeKey(stationId, municipalityName);
+            candidate.getVotesByStation().merge(key, votes, Integer::sum);
+        }
     }
 
     @Override
