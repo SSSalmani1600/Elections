@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
-public class JwtFilter extends OncePerRequestFilter {
+public class    JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService = new JwtService();
     String[] whiteListURLs = {
             "/nl/hva/election_backend/api/auth/",
@@ -39,6 +39,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+        }
+
+        // ✅ Debug endpoints ook doorlaten (voor test van XML parser)
+        if (uri.startsWith("/debug")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review

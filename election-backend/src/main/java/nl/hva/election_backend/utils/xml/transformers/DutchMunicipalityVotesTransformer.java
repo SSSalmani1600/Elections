@@ -17,6 +17,10 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
 
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> data) {
+        System.out.println("🟩 [DEBUG] registerPartyVotes() aangeroepen");
+        System.out.println("  aggregated = " + aggregated);
+        System.out.println("  data keys  = " + data.keySet());
+
         String partyName = data.get(TagAndAttributeNames.AFFILIATION_IDENTIFIER_ID);
         String votesStr = data.get(TagAndAttributeNames.VALID_VOTES);
         if (partyName == null || votesStr == null) return;
@@ -27,9 +31,14 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         String municipalityName = data.get(TagAndAttributeNames.REGION_NAME);
         String stationId = data.get(TagAndAttributeNames.REPORTING_UNIT_IDENTIFIER);
 
-        // Gebruik bestaande methode uit Election
+        System.out.printf("  🗳️ Party=%s | votes=%d | region=%s | station=%s%n",
+                partyName, votes, municipalityName, stationId);
+
         Party party = election.getPartyByName(partyName);
-        if (party == null) return;
+        if (party == null) {
+            System.out.println("  ⚠️ Geen partij gevonden voor: " + partyName);
+            return;
+        }
 
         if (aggregated) {
             String key = safeKey(municipalityId, municipalityName);
@@ -40,8 +49,13 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         }
     }
 
+
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> data) {
+        System.out.println("🟦 [DEBUG] registerCandidateVotes() aangeroepen");
+        System.out.println("  aggregated = " + aggregated);
+        System.out.println("  data keys  = " + data.keySet());
+
         String candidateName = data.get(TagAndAttributeNames.CANDIDATE_FULL_NAME);
         String votesStr = data.get(TagAndAttributeNames.VALID_VOTES);
         if (candidateName == null || votesStr == null) return;
@@ -52,9 +66,14 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         String municipalityName = data.get(TagAndAttributeNames.REGION_NAME);
         String stationId = data.get(TagAndAttributeNames.REPORTING_UNIT_IDENTIFIER);
 
-        // Gebruik bestaande methode uit Election
+        System.out.printf("  👤 Candidate=%s | votes=%d | region=%s | station=%s%n",
+                candidateName, votes, municipalityName, stationId);
+
         Candidate candidate = election.getCandidateByName(candidateName);
-        if (candidate == null) return;
+        if (candidate == null) {
+            System.out.println("  ⚠️ Geen kandidaat gevonden voor: " + candidateName);
+            return;
+        }
 
         if (aggregated) {
             String key = safeKey(municipalityId, municipalityName);
