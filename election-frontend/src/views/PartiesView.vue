@@ -2,37 +2,46 @@
 
 import {computed, onMounted, ref} from "vue";
 import {getParties} from "@/services/PartyService.ts";
+import {useFuse} from '@vueuse/integrations/useFuse';
+import {Search} from "lucide-vue-next";
+import {Input} from "@/components/ui/input";
 import IconSpinner from "@/components/icons/IconSpinner.vue";
+import type {User} from "@/types/api.ts";
+import {getAllUsers} from "@/services/UserService.ts";
 
 const data = ref<string[]>([]);
+const users = ref<User[]>([]);
 const loading = ref(false);
-const error = ref<string>("");
+const hasError = ref<boolean>(false);
+const inputText = ref<string>("");
+const { results } = useFuse(inputText, data);
 
 onMounted(async () => {
   loading.value = true;
   updatePageSize();
   try {
-    data.value = await getParties();
+    data.value = await getParties() as unknown as string[];
+    users.value = await getAllUsers();
+    console.log(users.value);
   } catch (err: any) {
     console.error(err.message)
-    error.value = "Er konden geen partijen gevonden worden!"
+    hasError.value;
+
   } finally {
     loading.value = false;
   }
 })
 
-
 const pageSize = ref(9);
 const currentPage = ref(1);
 
-const totalPages = computed(() => Math.ceil(data.value.length / pageSize.value));
+const totalPages = computed(() => Math.ceil(filteredList.value.length / pageSize.value));
 const maxVisiblePages = ref(3);
 
 const pages = computed(() => {
-  const total = totalPages.value;
   const current = currentPage.value;
   const result: (number | string)[] = [];
-
+  const total = totalPages.value;
   if (total <= maxVisiblePages.value) {
     for (let i = 1; i <= total; i++) result.push(i);
     return result;
@@ -64,10 +73,17 @@ const pages = computed(() => {
   return result;
 });
 
+const filteredList = computed(() => {
+  currentPage.value = 1;
+  return inputText.value.trim() === ""
+    ? data.value
+    : results.value.map(r => r.item)
+})
+
 const visibleParties = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   const end = currentPage.value * pageSize.value;
-  return data.value.slice(start, end);
+  return filteredList.value.slice(start, end);
 });
 
 const selectPage = (page: number | string) => {
@@ -81,12 +97,15 @@ function updatePageSize() {
   if (width >= 1280) {
     pageSize.value = 9;
     maxVisiblePages.value = 3;
+    currentPage.value = 1;
   } else if (width >= 768) {
     pageSize.value = 6;
     maxVisiblePages.value = 3;
+    currentPage.value = 1;
   } else {
     pageSize.value = 3;
     maxVisiblePages.value = 1;
+    currentPage.value = 1;
   }
 }
 
@@ -97,19 +116,25 @@ window.addEventListener("resize", updatePageSize);
 <template>
   <div class="w-full flex flex-col items-center">
     <div class="flex flex-col items-center w-[70%] gap-10 relative">
-      <div class="flex justify-between items-baseline w-full mt-8">
+      <div class="flex flex-col justify-between w-full mt-8 gap-4 xl:items-end xl:flex-row">
         <div>
           <h1 class="text-[3rem] font-bold">Partijen</h1>
-          <p class="text-text-muted max-w-[600px]">Op deze pagina vind je een overzicht van alle bestaande
+          <p class="text-text-muted max-w-[600px]">Op deze pagina vind je een overzicht van alle
+            bestaande
             partijen. Lees meer over hun visie en beleid door op 1 van de partijen de klikken</p>
+        </div>
+        <div class="relative flex w-full max-w-sm items-center">
+          <span class="absolute end-0 inset-y-0 flex items-center justify-center px-2">
+            <Search class="size-6 text-primary"/>
+          </span>
+          <Input v-model="inputText" id="search" onchange="" type="text" placeholder="Search..." class="pr-10 rounded-2xl bg-background border-none active:outline-none focus-visible:ring-1"/>
         </div>
       </div>
       <div class="flex flex-col items-center gap-6 min-h-[542px] relative w-full">
-          <span v-show="error !== ''"
-                class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">{{
-              error
-            }}</span>
-        <div v-show="error === ''" class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
+          <span v-show="hasError || visibleParties.length === 0"
+                class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">Er konden geen partijen gevonden worden!</span>
+        <div v-show="!hasError && visibleParties.length > 0"
+             class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
           <div v-for="party in visibleParties" :key="party"
                class="bg-primary w-full h-fit rounded-lg">
             <a href="/"
@@ -126,7 +151,8 @@ window.addEventListener("resize", updatePageSize);
             </a>
           </div>
         </div>
-        <div v-show="error === ''" class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]">
+        <div v-show="!hasError && visibleParties.length > 0"
+             class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]">
           <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><i
             class="pi pi-arrow-left"></i> <span class="hidden md:block">Vorige</span>
           </button>
