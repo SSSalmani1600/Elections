@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getUpcomingElections, type Election } from '@/services/ElectionService.ts'
 
 const elections = ref<Election[]>([])
 const loading = ref(true)
 const error = ref('')
+
+const pageSize = ref(3)
+const currentPage = ref(1)
 
 async function loadElections() {
   try {
@@ -16,7 +19,7 @@ async function loadElections() {
   }
 }
 
-// 📅 Datum helpers
+
 function formatDay(dateString: string) {
   const d = new Date(dateString)
   return isNaN(d.getTime()) ? '?' : d.getDate().toString().padStart(2, '0')
@@ -39,7 +42,6 @@ function formatFullDate(dateString: string) {
     })
 }
 
-// 🌍 Vertaalhelpers
 function translateType(type: string): string {
   switch (type) {
     case 'Municipal elections':
@@ -57,6 +59,20 @@ function translateStatus(status: string): string {
   if (status === 'confirmed') return 'Bevestigd'
   if (status === 'projected') return 'Verwacht'
   return status
+}
+
+
+const totalPages = computed(() => Math.ceil(elections.value.length / pageSize.value))
+const visibleElections = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = currentPage.value * pageSize.value
+  return elections.value.slice(start, end)
+})
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
 }
 
 onMounted(loadElections)
@@ -79,7 +95,7 @@ onMounted(loadElections)
     <!-- Lijst -->
     <div v-else class="flex flex-col gap-6 w-full max-w-3xl">
       <div
-        v-for="election in elections"
+        v-for="election in visibleElections"
         :key="election.id"
         class="flex items-center bg-surface rounded-2xl p-6 shadow-md hover:bg-surface-hover transition duration-200"
       >
@@ -120,6 +136,43 @@ onMounted(loadElections)
         class="text-center text-text-muted mt-8"
       >
         Geen aankomende verkiezingen gevonden.
+      </div>
+
+      <!-- 📄 Paginatie -->
+      <div
+        v-if="totalPages > 1"
+        class="flex items-center justify-center gap-4 mt-10"
+      >
+        <button
+          class="px-3 py-2 text-sm font-medium rounded-lg bg-surface-hover hover:bg-surface transition disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(currentPage - 1)"
+          :disabled="currentPage === 1"
+        >
+          Vorige
+        </button>
+
+        <div class="flex gap-2">
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            class="px-3 py-2 text-sm font-medium rounded-lg transition"
+            :class="{
+              'bg-primary text-white': page === currentPage,
+              'bg-surface-hover hover:bg-surface': page !== currentPage
+            }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          class="px-3 py-2 text-sm font-medium rounded-lg bg-surface-hover hover:bg-surface transition disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(currentPage + 1)"
+          :disabled="currentPage === totalPages"
+        >
+          Volgende
+        </button>
       </div>
     </div>
   </section>
