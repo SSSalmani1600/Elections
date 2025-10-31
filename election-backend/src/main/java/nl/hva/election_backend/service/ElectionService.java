@@ -5,6 +5,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,61 +18,76 @@ import java.util.regex.Pattern;
 @Service
 public class ElectionService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ElectionService.class);
+
+    @Value("${election.source.url}")
+    private String electionSourceUrl;
+
+    private static final String STATUS_CONFIRMED = "confirmed";
+
     public List<Election> fetchUpcomingElections() throws IOException {
-        String url = "https://www.kiesraad.nl/actueel/activiteiten";
-        System.out.println(" [ElectionService] Ophalen van: " + url);
+        logger.info("[ElectionService] Ophalen van: {}", electionSourceUrl);
 
-        Document doc = Jsoup.connect(url).get();
-        System.out.println(" [ElectionService] Pagina succesvol geladen");
+        final Document doc = Jsoup.connect(electionSourceUrl).get();
+        final Elements activities = doc.select(".activity, .views-row");
+        logger.info("[ElectionService] Gevonden activiteiten: {}", activities.size());
 
-        List<Election> elections = new ArrayList<>();
-        Elements activities = doc.select(".activity, .views-row");
-        System.out.println(" [ElectionService] Gevonden activiteiten: " + activities.size());
+        final List<Election> elections = new ArrayList<>();
 
         for (Element el : activities) {
-
-            String title = el.select("h3 a, h3").text().trim();
-            if (title.isEmpty()) continue;
-
-            Element timeElement = el.selectFirst("time");
-            String dateAttr = "";
-            if (timeElement != null) {
-                dateAttr = timeElement.attr("datetime").trim();
-                if (dateAttr.isEmpty()) {
-                    dateAttr = extractDateFromTitle(timeElement.text().trim());
-                }
-            }
-
-            // 🧹 Titel opschonen
-            String cleanTitle = title
-                    .replaceAll("(?i)\\b\\d{1,2}\\s*[a-zA-Zé]+\\s*\\d{4}\\b", "")
-                    .replaceAll("(?i)\\b\\d{1,2}\\s*[a-zA-Zé]+\\b", "")
-                    .replaceAll("(?i)\\b[a-zA-Zé]+\\s*\\d{4}\\b", "")
-                    .replaceAll("(?i)\\b(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|jan|feb|mrt|apr|jun|jul|aug|sep|okt|nov|dec)\\b", "")
-                    .replaceAll("\\s+", " ")
-                    .trim();
-
-            if (cleanTitle.toLowerCase().contains("verkiezing")) {
-                System.out.println("🗳️ [ElectionService] Verkiezing gevonden: " + cleanTitle + " (" + dateAttr + ")");
-                elections.add(new Election(
-                        UUID.randomUUID().toString(),
-                        capitalize(cleanTitle),
-                        dateAttr,
-                        "confirmed"
-                ));
-            }
+            parseElection(el).ifPresent(elections::add);
         }
 
         elections.sort(Comparator.comparing(Election::getDate, Comparator.nullsLast(String::compareTo)));
-        System.out.println("✅ [ElectionService] Aantal gevonden verkiezingen: " + elections.size());
+        logger.info("✅ Aantal gevonden verkiezingen: {}", elections.size());
 
         return elections;
     }
 
+    /** 🔍 Parse één HTML-element naar een Election, als die geldig is */
+    private Optional<Election> parseElection(Element el) {
+        String title = el.select("h3 a, h3").text().trim();
+        if (title.isEmpty()) return Optional.empty();
 
+        String date = extractDateFromElement(el);
+        String cleanTitle = cleanTitle(title);
 
+        if (!cleanTitle.toLowerCase().contains("verkiezing")) return Optional.empty();
 
-    // 🧠 Datum uit zichtbare tekst halen (zoals "29 oktober 2025")
+        logger.info("🗳️ Verkiezing gevonden: {} ({})", cleanTitle, date);
+        return Optional.of(new Election(
+                UUID.randomUUID().toString(),
+                capitalize(cleanTitle),
+                date,
+                STATUS_CONFIRMED
+        ));
+    }
+
+    /** 🧠 Haalt datum uit <time> element of uit tekst */
+    private String extractDateFromElement(Element el) {
+        return Optional.ofNullable(el.selectFirst("time"))
+                .map(time -> {
+                    String datetime = time.attr("datetime").trim();
+                    return datetime.isEmpty()
+                            ? extractDateFromTitle(time.text().trim())
+                            : datetime;
+                })
+                .orElse("");
+    }
+
+    /** 🧼 Maakt titel schoon door datums en maanden te verwijderen */
+    private String cleanTitle(String title) {
+        return title
+                .replaceAll("(?i)\\b\\d{1,2}\\s*[a-zA-Zé]+\\s*\\d{4}\\b", "")
+                .replaceAll("(?i)\\b\\d{1,2}\\s*[a-zA-Zé]+\\b", "")
+                .replaceAll("(?i)\\b[a-zA-Zé]+\\s*\\d{4}\\b", "")
+                .replaceAll("(?i)\\b(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december|"
+                        + "jan|feb|mrt|apr|jun|jul|aug|sep|okt|nov|dec)\\b", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    /** 📅 Datum extraheren uit tekst zoals '29 oktober 2025' */
     private String extractDateFromTitle(String text) {
         Pattern patternFull = Pattern.compile("(\\d{1,2})\\s*(\\p{L}+?)\\s*(\\d{4})", Pattern.CASE_INSENSITIVE);
         Matcher matcherFull = patternFull.matcher(text);
