@@ -8,6 +8,8 @@ import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 
 const constituencies = ref<Constituency[]>([])
 
+const constituencyNames: string[] = []
+
 const chartData = ref()
 const chartOptions = ref()
 
@@ -35,7 +37,7 @@ const setChartData = () => {
   const labels = sorted.map((p) => p.name)
   const values = sorted.map((p) => p.votes)
 
-  // color per bar (cycles through palette)
+  // color per bar
   const colors = labels.map((_, i) => palette[i % palette.length])
 
   return {
@@ -46,12 +48,11 @@ const setChartData = () => {
         data: values,
         backgroundColor: colors,
         hoverBackgroundColor: colors,
-        // bar styling
-        borderRadius: 8, // rounded ends
-        borderSkipped: false, // fully rounded
-        barThickness: 14, // clean, even bars
+        borderRadius: 8,
+        borderSkipped: false,
+        barThickness: 14,
         maxBarThickness: 18,
-        minBarLength: 2, // ensures tiny values are still visible
+        minBarLength: 2,
       },
     ],
   }
@@ -73,7 +74,7 @@ const setChartOptions = () => ({
       display: false,
     },
     tooltip: {
-      backgroundColor: '#e2e8f0', // slate-200
+      backgroundColor: '#e2e8f0',
       titleColor: '#0B132B',
       bodyColor: '#0B132B',
       borderColor: 'rgba(0,0,0,0.08)',
@@ -99,7 +100,6 @@ const setChartOptions = () => ({
       },
     },
   },
-  // tighten category spacing
   categoryPercentage: 0.85,
   barPercentage: 0.9,
 })
@@ -130,6 +130,8 @@ const fetchConstituencies = async () => {
 onMounted(async () => {
   await fetchConstituencies()
 
+  constituencies.value.map((c) => constituencyNames.push(c.name))
+
   if (!selectedConstituency.value && constituencies.value.length) {
     selectedConstituency.value = constituencies.value[0].name
   }
@@ -138,8 +140,8 @@ onMounted(async () => {
   chartData.value = setChartData()
 })
 
-function sortConstituenciesByName(constituencies: Constituency[]): Constituency[] {
-  return constituencies.slice().sort((a, b) => a.name.localeCompare(b.name))
+function sortConstituenciesByName(constituencies: string[]): string[] {
+  return constituencies.sort((a, b) => a.localeCompare(b))
 }
 
 // Update chart when user changes selection
@@ -235,9 +237,7 @@ watch(selectedConstituency, () => {
         <Select
           v-model="selectedConstituency"
           name="Kieskringen"
-          :options="sortConstituenciesByName(constituencies)"
-          optionLabel="name"
-          optionValue="name"
+          :options="sortConstituenciesByName(constituencyNames)"
           placeholder="Selecteer een kieskring"
           class="w-full sm:max-w-md"
         />
