@@ -44,7 +44,7 @@ public class ElectionService {
         return elections;
     }
 
-    /** 🔍 Parse één HTML-element naar een Election, als die geldig is */
+
     private Optional<Election> parseElection(Element el) {
         String title = el.select("h3 a, h3").text().trim();
         if (title.isEmpty()) return Optional.empty();
@@ -63,7 +63,7 @@ public class ElectionService {
         ));
     }
 
-    /** 🧠 Haalt datum uit <time> element of uit tekst */
+
     private String extractDateFromElement(Element el) {
         return Optional.ofNullable(el.selectFirst("time"))
                 .map(time -> {
@@ -75,7 +75,6 @@ public class ElectionService {
                 .orElse("");
     }
 
-    /** 🧼 Maakt titel schoon door datums en maanden te verwijderen */
     private String cleanTitle(String title) {
         return title
                 .replaceAll("(?i)\\b\\d{1,2}\\s*[a-zA-Zé]+\\s*\\d{4}\\b", "")
@@ -87,7 +86,7 @@ public class ElectionService {
                 .trim();
     }
 
-    /** 📅 Datum extraheren uit tekst zoals '29 oktober 2025' */
+
     private String extractDateFromTitle(String text) {
         Pattern patternFull = Pattern.compile("(\\d{1,2})\\s*(\\p{L}+?)\\s*(\\d{4})", Pattern.CASE_INSENSITIVE);
         Matcher matcherFull = patternFull.matcher(text);
