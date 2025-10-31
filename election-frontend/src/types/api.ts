@@ -45,3 +45,10 @@ export interface Constituency {
   name: string;
   parties: Party[];
 }
+
+export interface User {
+  id: number;
+  displayName: string;
+  email: string;
+  password: string;
+}

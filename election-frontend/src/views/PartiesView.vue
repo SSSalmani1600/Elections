@@ -6,8 +6,11 @@ import {useFuse} from '@vueuse/integrations/useFuse';
 import {Search} from "lucide-vue-next";
 import {Input} from "@/components/ui/input";
 import IconSpinner from "@/components/icons/IconSpinner.vue";
+import type {User} from "@/types/api.ts";
+import {getAllUsers} from "@/services/UserService.ts";
 
 const data = ref<string[]>([]);
+const users = ref<User[]>([]);
 const loading = ref(false);
 const hasError = ref<boolean>(false);
 const inputText = ref<string>("");
@@ -18,6 +21,8 @@ onMounted(async () => {
   updatePageSize();
   try {
     data.value = await getParties() as unknown as string[];
+    users.value = await getAllUsers();
+    console.log(users.value);
   } catch (err: any) {
     console.error(err.message)
     hasError.value;
