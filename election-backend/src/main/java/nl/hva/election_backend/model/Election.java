@@ -1,5 +1,7 @@
 package nl.hva.election_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +18,7 @@ public class Election {
     private Set<Constituency> constituencies = new HashSet<>();
     private String type;
     private String date;
+    @JsonIgnore
     private String status;
 
     public Election(String id, String type, String date, String status) {
@@ -24,6 +27,7 @@ public class Election {
         this.type = type;
         this.date = date;
         this.status = status;
+
     }
 
     public Election(String electionId) {
