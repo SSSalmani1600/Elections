@@ -1,43 +1,3 @@
-<template>
-  <section class="calendar">
-    <h1>Verkiezingskalender</h1>
-
-    <div v-if="loading" class="loading">Verkiezingen worden geladen...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <div v-else class="calendar-list">
-      <div
-        v-for="election in elections"
-        :key="election.id"
-        class="calendar-item"
-      >
-        <div class="date-box">
-          <div class="day">{{ formatDay(election.date) }}</div>
-          <div class="month">{{ formatMonth(election.date) }}</div>
-        </div>
-
-        <div class="details">
-          <h2 class="type">{{ translateType(election.type) }}</h2>
-          <p class="date-line">
-             {{ formatFullDate(election.date) }}
-            <br />
-            📍 Nederland
-          </p>
-          <p
-            class="status"
-            :class="{
-              confirmed: election.status === 'confirmed',
-              projected: election.status === 'projected'
-            }"
-          >
-            {{ translateStatus(election.status) }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUpcomingElections, type Election } from '@/services/ElectionService.ts'
@@ -56,7 +16,7 @@ async function loadElections() {
   }
 }
 
-// ✅ Datum helpers
+// 📅 Datum helpers
 function formatDay(dateString: string) {
   const d = new Date(dateString)
   return isNaN(d.getTime()) ? '?' : d.getDate().toString().padStart(2, '0')
@@ -75,11 +35,11 @@ function formatFullDate(dateString: string) {
     : d.toLocaleDateString('nl-NL', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric',
+      year: 'numeric'
     })
 }
 
-// ✅ Vertaalhelpers
+// 🌍 Vertaalhelpers
 function translateType(type: string): string {
   switch (type) {
     case 'Municipal elections':
@@ -102,91 +62,65 @@ function translateStatus(status: string): string {
 onMounted(loadElections)
 </script>
 
-<style scoped>
-.calendar {
-  max-width: 800px;
-  margin: 2rem auto;
-  font-family: system-ui, sans-serif;
-  color: #fff;
-}
+<template>
+  <section
+    class="flex flex-col items-center min-h-screen py-16 px-4 text-white bg-background"
+  >
+    <h1 class="text-4xl font-bold mb-10 text-center max-md:text-3xl">
+      Verkiezingskalender
+    </h1>
 
-h1 {
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
+    <!-- Loading & errors -->
+    <div v-if="loading" class="text-text-muted text-lg mt-4">
+      Verkiezingen worden geladen...
+    </div>
+    <div v-else-if="error" class="text-red-400 text-lg mt-4">{{ error }}</div>
 
-.calendar-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+    <!-- Lijst -->
+    <div v-else class="flex flex-col gap-6 w-full max-w-3xl">
+      <div
+        v-for="election in elections"
+        :key="election.id"
+        class="flex items-center bg-surface rounded-2xl p-6 shadow-md hover:bg-surface-hover transition duration-200"
+      >
+        <!-- Datum -->
+        <div class="text-center mr-6 pr-6 border-r border-border min-w-[80px]">
+          <div class="text-3xl font-bold">
+            {{ formatDay(election.date) }}
+          </div>
+          <div class="text-sm text-text-muted uppercase tracking-wide">
+            {{ formatMonth(election.date) }}
+          </div>
+        </div>
 
-.calendar-item {
-  display: flex;
-  background: #1d2233;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  align-items: center;
-  transition: background 0.2s;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
-}
+        <!-- Details -->
+        <div class="flex flex-col flex-1">
+          <h2 class="text-xl font-semibold mb-1">
+            {{ translateType(election.type) }}
+          </h2>
+          <p class="text-text-muted mb-1">
+            {{ formatFullDate(election.date) }} <br />
+            📍 Nederland
+          </p>
+          <p
+            class="font-semibold capitalize"
+            :class="{
+              'text-green-400': election.status === 'confirmed',
+              'text-yellow-400': election.status === 'projected'
+            }"
+          >
+            {{ translateStatus(election.status) }}
+          </p>
+        </div>
+      </div>
 
-.calendar-item:hover {
-  background: #242b40;
-}
-
-.date-box {
-  text-align: center;
-  margin-right: 1.5rem;
-  border-right: 2px solid #444;
-  padding-right: 1.5rem;
-  min-width: 70px;
-}
-
-.day {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #fff;
-}
-
-.month {
-  font-size: 1rem;
-  color: #aaa;
-}
-
-.details {
-  flex: 1;
-}
-
-.type {
-  font-size: 1.2rem;
-  margin-bottom: 0.4rem;
-  font-weight: bold;
-}
-
-.date-line {
-  color: #ccc;
-  margin-bottom: 0.4rem;
-}
-
-.status {
-  font-weight: bold;
-  text-transform: capitalize;
-}
-
-.confirmed {
-  color: #00d26a;
-}
-
-.projected {
-  color: #ffb347;
-}
-
-.loading,
-.error {
-  text-align: center;
-  margin-top: 2rem;
-}
-</style>
+      <!-- Geen resultaten -->
+      <div
+        v-if="!elections.length && !loading && !error"
+        class="text-center text-text-muted mt-8"
+      >
+        Geen aankomende verkiezingen gevonden.
+      </div>
+    </div>
+  </section>
+</template>
