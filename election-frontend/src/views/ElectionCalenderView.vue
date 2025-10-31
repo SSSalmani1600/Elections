@@ -80,41 +80,41 @@ onMounted(loadElections)
 
 <template>
   <section
-    class="flex flex-col items-center min-h-screen py-16 px-4 text-white bg-background"
+    class="flex flex-col items-center min-h-screen py-16 px-4 text-white bg-[var(--color-surface)]"
   >
     <h1 class="text-4xl font-bold mb-10 text-center max-md:text-3xl">
       Verkiezingskalender
     </h1>
 
-    <!-- Loading & errors -->
-    <div v-if="loading" class="text-text-muted text-lg mt-4">
+
+    <div v-if="loading" class="text-[var(--color-text-muted)] text-lg mt-4">
       Verkiezingen worden geladen...
     </div>
     <div v-else-if="error" class="text-red-400 text-lg mt-4">{{ error }}</div>
 
-    <!-- Lijst -->
+
     <div v-else class="flex flex-col gap-6 w-full max-w-3xl">
       <div
         v-for="election in visibleElections"
         :key="election.id"
-        class="flex items-center bg-surface rounded-2xl p-6 shadow-md hover:bg-surface-hover transition duration-200"
+        class="flex items-center bg-[#0B132B] rounded-2xl p-6 shadow-md hover:bg-[#101b3d] transition duration-200 border border-[#1C2541]"
       >
-        <!-- Datum -->
-        <div class="text-center mr-6 pr-6 border-r border-border min-w-[80px]">
-          <div class="text-3xl font-bold">
+
+        <div class="text-center mr-6 pr-6 border-r border-[rgba(255,255,255,0.15)] min-w-[80px]">
+          <div class="text-3xl font-bold text-[var(--color-secondary)]">
             {{ formatDay(election.date) }}
           </div>
-          <div class="text-sm text-text-muted uppercase tracking-wide">
+          <div class="text-sm text-[var(--color-text-muted)] uppercase tracking-wide">
             {{ formatMonth(election.date) }}
           </div>
         </div>
 
-        <!-- Details -->
+
         <div class="flex flex-col flex-1">
-          <h2 class="text-xl font-semibold mb-1">
+          <h2 class="text-xl font-semibold mb-1 text-[var(--color-secondary)]">
             {{ translateType(election.type) }}
           </h2>
-          <p class="text-text-muted mb-1">
+          <p class="text-[var(--color-text-muted)] mb-1">
             {{ formatFullDate(election.date) }} <br />
             📍 Nederland
           </p>
@@ -130,21 +130,21 @@ onMounted(loadElections)
         </div>
       </div>
 
-      <!-- Geen resultaten -->
+
       <div
         v-if="!elections.length && !loading && !error"
-        class="text-center text-text-muted mt-8"
+        class="text-center text-[var(--color-text-muted)] mt-8"
       >
         Geen aankomende verkiezingen gevonden.
       </div>
 
-      <!-- 📄 Paginatie -->
+
       <div
         v-if="totalPages > 1"
         class="flex items-center justify-center gap-4 mt-10"
       >
         <button
-          class="px-3 py-2 text-sm font-medium rounded-lg bg-surface-hover hover:bg-surface transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-2 text-sm font-medium rounded-lg bg-[#1C2541] hover:bg-[#27335a] transition disabled:opacity-50 disabled:cursor-not-allowed"
           @click="goToPage(currentPage - 1)"
           :disabled="currentPage === 1"
         >
@@ -157,8 +157,8 @@ onMounted(loadElections)
             :key="page"
             class="px-3 py-2 text-sm font-medium rounded-lg transition"
             :class="{
-              'bg-primary text-white': page === currentPage,
-              'bg-surface-hover hover:bg-surface': page !== currentPage
+              'bg-[var(--color-primary)] text-white': page === currentPage,
+              'bg-[#1C2541] hover:bg-[#27335a]': page !== currentPage
             }"
             @click="goToPage(page)"
           >
@@ -167,7 +167,7 @@ onMounted(loadElections)
         </div>
 
         <button
-          class="px-3 py-2 text-sm font-medium rounded-lg bg-surface-hover hover:bg-surface transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-2 text-sm font-medium rounded-lg bg-[#1C2541] hover:bg-[#27335a] transition disabled:opacity-50 disabled:cursor-not-allowed"
           @click="goToPage(currentPage + 1)"
           :disabled="currentPage === totalPages"
         >
@@ -177,3 +177,4 @@ onMounted(loadElections)
     </div>
   </section>
 </template>
+
