@@ -262,7 +262,16 @@ watch(selectedConstituency, () => {
               <span class="text-xs text-white/60">stemmen</span>
             </div>
             <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
-              <Chart type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
+              <Chart
+                v-if="chartData"
+                type="bar"
+                :data="chartData"
+                :options="chartOptions"
+                class="w-full h-full"
+              />
+              <div v-else class="flex items-center justify-center w-full h-full">
+                <p class="text-center text-white/80">Couldn't load data</p>
+              </div>
             </div>
           </div>
         </div>
