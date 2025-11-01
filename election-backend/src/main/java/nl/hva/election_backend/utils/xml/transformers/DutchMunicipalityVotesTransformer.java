@@ -8,7 +8,7 @@ import nl.hva.election_backend.utils.xml.VotesTransformer;
 
 import java.util.Map;
 
-// dit ding leest stemmen per gemeente of stembureau en zet ze in election
+// leest stemmen per gemeente of stembureau en zet ze in election
 public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     private final Election election; // hier worden stemmen opgeslagen
 
