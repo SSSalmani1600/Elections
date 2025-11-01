@@ -102,7 +102,7 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         // hier doen we niks mee, niet nodig voor dit bestand
     }
 
-    // ---------- helpers ----------
+    // helpers
     private static int safeInt(String s) {
         try { return Integer.parseInt(s); } catch (Exception e) { return 0; } // zet tekst naar getal, anders 0
     }
