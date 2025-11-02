@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Type voor een discussie-item
+// ✅ Type voor 1 discussie
 type Discussion = {
   id: string
   title: string
@@ -11,13 +11,13 @@ type Discussion = {
   lastActivityAt: string
 }
 
-// Variabelen voor data en status
+// ✅ Variabelen voor data en status
 const discussions = ref<Discussion[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const router = useRouter()
 
-// Data ophalen bij laden
+// ✅ Data ophalen bij laden
 onMounted(async () => {
   try {
     const res = await fetch('http://localhost:8080/api/discussions')
@@ -29,13 +29,12 @@ onMounted(async () => {
     } else {
       error.value = 'Onbekende fout'
     }
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 })
 
-// Chronologisch sorteren (laatste activiteit bovenaan)
+// ✅ Chronologisch sorteren (laatste activiteit bovenaan)
 const sorted = computed(() =>
   [...discussions.value].sort(
     (a, b) =>
@@ -44,20 +43,51 @@ const sorted = computed(() =>
   )
 )
 
-// Klik naar detailpagina
+// ✅ Klik naar detailpagina
 function openDetail(id: string) {
   router.push({ name: 'discussion-detail', params: { id } })
 }
 
+// ✅ Nieuw topic aanmaken (modal + form)
+const showModal = ref(false)
+const form = ref({ title: '', body: '' })
+
+function openCreateModal() {
+  showModal.value = true
+}
+
+function closeModal() {
+  showModal.value = false
+  form.value = { title: '', body: '' }
+}
+
+async function createDiscussion() {
+  try {
+    const res = await fetch('http://localhost:8080/api/discussions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer testtoken123' // tijdelijk token
+      },
+      body: JSON.stringify(form.value)
+    })
+
+    if (!res.ok) throw new Error('Kon discussie niet aanmaken')
+    const newDiscussion = await res.json()
+
+    // ✅ Nieuwe discussie bovenaan toevoegen
+    discussions.value.unshift(newDiscussion)
+    closeModal()
+  } catch (err) {
+    console.error(err)
+    alert('Er ging iets mis bij het plaatsen van je topic')
+  }
+}
 </script>
 
 <template>
-  <main
-    class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen"
-  >
-    <div
-      class="flex flex-col items-center w-full mt-[75px] gap-8 px-6 max-w-5xl"
-    >
+  <main class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
+    <div class="flex flex-col items-center w-full mt-[75px] gap-8 px-6 max-w-5xl">
       <!-- Titel -->
       <div class="flex flex-col items-center gap-3 text-center">
         <h1 class="text-3xl font-bold">Forum Discussies</h1>
@@ -94,18 +124,55 @@ function openDetail(id: string) {
           </h2>
           <p class="text-sm text-[--color-text-muted]">
             door <span class="font-medium">{{ d.author }}</span> •
-            {{ d.replies }} reacties
+            {{ d.reactionsCount }} reacties
           </p>
         </div>
       </div>
 
-      <!-- Call To Action -->
+      <!-- Knop om nieuwe discussie te starten -->
       <div class="mt-8">
         <button
+          @click="openCreateModal"
           class="px-6 py-3 rounded-lg font-semibold bg-[--color-primary] text-[--color-secondary] hover:opacity-90 transition"
         >
-          Nieuwe discussie starten
+          Nieuw topic starten
         </button>
+      </div>
+    </div>
+
+    <!-- Modal voor nieuw topic -->
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div
+        class="bg-[--color-surface] rounded-2xl p-6 w-[500px] max-w-[90%] text-white shadow-xl border border-[rgba(255,255,255,0.1)]"
+      >
+        <h2 class="text-xl font-semibold mb-4 text-[--color-primary]">Nieuw topic</h2>
+
+        <form @submit.prevent="createDiscussion" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm mb-1">Titel</label>
+            <input
+              v-model="form.title"
+              type="text"
+              class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1">Bericht</label>
+            <textarea
+              v-model="form.body"
+              rows="5"
+              class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+              required
+            ></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 mt-3">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Annuleren</button>
+            <button type="submit" class="btn btn-primary">Plaatsen</button>
+          </div>
+        </form>
       </div>
     </div>
   </main>
