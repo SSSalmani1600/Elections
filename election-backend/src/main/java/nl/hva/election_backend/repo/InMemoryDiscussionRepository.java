@@ -1,10 +1,8 @@
 package nl.hva.election_backend.repo;
 
-
 import nl.hva.election_backend.model.Discussion;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,25 +22,23 @@ public class InMemoryDiscussionRepository {
         discussions.add(
                 Discussion.create("Verkiezingsdebat 2025", "Nabil",
                                 "Wat vonden jullie van het debat gisteravond?")
-                        .withActivity(now.plusSeconds(3600), 5) // 1 uur later
+                        .withActivity(now.plusSeconds(3600), 5)
         );
         discussions.add(
                 Discussion.create("Stemrecht voor jongeren", "Daan",
                                 "Moeten 16-jarigen mogen stemmen?")
-                        .withActivity(now.plusSeconds(7200), 8) // 2 uur later
+                        .withActivity(now.plusSeconds(7200), 8)
         );
         discussions.add(
                 Discussion.create("Toekomst van de EU", "Sara",
                                 "Wat denken jullie van uitbreiding van de EU?")
-                        .withActivity(now.plusSeconds(10800), 2) // 3 uur later
+                        .withActivity(now.plusSeconds(10800), 2)
         );
     }
 
-    /** Alle discussies, gesorteerd op laatste activiteit (nieuwste eerst) */
+    /** Alle discussies in de huidige volgorde (nieuwste bovenaan toegevoegd) */
     public List<Discussion> findAll() {
-        return discussions.stream()
-                .sorted(Comparator.comparing(Discussion::getLastActivityAt).reversed())
-                .toList();
+        return new ArrayList<>(discussions);
     }
 
     /** Zoek 1 discussie op id */
@@ -51,7 +47,8 @@ public class InMemoryDiscussionRepository {
                 .filter(d -> d.getId().equals(id))
                 .findFirst();
     }
-    /** Zoek een detail view van 1 discussie (met reacties e.d.) */
+
+    /** Zoek een detail view van 1 discussie */
     public Optional<nl.hva.election_backend.dto.DiscussionDetailDto> findDetailById(String id) {
         return findById(id)
                 .map(d -> new nl.hva.election_backend.dto.DiscussionDetailDto(
@@ -66,8 +63,8 @@ public class InMemoryDiscussionRepository {
                 ));
     }
 
-    /** Nieuwe discussie opslaan */
+    /** Nieuwe discussie opslaan — bovenaan zetten */
     public void save(Discussion discussion) {
-        discussions.add(0, discussion); // voeg bovenaan toe
+        discussions.add(0, discussion);
     }
 }
