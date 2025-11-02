@@ -9,6 +9,12 @@ export interface RegisterResponse {
   username: string;
 }
 export type ParserResponse = { parties: { name: string }[] }
+export type ParserResponse = {
+  parties: {
+    name: string;
+    candidates: Candidate[];
+  }[];
+};
 
 export interface Affiliation {
   name: string;
