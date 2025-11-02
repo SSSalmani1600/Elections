@@ -4,6 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 
 import nl.hva.election_backend.service.DiscussionService;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
@@ -25,7 +28,9 @@ public class DiscussionController {
         this.service = service; // sla service op zodat we 'm kunnen gebruiken
     }
 
-    /** haalt alle discussies op */
+    /**
+     * haalt alle discussies op
+     */
     @GetMapping
     public List<DiscussionListItemDto> list() {
         // pakt discussies uit service en maakt er simpele lijst van
@@ -40,7 +45,9 @@ public class DiscussionController {
                 .toList();
     }
 
-    /** haalt info van 1 discussie op via id */
+    /**
+     * haalt info van 1 discussie op via id
+     */
     @GetMapping("/{id}")
     public DiscussionDetailDto get(@PathVariable String id) {
         try {
@@ -51,37 +58,38 @@ public class DiscussionController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Discussion not found");
         }
     }
+
     @PostMapping
     public ResponseEntity<DiscussionDetailDto> create(
             @RequestBody Map<String, String> body,
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        // Data
+        String title   = body.get("title");
+        String content = body.get("body");
 
-        // ✅ Controleer of er een geldig token is
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token ontbreekt of ongeldig");
+        // Author uit JWT (val terug op sub of 'Anonieme gebruiker')
+        String author = "Anonieme gebruiker";
+        if (jwt != null) {
+            String preferred = jwt.getClaimAsString("preferred_username");
+            String sub       = jwt.getClaimAsString("sub");
+            String resolved  = (preferred != null && !preferred.isBlank()) ? preferred : sub;
+            if (resolved != null && !resolved.isBlank()) author = resolved;
         }
 
-        // ✅ Haal data uit body
-        String title = body.get("title");
-        String content = body.get("body");
-        String author = "Anonieme gebruiker"; // later kunnen we dit uit token halen
-
-        // ✅ Validatie
+        // Validatie
         if (title == null || title.isBlank() || title.length() < 5 || title.length() > 120) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Titel moet tussen 5 en 120 tekens zijn");
         }
-
         if (content == null || content.isBlank() || content.length() < 10 || content.length() > 2000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bericht moet tussen 10 en 2000 tekens zijn");
         }
 
-        // ✅ Nieuw topic aanmaken
+        // Aanmaken + opslaan
         Discussion newDiscussion = Discussion.create(title, author, content);
+        service.save(newDiscussion); // <-- via jouw service/repo
 
-        // ✅ Opslaan in repository
-        service.save(newDiscussion); // moet je zo toevoegen aan je InMemoryDiscussionRepository
-
-        // ✅ Terugsturen als JSON
+        // Terug als DTO
         DiscussionDetailDto dto = new DiscussionDetailDto(
                 newDiscussion.getId(),
                 newDiscussion.getTitle(),
@@ -90,10 +98,8 @@ public class DiscussionController {
                 newDiscussion.getCreatedAt(),
                 newDiscussion.getLastActivityAt(),
                 newDiscussion.getReactionsCount(),
-                null // tijdelijk geen reacties, kan later vervangen worden door echte lijst
+                null
         );
-
-
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 }
