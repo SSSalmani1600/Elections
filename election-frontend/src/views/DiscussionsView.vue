@@ -2,6 +2,10 @@
 import { ref, onMounted, computed, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
+// ✅ Toast state
+const showToast = ref(false)
+const toastMessage = ref('')
+
 // Type voor 1 discussie
 type Discussion = {
   id: string
@@ -31,7 +35,7 @@ onMounted(async () => {
   }
 })
 
-// ✅ Chronologisch sorteren (laatste activiteit bovenaan)
+// Chronologisch sorteren
 const sorted = computed(() =>
   [...discussions.value].sort(
     (a, b) =>
@@ -40,19 +44,18 @@ const sorted = computed(() =>
   )
 )
 
-// ✅ Klik naar detailpagina
+// Klik naar detailpagina
 function openDetail(id: string) {
   router.push({ name: 'discussion-detail', params: { id } })
 }
 
-// ✅ Nieuw topic aanmaken (modal + form)
+// Nieuw topic aanmaken (modal + form)
 const showModal = ref(false)
 const form = ref({ title: '', body: '' })
 const titleError = ref<string | null>(null)
 const bodyError = ref<string | null>(null)
 const submitting = ref(false)
 
-// Knop pas actief als velden gevuld zijn
 const canSubmit = computed(() => {
   return !!form.value.title?.trim() && !!form.value.body?.trim() && !submitting.value
 })
@@ -76,7 +79,7 @@ const onKeydown = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
-// ✅ Simpele validatie
+// Validatie
 function validate() {
   titleError.value = null
   bodyError.value = null
@@ -98,7 +101,7 @@ function closeModal() {
   form.value = { title: '', body: '' }
 }
 
-// Nieuw topic opslaan (met username)
+// Nieuw topic opslaan + toast tonen
 async function createDiscussion() {
   if (!validate()) return
   submitting.value = true
@@ -122,10 +125,16 @@ async function createDiscussion() {
     if (!res.ok) throw new Error(`Server gaf status ${res.status}`)
 
     const newDiscussion = await res.json()
-    discussions.value.unshift(newDiscussion) // bovenaan toevoegen
+    discussions.value.unshift(newDiscussion)
     closeModal()
+
+    // ✅ Toon toast
+    toastMessage.value = 'Topic succesvol geplaatst!'
+    showToast.value = true
+    console.log('TOAST ACTIEF ✅') // debug
+    setTimeout(() => (showToast.value = false), 3000)
   } catch (err) {
-    console.error(err)
+    console.error('❌ Fout bij aanmaken topic:', err)
     alert('Er ging iets mis bij het plaatsen van je topic.')
   } finally {
     submitting.value = false
@@ -134,9 +143,19 @@ async function createDiscussion() {
 </script>
 
 <template>
-  <main class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
+  <main class="relative flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
+    <!-- ✅ Toast melding -->
+    <transition name="fade">
+      <div
+        v-if="showToast"
+        class="absolute top-8 left-1/2 -translate-x-1/2 bg-[rgba(239,48,84,0.95)]
+               text-white px-6 py-3 rounded-xl shadow-2xl z-[9999] text-lg font-semibold"
+      >
+        ✅ {{ toastMessage }}
+      </div>
+    </transition>
+
     <div class="flex flex-col items-center w-full mt-[75px] gap-8 px-6 max-w-5xl">
-      <!-- Titel -->
       <div class="flex flex-col items-center gap-3 text-center">
         <h1 class="text-3xl font-bold">Forum Discussies</h1>
         <p class="text-[--color-text-muted] text-lg max-w-[680px]">
@@ -146,7 +165,6 @@ async function createDiscussion() {
         </p>
       </div>
 
-      <!-- Knop om nieuw topic te starten -->
       <button
         @click="showModal = true"
         class="px-7 py-3 rounded-xl font-semibold
@@ -162,7 +180,6 @@ async function createDiscussion() {
         <span class="tracking-wide">+ Nieuw topic starten</span>
       </button>
 
-      <!-- Lijst met discussies -->
       <div class="flex flex-col w-full gap-6 mt-6">
         <div v-if="loading" class="text-lg text-center">Laden...</div>
         <div v-else-if="error" class="text-red-400 text-center">{{ error }}</div>
@@ -227,3 +244,13 @@ async function createDiscussion() {
     </div>
   </main>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
