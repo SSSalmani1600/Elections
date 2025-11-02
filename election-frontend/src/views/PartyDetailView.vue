@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getParties } from '@/services/ElectionService.ts'
 import type { Candidate } from '@/types/api.ts'
+import {getWikipediaSummary} from '@/services/WikipediaService.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
@@ -10,6 +11,7 @@ const routeName = route.params.name as string
 const loading = ref(true)
 const errorMessage = ref('')
 const candidates = ref<Candidate[]>([])
+const wikiSummary = ref<string>('')
 
 onMounted(async () => {
   try {
@@ -20,10 +22,23 @@ onMounted(async () => {
     const foundParty = partiesArray.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
     console.log(foundParty)
 
+
     if (foundParty) {
       partyName.value = foundParty.name
       candidates.value = foundParty.candidates ?? []
       console.log('Kandidaten gevonden:', candidates.value)
+
+      try {
+        const summary = await getWikipediaSummary(foundParty.name)
+        console.log('Wikipedia parsed summary:', summary)
+        wikiSummary.value =
+          summary.summary ||
+          'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
+      } catch (wikiErr) {
+        console.warn('Wikipedia niet gevonden:', wikiErr)
+        wikiSummary.value =
+          'Geen Wikipedia-informatie beschikbaar voor deze partij.'
+      }
     } else {
       errorMessage.value = `De partij "${routeName}" bestaat niet.`
       console.warn('Geen partij gevonden met naam:', routeName)
@@ -90,13 +105,12 @@ const scrollRight = () => {
 
       <section class="bg-[#131a2c] px-8 py-12">
         <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
-        <p class="text-gray-300 max-w-4xl leading-relaxed">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-          ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-          sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-          est laborum.
+        <p v-if="wikiSummary" class="text-gray-300 max-w-4xl leading-relaxed">
+          {{ wikiSummary }}
+        </p>
+
+        <p v-else class="text-gray-500 italic">
+          Geen Wikipedia-informatie gevonden voor {{ partyName }}.
         </p>
       </section>
 
