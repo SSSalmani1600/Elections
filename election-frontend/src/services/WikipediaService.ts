@@ -1,6 +1,6 @@
 export async function getWikipediaSummary(query: string) {
   let response = await fetch(
-    `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`,
+    `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`
   )
   if (response.status === 404) {
     const searchUrl = `https://nl.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
@@ -13,15 +13,15 @@ export async function getWikipediaSummary(query: string) {
     if (firstTitle){
       console.log(`Geen exacte match, probeer met titel: ${firstTitle}`)
       response = await fetch(
-          `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(firstTitle)}`
-        )
-      }
-    const data = await response.json()
-    console.log('Wikipedia data:', data)
-
-    return {
-      title: data.title,
-      summary: data.extract
+        `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(firstTitle)}`
+      )
     }
+  }
+  const data = await response.json()
+  console.log('Wikipedia data:', data)
+
+  return {
+    title: data.title,
+    summary: data.extract
   }
 }

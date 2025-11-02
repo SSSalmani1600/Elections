@@ -31,9 +31,7 @@ onMounted(async () => {
       try {
         const summary = await getWikipediaSummary(foundParty.name)
         console.log('Wikipedia parsed summary:', summary)
-        wikiSummary.value =
-          summary.summary ||
-          'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
+        wikiSummary.value = summary.summary || 'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
       } catch (wikiErr) {
         console.warn('Wikipedia niet gevonden:', wikiErr)
         wikiSummary.value =
