@@ -4,11 +4,11 @@ import { useRouter } from 'vue-router'
 
 // Type voor een discussie-item
 type Discussion = {
-  id: number
+  id: string
   title: string
   author: string
-  replies: number
-  lastActivityAt?: string
+  reactionsCount: number
+  lastActivityAt: string
 }
 
 // Variabelen voor data en status
@@ -45,9 +45,10 @@ const sorted = computed(() =>
 )
 
 // Klik naar detailpagina
-function openDetail(id: number) {
+function openDetail(id: string) {
   router.push({ name: 'discussion-detail', params: { id } })
 }
+
 </script>
 
 <template>

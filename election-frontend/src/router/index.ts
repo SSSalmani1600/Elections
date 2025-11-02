@@ -42,13 +42,13 @@ const router = createRouter({
       name: "partyDetail",
       component: PartyDetailView,
     },
-      {
-          path: '/forum',
-          name: 'forum',
-          component: DiscussionsView,
-      },
     {
-      path: '/forum/:id',
+      path: '/discussions',
+      name: 'forum',
+      component: DiscussionsView,
+    },
+    {
+      path: '/discussions/:id',
       name: 'discussion-detail',
       component: DiscussionDetailView,
     },

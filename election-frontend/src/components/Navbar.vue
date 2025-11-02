@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
     <div class="hidden lg:flex items-center justify-center gap-8">
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
-      <router-link to="/forum" class="nav-link">Forum</router-link>
+      <router-link to="/discussions" class="nav-link">Forum</router-link>
     </div>
 
     <!-- RECHTS (Login / User menu) -->
@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
             >Verkiezingen</router-link
           >
           <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
-          <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
+          <router-link to="/discussions" class="nav-link" @click="toggleMenu">Forum</router-link>
 
           <template v-if="!isLoggedIn">
             <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu"
