@@ -36,6 +36,23 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const scrollContainer = ref<HTMLElement | null>(null)
+
+const scrollAmount = 150
+
+const scrollLeft = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+  }
+}
+
+const scrollRight = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+  }
+}
+
 </script>
 
 <template>
@@ -179,4 +196,13 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
