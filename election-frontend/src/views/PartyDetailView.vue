@@ -2,29 +2,37 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getParties } from '@/services/ElectionService.ts'
+import type { Candidate } from '@/types/api.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
 const routeName = route.params.name as string
 const loading = ref(true)
 const errorMessage = ref('')
+const candidates = ref<Candidate[]>([])
 
 onMounted(async () => {
   try {
     const data = await getParties()
-    console.log('Fetched data:', data)
+    console.log(data)
+
     const partiesArray = data.parties ?? data
-    const foundParty = partiesArray.find(
-      (p) => p.name.toLowerCase() === routeName.toLowerCase()
-    )
+    const foundParty = partiesArray.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
+    console.log(foundParty)
+
     if (foundParty) {
       partyName.value = foundParty.name
+      candidates.value = foundParty.candidates ?? []
+      console.log('Kandidaten gevonden:', candidates.value)
     } else {
       errorMessage.value = `De partij "${routeName}" bestaat niet.`
+      console.warn('Geen partij gevonden met naam:', routeName)
     }
   } catch (err) {
     console.error('Kon partijen niet ophalen:', err)
     errorMessage.value = 'Er is een fout opgetreden bij het ophalen van de partijen. Probeer het later opnieuw.'
+    errorMessage.value =
+      'Er is een fout opgetreden bij het ophalen van de partijen. Probeer het later opnieuw.'
   } finally {
     loading.value = false
   }
