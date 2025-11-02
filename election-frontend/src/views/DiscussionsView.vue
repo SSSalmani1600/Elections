@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
-// ✅ Type voor 1 discussie
+// Type voor 1 discussie
 type Discussion = {
   id: string
   title: string
@@ -11,24 +11,21 @@ type Discussion = {
   lastActivityAt: string
 }
 
-// ✅ Variabelen voor data en status
+// Variabelen voor data en status
 const discussions = ref<Discussion[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const router = useRouter()
 
-// ✅ Data ophalen bij laden
+// Data ophalen bij laden
 onMounted(async () => {
   try {
     const res = await fetch('http://localhost:8080/api/discussions')
     if (!res.ok) throw new Error('Kon discussies niet laden')
     discussions.value = await res.json()
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      error.value = e.message
-    } else {
-      error.value = 'Onbekende fout'
-    }
+    if (e instanceof Error) error.value = e.message
+    else error.value = 'Onbekende fout'
   } finally {
     loading.value = false
   }
@@ -51,39 +48,93 @@ function openDetail(id: string) {
 // ✅ Nieuw topic aanmaken (modal + form)
 const showModal = ref(false)
 const form = ref({ title: '', body: '' })
+const titleError = ref<string | null>(null)
+const bodyError = ref<string | null>(null)
+const submitting = ref(false)
+
+// Knop pas actief als velden gevuld zijn
+const canSubmit = computed(() => {
+  return !!form.value.title?.trim() && !!form.value.body?.trim() && !submitting.value
+})
+
+// Focus op titel bij openen van modal
+const titleInputRef = ref<HTMLInputElement | null>(null)
+
+watch(showModal, async (open) => {
+  if (open) {
+    titleError.value = null
+    bodyError.value = null
+    await nextTick()
+    titleInputRef.value?.focus()
+  }
+})
+
+// ESC toets sluit modal
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && showModal.value && !submitting.value) closeModal()
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+
+// ✅ Simpele validatie
+function validate() {
+  titleError.value = null
+  bodyError.value = null
+
+  const t = form.value.title?.trim() ?? ''
+  const b = form.value.body?.trim() ?? ''
+
+  if (t.length < 5 || t.length > 120) {
+    titleError.value = 'Titel moet tussen 5 en 120 tekens zijn.'
+  }
+  if (b.length < 10 || b.length > 2000) {
+    bodyError.value = 'Bericht moet tussen 10 en 2000 tekens zijn.'
+  }
+  return !titleError.value && !bodyError.value
+}
 
 function closeModal() {
   showModal.value = false
   form.value = { title: '', body: '' }
 }
 
+// Nieuw topic opslaan (met username)
 async function createDiscussion() {
+  if (!validate()) return
+  submitting.value = true
+
   try {
+    const username = localStorage.getItem('username') || 'Onbekende gebruiker'
+
     const res = await fetch('http://localhost:8080/api/discussions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer testtoken123' // tijdelijk token
+        'Authorization': 'Bearer ' + (localStorage.getItem('JWT') || '')
       },
-      body: JSON.stringify(form.value)
+      body: JSON.stringify({
+        title: form.value.title.trim(),
+        body: form.value.body.trim(),
+        author: username
+      })
     })
 
-    if (!res.ok) throw new Error('Kon discussie niet aanmaken')
-    const newDiscussion = await res.json()
+    if (!res.ok) throw new Error(`Server gaf status ${res.status}`)
 
-    discussions.value.unshift(newDiscussion)
+    const newDiscussion = await res.json()
+    discussions.value.unshift(newDiscussion) // bovenaan toevoegen
     closeModal()
   } catch (err) {
     console.error(err)
     alert('Er ging iets mis bij het plaatsen van je topic.')
+  } finally {
+    submitting.value = false
   }
 }
 </script>
 
 <template>
-  <main
-    class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen"
-  >
+  <main class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
     <div class="flex flex-col items-center w-full mt-[75px] gap-8 px-6 max-w-5xl">
       <!-- Titel -->
       <div class="flex flex-col items-center gap-3 text-center">
@@ -95,31 +146,26 @@ async function createDiscussion() {
         </p>
       </div>
 
-      <!-- 🔹 Knop om nieuw topic te starten -->
       <!-- Knop om nieuw topic te starten -->
       <button
         @click="showModal = true"
         class="px-7 py-3 rounded-xl font-semibold
          bg-gradient-to-r from-[#d82f4c] to-[#ef3054]
          text-white
-         shadow-[0_2px_10px_rgba(239,48,84,0.25)]
-         hover:shadow-[0_3px_15px_rgba(239,48,84,0.35)]
-         hover:scale-[1.02]
+         shadow-[0_2px_10px_rgba(239,48,84,0.15)]
+         hover:shadow-[0_3px_15px_rgba(239,48,84,0.25)]
+         hover:scale-[1.03]
          transition-all duration-200 ease-out
-         border border-[rgba(255,255,255,0.06)]
+         border border-[rgba(255,255,255,0.08)]
          mt-2"
       >
-        <span class="tracking-wide">➕ Nieuw topic starten</span>
+        <span class="tracking-wide">+ Nieuw topic starten</span>
       </button>
 
-
-
-      <!-- 🔹 Lijst met discussies -->
+      <!-- Lijst met discussies -->
       <div class="flex flex-col w-full gap-6 mt-6">
         <div v-if="loading" class="text-lg text-center">Laden...</div>
-        <div v-else-if="error" class="text-red-400 text-center">
-          {{ error }}
-        </div>
+        <div v-else-if="error" class="text-red-400 text-center">{{ error }}</div>
 
         <div
           v-else
@@ -131,67 +177,49 @@ async function createDiscussion() {
                  hover:bg-[color:rgb(45,55,95)]
                  border border-[color:rgba(255,255,255,0.06)]"
         >
-          <h2 class="text-xl font-semibold text-[--color-primary] mb-2">
-            {{ d.title }}
-          </h2>
+          <h2 class="text-xl font-semibold text-[--color-primary] mb-2">{{ d.title }}</h2>
           <p class="text-sm text-[--color-text-muted]">
-            door <span class="font-medium">{{ d.author }}</span> •
-            {{ d.reactionsCount }} reacties
+            door <span class="font-medium">{{ d.author }}</span> • {{ d.reactionsCount }} reacties
           </p>
         </div>
       </div>
     </div>
 
-    <!-- 🌙 Modal: Nieuw topic -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm"
-    >
-      <div
-        class="bg-gradient-to-b from-[#1b2240] to-[#0e142b]
-               p-8 rounded-3xl w-[500px] max-w-[90%] text-white shadow-[0_0_30px_rgba(79,70,229,0.4)]
-               border border-[rgba(255,255,255,0.08)] animate-fadeIn"
-      >
-        <h2 class="text-2xl font-bold mb-4 text-[--color-primary] text-center">
-          Nieuw topic starten
-        </h2>
+    <!-- Modal -->
+    <div v-if="showModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" @click.self="!submitting && closeModal()">
+      <div class="bg-[#111830] p-8 rounded-2xl w-[500px] max-w-[90%] text-white shadow-xl border border-gray-700">
+        <h2 class="text-2xl font-bold mb-4 text-[--color-primary] text-center">Nieuw topic starten</h2>
 
         <form @submit.prevent="createDiscussion" class="flex flex-col gap-4">
           <div>
-            <label class="text-sm mb-1 block text-[--color-text-muted]">Titel</label>
+            <label class="text-sm mb-1 block">Titel</label>
             <input
+              ref="titleInputRef"
               v-model="form.title"
               type="text"
-              required
-              class="w-full bg-[#121830] border border-[rgba(255,255,255,0.1)] rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              class="w-full bg-[#1b2144] border rounded-lg p-2 text-white"
               placeholder="Bijv. Wat vind jij van de verkiezingen?"
             />
+            <p v-if="titleError" class="text-red-400 text-sm mt-1">{{ titleError }}</p>
           </div>
 
           <div>
-            <label class="text-sm mb-1 block text-[--color-text-muted]">Bericht</label>
+            <label class="text-sm mb-1 block">Bericht</label>
             <textarea
               v-model="form.body"
               rows="5"
-              required
-              class="w-full bg-[#121830] border border-[rgba(255,255,255,0.1)] rounded-xl p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              class="w-full bg-[#1b2144] border rounded-lg p-2 text-white resize-none"
               placeholder="Schrijf hier je mening of vraag..."
             ></textarea>
+            <p v-if="bodyError" class="text-red-400 text-sm mt-1">{{ bodyError }}</p>
           </div>
 
-          <div class="flex justify-end gap-3 mt-6">
-            <button
-              type="button"
-              @click="closeModal"
-              class="px-5 py-2 rounded-lg bg-[rgba(255,255,255,0.1)] text-white hover:bg-[rgba(255,255,255,0.2)] transition"
-            >
+          <div class="flex justify-end gap-3 mt-4">
+            <button type="button" @click="closeModal" :disabled="submitting" class="px-4 py-2 rounded-lg bg-gray-600 text-white hover:opacity-80 disabled:opacity-50">
               Annuleren
             </button>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded-lg bg-[--color-primary] text-white hover:opacity-90 shadow-md"
-            >
-              Plaatsen
+            <button type="submit" :disabled="!canSubmit" class="px-4 py-2 rounded-lg bg-[--color-primary] text-white hover:opacity-90 disabled:opacity-50">
+              {{ submitting ? 'Plaatsen...' : 'Plaatsen' }}
             </button>
           </div>
         </form>
@@ -199,19 +227,3 @@ async function createDiscussion() {
     </div>
   </main>
 </template>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.25s ease-out;
-}
-</style>
