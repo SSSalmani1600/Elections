@@ -30,7 +30,6 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error('Kon partijen niet ophalen:', err)
-    errorMessage.value = 'Er is een fout opgetreden bij het ophalen van de partijen. Probeer het later opnieuw.'
     errorMessage.value =
       'Er is een fout opgetreden bij het ophalen van de partijen. Probeer het later opnieuw.'
   } finally {
@@ -38,6 +37,7 @@ onMounted(async () => {
   }
 })
 </script>
+
 <template>
   <div class="min-h-screen text-white">
     <div v-if="loading" class="text-center text-gray-400 text-2xl py-20">
@@ -82,17 +82,62 @@ onMounted(async () => {
           est laborum.
         </p>
       </section>
+
+      <section class="px-8 mt-4">
+        <h3 class="text-3xl font-semibold mb-4 text-center">Kandidaten</h3>
+
+        <div class="relative max-w-[1200px] mx-auto">
+          <button
+            v-if="candidates.length > 5"
+            @click="scrollLeft"
+            class="absolute left--6 top-1/2 -translate-y-1/2
+             bg-[#1b203a] hover:bg-[#253054] text-white
+             p-2 rounded-full shadow-md z-10"
+          >
+            ◀
+          </button>
+
+          <div
+            ref="scrollContainer"
+            v-if="candidates.length"
+            class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10"
+          >
+      <span
+        v-for="cand in candidates"
+        :key="cand.candidateId"
+        class="bg-[#1b203a] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
+      >
+        {{ cand.initials }} {{ cand.lastName }}
+      </span>
+          </div>
+
+          <button
+            v-if="candidates.length > 5"
+            @click="scrollRight"
+            class="absolute right-0 top-1/2 -translate-y-1/2
+             bg-[#1b203a] hover:bg-[#253054] text-white
+             p-2 rounded-full shadow-md z-10"
+          >
+            ▶
+          </button>
+        </div>
+      </section>
+
       <section class="px-8 py-12 mt-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
           <div class="flex flex-col gap-6">
-            <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
+            <div
+              class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
+            >
               <h4 class="text-xl font-semibold mb-2">Standpunt 1</h4>
               <p class="text-gray-400 leading-relaxed">
                 Lorem ipsum dolor sit amet. Vel dignissimos nihil sit dignissimos.
               </p>
             </div>
 
-            <div class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30">
+            <div
+              class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
+            >
               <h4 class="text-xl font-semibold mb-2">Standpunt 2</h4>
               <p class="text-gray-400 leading-relaxed">
                 Quo ipsa provident sit autem soluta et earum distinctio. Aut exercitationem dolores
