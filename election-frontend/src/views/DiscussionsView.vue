@@ -52,10 +52,6 @@ function openDetail(id: string) {
 const showModal = ref(false)
 const form = ref({ title: '', body: '' })
 
-function openCreateModal() {
-  showModal.value = true
-}
-
 function closeModal() {
   showModal.value = false
   form.value = { title: '', body: '' }
@@ -75,18 +71,19 @@ async function createDiscussion() {
     if (!res.ok) throw new Error('Kon discussie niet aanmaken')
     const newDiscussion = await res.json()
 
-    // ✅ Nieuwe discussie bovenaan toevoegen
     discussions.value.unshift(newDiscussion)
     closeModal()
   } catch (err) {
     console.error(err)
-    alert('Er ging iets mis bij het plaatsen van je topic')
+    alert('Er ging iets mis bij het plaatsen van je topic.')
   }
 }
 </script>
 
 <template>
-  <main class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen">
+  <main
+    class="flex flex-col items-center bg-[--color-background] text-[--color-text-base] min-h-screen"
+  >
     <div class="flex flex-col items-center w-full mt-[75px] gap-8 px-6 max-w-5xl">
       <!-- Titel -->
       <div class="flex flex-col items-center gap-3 text-center">
@@ -98,17 +95,32 @@ async function createDiscussion() {
         </p>
       </div>
 
-      <!-- Lijst met discussies -->
-      <div class="flex flex-col w-full gap-6 mt-4">
-        <!-- Laden -->
-        <div v-if="loading" class="text-lg text-center">Laden...</div>
+      <!-- 🔹 Knop om nieuw topic te starten -->
+      <!-- Knop om nieuw topic te starten -->
+      <button
+        @click="showModal = true"
+        class="px-7 py-3 rounded-xl font-semibold
+         bg-gradient-to-r from-[#d82f4c] to-[#ef3054]
+         text-white
+         shadow-[0_2px_10px_rgba(239,48,84,0.25)]
+         hover:shadow-[0_3px_15px_rgba(239,48,84,0.35)]
+         hover:scale-[1.02]
+         transition-all duration-200 ease-out
+         border border-[rgba(255,255,255,0.06)]
+         mt-2"
+      >
+        <span class="tracking-wide">➕ Nieuw topic starten</span>
+      </button>
 
-        <!-- Foutmelding -->
+
+
+      <!-- 🔹 Lijst met discussies -->
+      <div class="flex flex-col w-full gap-6 mt-6">
+        <div v-if="loading" class="text-lg text-center">Laden...</div>
         <div v-else-if="error" class="text-red-400 text-center">
           {{ error }}
         </div>
 
-        <!-- Lijst met items -->
         <div
           v-else
           v-for="d in sorted"
@@ -128,52 +140,78 @@ async function createDiscussion() {
           </p>
         </div>
       </div>
-
-      <!-- Knop om nieuwe discussie te starten -->
-      <div class="mt-8">
-        <button
-          @click="openCreateModal"
-          class="px-6 py-3 rounded-lg font-semibold bg-[--color-primary] text-[--color-secondary] hover:opacity-90 transition"
-        >
-          Nieuw topic starten
-        </button>
-      </div>
     </div>
 
-    <!-- Modal voor nieuw topic -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <!-- 🌙 Modal: Nieuw topic -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm"
+    >
       <div
-        class="bg-[--color-surface] rounded-2xl p-6 w-[500px] max-w-[90%] text-white shadow-xl border border-[rgba(255,255,255,0.1)]"
+        class="bg-gradient-to-b from-[#1b2240] to-[#0e142b]
+               p-8 rounded-3xl w-[500px] max-w-[90%] text-white shadow-[0_0_30px_rgba(79,70,229,0.4)]
+               border border-[rgba(255,255,255,0.08)] animate-fadeIn"
       >
-        <h2 class="text-xl font-semibold mb-4 text-[--color-primary]">Nieuw topic</h2>
+        <h2 class="text-2xl font-bold mb-4 text-[--color-primary] text-center">
+          Nieuw topic starten
+        </h2>
 
         <form @submit.prevent="createDiscussion" class="flex flex-col gap-4">
           <div>
-            <label class="block text-sm mb-1">Titel</label>
+            <label class="text-sm mb-1 block text-[--color-text-muted]">Titel</label>
             <input
               v-model="form.title"
               type="text"
-              class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
               required
+              class="w-full bg-[#121830] border border-[rgba(255,255,255,0.1)] rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              placeholder="Bijv. Wat vind jij van de verkiezingen?"
             />
           </div>
 
           <div>
-            <label class="block text-sm mb-1">Bericht</label>
+            <label class="text-sm mb-1 block text-[--color-text-muted]">Bericht</label>
             <textarea
               v-model="form.body"
               rows="5"
-              class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
               required
+              class="w-full bg-[#121830] border border-[rgba(255,255,255,0.1)] rounded-xl p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              placeholder="Schrijf hier je mening of vraag..."
             ></textarea>
           </div>
 
-          <div class="flex justify-end gap-3 mt-3">
-            <button type="button" @click="closeModal" class="btn btn-secondary">Annuleren</button>
-            <button type="submit" class="btn btn-primary">Plaatsen</button>
+          <div class="flex justify-end gap-3 mt-6">
+            <button
+              type="button"
+              @click="closeModal"
+              class="px-5 py-2 rounded-lg bg-[rgba(255,255,255,0.1)] text-white hover:bg-[rgba(255,255,255,0.2)] transition"
+            >
+              Annuleren
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-lg bg-[--color-primary] text-white hover:opacity-90 shadow-md"
+            >
+              Plaatsen
+            </button>
           </div>
         </form>
       </div>
     </div>
   </main>
 </template>
+
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+</style>
