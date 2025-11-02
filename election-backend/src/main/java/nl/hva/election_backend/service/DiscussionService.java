@@ -29,4 +29,9 @@ public class DiscussionService {
         return repo.findDetailById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
     }
+    // nieuw topic opslaan
+    public void save(Discussion d) {
+        repo.save(d);
+    }
+
 }

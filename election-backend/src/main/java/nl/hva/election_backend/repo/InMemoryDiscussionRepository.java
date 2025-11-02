@@ -65,4 +65,9 @@ public class InMemoryDiscussionRepository {
                         null
                 ));
     }
+
+    /** Slaat een nieuwe discussie op in de lijst */
+    public void save(Discussion d) {
+        discussions.add(d);
+    }
 }
