@@ -27,11 +27,45 @@ export interface Candidate {
   votes: string;
 }
 
-export interface Affiliation {
-  name: string;
+export interface Candidate {
+  firstName: string;
+  lastName: string;
+  initials: string;
+  gender: string;
+  localityName: string;
+  electionName: string;
+  partiesId: string;
+  candidateId: string;
+  votes: string;
 }
 
-export interface AffiliationResponse {
+export interface Candidate {
+  firstName: string;
+  lastName: string;
+  initials: string;
+  gender: string;
+  localityName: string;
+  electionName: string;
+  partiesId: string;
+  candidateId: string;
+  votes: string;
+}
+
+export interface Party {
+  name: string;
   id: string;
-  affiliations: Affiliation[];
+  votes: number;
+  candidates: Candidate[];
+}
+
+export interface Constituency {
+  name: string;
+  parties: Party[];
+}
+
+export interface User {
+  id: number;
+  displayName: string;
+  email: string;
+  password: string;
 }

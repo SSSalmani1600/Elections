@@ -5,10 +5,12 @@ import java.util.Set;
 
 public class Constituency {
     private String name;
+    private String contestId;
     private Set<Party> parties = new HashSet<>();
 
-    public Constituency(String name) {
+    public Constituency(String name, String contestId) {
         this.name = name;
+        this.contestId = contestId;
     }
 
     public String getName() {
@@ -25,6 +27,14 @@ public class Constituency {
 
     public void setParties(Set<Party> parties) {
         this.parties = parties;
+    }
+
+    public String getContestId() {
+        return contestId;
+    }
+
+    public void setContestId(String contestId) {
+        this.contestId = contestId;
     }
 
     @Override
