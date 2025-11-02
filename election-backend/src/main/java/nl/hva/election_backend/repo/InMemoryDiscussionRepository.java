@@ -66,8 +66,8 @@ public class InMemoryDiscussionRepository {
                 ));
     }
 
-    /** Slaat een nieuwe discussie op in de lijst */
-    public void save(Discussion d) {
-        discussions.add(d);
+    /** Nieuwe discussie opslaan */
+    public void save(Discussion discussion) {
+        discussions.add(0, discussion); // voeg bovenaan toe
     }
 }
