@@ -4,8 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 
 import nl.hva.election_backend.service.DiscussionService;
@@ -60,36 +58,19 @@ public class DiscussionController {
     }
 
     @PostMapping
-    public ResponseEntity<DiscussionDetailDto> create(
-            @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        // Data
-        String title   = body.get("title");
+    public ResponseEntity<DiscussionDetailDto> createDiscussion(@RequestBody Map<String, String> body) {
+
+        String title = body.get("title");
         String content = body.get("body");
+        String author = body.get("author"); // komt nu gewoon vanuit frontend
 
-        // Author uit JWT (val terug op sub of 'Anonieme gebruiker')
-        String author = "Anonieme gebruiker";
-        if (jwt != null) {
-            String preferred = jwt.getClaimAsString("preferred_username");
-            String sub       = jwt.getClaimAsString("sub");
-            String resolved  = (preferred != null && !preferred.isBlank()) ? preferred : sub;
-            if (resolved != null && !resolved.isBlank()) author = resolved;
+        if (title == null || title.isBlank() || content == null || content.isBlank()) {
+            return ResponseEntity.badRequest().build();
         }
 
-        // Validatie
-        if (title == null || title.isBlank() || title.length() < 5 || title.length() > 120) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Titel moet tussen 5 en 120 tekens zijn");
-        }
-        if (content == null || content.isBlank() || content.length() < 10 || content.length() > 2000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bericht moet tussen 10 en 2000 tekens zijn");
-        }
-
-        // Aanmaken + opslaan
         Discussion newDiscussion = Discussion.create(title, author, content);
-        service.save(newDiscussion); // <-- via jouw service/repo
+        service.save(newDiscussion);
 
-        // Terug als DTO
         DiscussionDetailDto dto = new DiscussionDetailDto(
                 newDiscussion.getId(),
                 newDiscussion.getTitle(),
@@ -100,6 +81,7 @@ public class DiscussionController {
                 newDiscussion.getReactionsCount(),
                 null
         );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 }
