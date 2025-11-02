@@ -22,6 +22,7 @@ export async function getWikipediaSummary(query: string) {
 
   return {
     title: data.title,
-    summary: data.extract
+    summary: data.extract,
+    url: data.content_urls?.desktop?.page,
   }
 }

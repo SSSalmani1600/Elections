@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getParties } from '@/services/ElectionService.ts'
 import type { Candidate } from '@/types/api.ts'
-import {getWikipediaSummary} from '@/services/WikipediaService.ts'
+import { getWikipediaSummary } from '@/services/WikipediaService.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
@@ -12,6 +12,7 @@ const loading = ref(true)
 const errorMessage = ref('')
 const candidates = ref<Candidate[]>([])
 const wikiSummary = ref<string>('')
+const wikiUrl = ref<string>('')
 
 onMounted(async () => {
   try {
@@ -22,7 +23,6 @@ onMounted(async () => {
     const foundParty = partiesArray.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
     console.log(foundParty)
 
-
     if (foundParty) {
       partyName.value = foundParty.name
       candidates.value = foundParty.candidates ?? []
@@ -31,11 +31,12 @@ onMounted(async () => {
       try {
         const summary = await getWikipediaSummary(foundParty.name)
         console.log('Wikipedia parsed summary:', summary)
-        wikiSummary.value = summary.summary || 'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
+        wikiSummary.value =
+          summary.summary || 'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
+        wikiUrl.value = summary.url || ''
       } catch (wikiErr) {
         console.warn('Wikipedia niet gevonden:', wikiErr)
-        wikiSummary.value =
-          'Geen Wikipedia-informatie beschikbaar voor deze partij.'
+        wikiSummary.value = 'Geen Wikipedia-informatie beschikbaar voor deze partij.'
       }
     } else {
       errorMessage.value = `De partij "${routeName}" bestaat niet.`
@@ -65,7 +66,6 @@ const scrollRight = () => {
     scrollContainer.value.scrollBy({ left: scrollAmount, behavior: 'smooth' })
   }
 }
-
 </script>
 
 <template>
@@ -106,7 +106,11 @@ const scrollRight = () => {
         <p v-if="wikiSummary" class="text-gray-300 max-w-4xl leading-relaxed">
           {{ wikiSummary }}
         </p>
-
+        <div v-if="wikiUrl" class="mt-4">
+          <a :href="wikiUrl" target="_blank" class="text-[#EF3054] underline">
+            Lees verder op Wikipedia →
+          </a>
+        </div>
         <p v-else class="text-gray-500 italic">
           Geen Wikipedia-informatie gevonden voor {{ partyName }}.
         </p>
@@ -119,9 +123,7 @@ const scrollRight = () => {
           <button
             v-if="candidates.length > 5"
             @click="scrollLeft"
-            class="absolute left--6 top-1/2 -translate-y-1/2
-             bg-[#1b203a] hover:bg-[#253054] text-white
-             p-2 rounded-full shadow-md z-10"
+            class="absolute left--6 top-1/2 -translate-y-1/2 bg-[#1b203a] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
           >
             ◀
           </button>
@@ -131,21 +133,19 @@ const scrollRight = () => {
             v-if="candidates.length"
             class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10"
           >
-      <span
-        v-for="cand in candidates"
-        :key="cand.candidateId"
-        class="bg-[#1b203a] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
-      >
-        {{ cand.initials }} {{ cand.lastName }}
-      </span>
+            <span
+              v-for="cand in candidates"
+              :key="cand.candidateId"
+              class="bg-[#1b203a] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
+            >
+              {{ cand.initials }} {{ cand.lastName }}
+            </span>
           </div>
 
           <button
             v-if="candidates.length > 5"
             @click="scrollRight"
-            class="absolute right-0 top-1/2 -translate-y-1/2
-             bg-[#1b203a] hover:bg-[#253054] text-white
-             p-2 rounded-full shadow-md z-10"
+            class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#1b203a] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
           >
             ▶
           </button>
