@@ -13,6 +13,7 @@ const errorMessage = ref('')
 const candidates = ref<Candidate[]>([])
 const wikiSummary = ref<string>('')
 const wikiUrl = ref<string>('')
+const wikiImage = ref<string>('')
 
 onMounted(async () => {
   try {
@@ -34,6 +35,7 @@ onMounted(async () => {
         wikiSummary.value =
           summary.summary || 'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
         wikiUrl.value = summary.url || ''
+        wikiImage.value = summary.image || ''
       } catch (wikiErr) {
         console.warn('Wikipedia niet gevonden:', wikiErr)
         wikiSummary.value = 'Geen Wikipedia-informatie beschikbaar voor deze partij.'
@@ -83,7 +85,15 @@ const scrollRight = () => {
       <header class="flex flex-col md:flex-row justify-between items-center px-8 py-16 gap-8">
         <div>
           <div class="flex items-center gap-3">
-            <h2 class="text-6xl font-semibold">Partij {{ partyName }}</h2>
+            <img
+              v-if="wikiImage"
+              :src="wikiImage"
+              :alt="`Logo van ${partyName}`"
+              class="max-h-17 md:max-h-25 object-contain rounded-lg"
+              style="width: auto;"
+            />
+
+            <h2 class="text-5xl font-semibold">Partij {{ partyName }}</h2>
           </div>
 
           <p class="text-gray-300 mt-3 text-xl md:text-2xl">
