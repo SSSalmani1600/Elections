@@ -14,6 +14,7 @@ const candidates = ref<Candidate[]>([])
 const wikiSummary = ref<string>('')
 const wikiUrl = ref<string>('')
 const wikiImage = ref<string>('')
+const partyLeader = ref<Candidate | null>(null)
 
 onMounted(async () => {
   try {
@@ -27,7 +28,11 @@ onMounted(async () => {
     if (foundParty) {
       partyName.value = foundParty.name
       candidates.value = foundParty.candidates ?? []
-      console.log('Kandidaten gevonden:', candidates.value)
+      const partyleader = candidates.value.find(c => c.candidateId === '1')
+      if (partyleader) {
+        partyLeader.value = partyleader
+        candidates.value = candidates.value.filter(c => c.candidateId !== '1')
+      }      console.log('Kandidaten gevonden:', candidates.value)
 
       try {
         const summary = await getWikipediaSummary(foundParty.name)
@@ -124,6 +129,22 @@ const scrollRight = () => {
         <p v-else class="text-gray-500 italic">
           Geen Wikipedia-informatie gevonden voor {{ partyName }}.
         </p>
+      </section>
+
+      <section v-if="partyLeader" class="px-8 py-8">
+        <div
+          class="p-6 rounded-2xl flex items-center gap-4"
+        >
+          <span class="text-yellow-400 text-3xl"></span>
+          <div>
+            <h4 class="text-2xl font-semibold mb-1">
+              Lijsttrekker: {{ partyLeader.initials }} {{ partyLeader.lastName }}
+            </h4>
+<!--            <p class="text-gray-400">-->
+<!--              {{ partyLeader.localityName }}-->
+<!--            </p>-->
+          </div>
+        </div>
       </section>
 
       <section class="px-8 mt-4">
