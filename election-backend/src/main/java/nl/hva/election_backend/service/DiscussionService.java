@@ -6,6 +6,8 @@ import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.model.Discussion;
 import nl.hva.election_backend.repo.InMemoryDiscussionRepository;
 import org.springframework.stereotype.Service;
+import nl.hva.election_backend.dto.ReactionDto;
+import java.time.Instant;
 
 import java.util.List;
 
@@ -29,9 +31,14 @@ public class DiscussionService {
         return repo.findDetailById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
     }
+
     // nieuw topic opslaan
     public void save(Discussion d) {
         repo.save(d);
     }
 
+    /** Nieuwe reactie toevoegen aan bestaande discussie */
+    public ReactionDto addReaction(String discussionId, String author, String message) {
+        return repo.addReaction(discussionId, author, message, Instant.now());
+    }
 }
