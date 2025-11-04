@@ -1,26 +1,30 @@
 package nl.hva.election_backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String email;
+
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "display_name") // of wat jouw kolom echt heet
     private String displayName;
+
+
+    public User() {}
 
     public User(String email, String passwordHash, String displayName) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
-    }
-
-    public User() {
-
     }
 
     public Long getId() {
@@ -55,4 +59,3 @@ public class User {
         this.displayName = displayName;
     }
 }
-
