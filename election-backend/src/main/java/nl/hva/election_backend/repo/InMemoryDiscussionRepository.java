@@ -5,6 +5,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.hva.election_backend.dto.ReactionDto;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Simpele in-memory opslag van discussies.
@@ -13,6 +16,8 @@ import java.util.Optional;
 public class InMemoryDiscussionRepository {
 
     private final List<Discussion> discussions = new ArrayList<>();
+    private final Map<String, List<ReactionDto>> reactionsByDiscussion = new HashMap<>();
+
 
     public InMemoryDiscussionRepository() {
         // Gebruik één referentietijdstip zodat lastActivityAt > createdAt
@@ -48,23 +53,55 @@ public class InMemoryDiscussionRepository {
                 .findFirst();
     }
 
-    /** Zoek een detail view van 1 discussie */
+    /** Zoek een detail view van 1 discussie (met reacties) */
     public Optional<nl.hva.election_backend.dto.DiscussionDetailDto> findDetailById(String id) {
         return findById(id)
-                .map(d -> new nl.hva.election_backend.dto.DiscussionDetailDto(
-                        d.getId(),
-                        d.getTitle(),
-                        d.getAuthor(),
-                        d.getBody(),
-                        d.getCreatedAt(),
-                        d.getLastActivityAt(),
-                        d.getReactionsCount(),
-                        null
-                ));
+                .map(d -> {
+                    List<ReactionDto> reactions =
+                            reactionsByDiscussion.getOrDefault(d.getId(), List.of());
+                    return new nl.hva.election_backend.dto.DiscussionDetailDto(
+                            d.getId(),
+                            d.getTitle(),
+                            d.getAuthor(),
+                            d.getBody(),
+                            d.getCreatedAt(),
+                            d.getLastActivityAt(),
+                            d.getReactionsCount(),
+                            reactions
+                    );
+                });
     }
 
     /** Nieuwe discussie opslaan — bovenaan zetten */
     public void save(Discussion discussion) {
         discussions.add(0, discussion);
+    }
+
+    /** Reactie toevoegen bij discussie */
+    public ReactionDto addReaction(String discussionId, String author, String message, Instant createdAt) {
+        Discussion discussion = findById(discussionId)
+                .orElseThrow(() -> new IllegalArgumentException("Discussion not found: " + discussionId));
+
+        ReactionDto reaction = new ReactionDto(author, message, createdAt);
+
+        reactionsByDiscussion
+                .computeIfAbsent(discussionId, id -> new ArrayList<>())
+                .add(reaction);
+
+        // activiteit + teller updaten
+        Discussion updated = discussion.withActivity(
+                createdAt.isAfter(discussion.getLastActivityAt()) ? createdAt : discussion.getLastActivityAt(),
+                discussion.getReactionsCount() + 1
+        );
+
+        // oude discussie vervangen
+        for (int i = 0; i < discussions.size(); i++) {
+            if (discussions.get(i).getId().equals(discussionId)) {
+                discussions.set(i, updated);
+                break;
+            }
+        }
+
+        return reaction;
     }
 }
