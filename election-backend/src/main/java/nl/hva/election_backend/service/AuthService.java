@@ -1,7 +1,6 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.model.User;
-import nl.hva.election_backend.repo.InMemoryUserRepository;
 import nl.hva.election_backend.repo.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import nl.hva.election_backend.security.PasswordHasher;
