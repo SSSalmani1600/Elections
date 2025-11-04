@@ -191,7 +191,7 @@ textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* 🔥 Scrollbar styling */
+/* Scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
 }
