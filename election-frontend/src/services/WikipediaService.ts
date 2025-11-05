@@ -27,3 +27,15 @@ export async function getWikipediaSummary(query: string) {
     image: data.thumbnail?.source,
   }
 }
+export async function getWikipediaPerson(name: string) {
+  const url = `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`
+  const res = await fetch(url)
+
+
+  const data = await res.json()
+  return {
+    title: data.title,
+    description: data.description,
+    image: data.thumbnail?.source || '',
+  }
+}
