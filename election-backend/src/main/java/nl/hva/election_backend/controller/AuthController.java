@@ -1,5 +1,7 @@
 package nl.hva.election_backend.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.dto.LoginRequest;
 import nl.hva.election_backend.dto.LoginResponse;
 import nl.hva.election_backend.dto.RegisterRequest;
@@ -26,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req, HttpServletResponse response) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
@@ -38,23 +40,32 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        String displayName = user.getUserName();
+        String username = user.getUsername();
         String token = jwtService.generateToken(user.getId().toString());
 
-        return ResponseEntity.ok(new LoginResponse(token, displayName));
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(new LoginResponse(username));
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
-            User user = authService.register(req.getEmail(), req.getPassword(), req.getDisplayName());
+            User user = authService.register(req.getEmail(), req.getPassword(), req.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUserName()));
+                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUsername()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
 

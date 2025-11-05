@@ -1,29 +1,19 @@
 package nl.hva.election_backend.dto;
 
 public class LoginResponse {
-    private String displayName;
-    private String token;
+    private String username;
 
     public LoginResponse() {}
 
-    public LoginResponse(String token, String displayName) {
-        this.displayName = displayName;
-        this.token = token;
+    public LoginResponse(String username) {
+        this.username = username;
     }
 
     public String getDisplayName() {
-        return displayName;
+        return username;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

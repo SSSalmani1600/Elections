@@ -21,11 +21,11 @@ public class AuthService {
     }
 
 
-    public User register(String email, String rawPassword, String userName) {
+    public User register(String email, String rawPassword, String username) {
         if (email == null || email.isBlank()
                 || rawPassword == null || rawPassword.isBlank()
-                || userName == null || userName.isBlank()) {
-            throw new IllegalArgumentException("Email, password en displayName zijn verplicht");
+                || username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Email, password en username zijn verplicht");
         }
 
         String normalizedEmail = normalizeEmail(email);
@@ -47,7 +47,7 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(normalizedEmail);
-        user.setUserName(userName.trim());
+        user.setUsername(username);
         user.setPasswordHash(passwordHash);
 
         return userRepo.save(user);

@@ -19,18 +19,22 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return (await res.json()) as LoginResponse
 }
 
-export async function register(email: string, password: string, username: string): Promise<RegisterResponse> {
-  const res = await fetch("http://localhost:8080/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+export async function register(
+  email: string,
+  password: string,
+  username: string,
+): Promise<RegisterResponse> {
+  const res = await fetch('http://localhost:8080/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email: email,
       password: password,
-      displayName: username,
+      username: username,
     }),
   })
 
   if (!res.ok) throw new Error(await res.text())
 
-  return (await res.json()) as RegisterResponse;
+  return (await res.json()) as RegisterResponse
 }
