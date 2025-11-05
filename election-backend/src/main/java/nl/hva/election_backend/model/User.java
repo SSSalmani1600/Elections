@@ -10,21 +10,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "display_name") // of wat jouw kolom echt heet
-    private String displayName;
-
-
     public User() {}
 
-    public User(String email, String passwordHash, String displayName) {
+    public User(String email, String passwordHash, String username) {
         this.email = email;
         this.passwordHash = passwordHash;
-        this.displayName = displayName;
+        this.username = username;
     }
 
     public Long getId() {
@@ -33,6 +33,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -49,13 +57,5 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 }
