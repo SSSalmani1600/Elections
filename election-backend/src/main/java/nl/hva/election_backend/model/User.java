@@ -11,12 +11,12 @@ public class User {
     private Long id;
     private String email;
     private String passwordHash;
-    private String displayName;
+    private String userName;
 
-    public User(String email, String passwordHash, String displayName) {
+    public User(String email, String passwordHash, String userName) {
         this.email = email;
         this.passwordHash = passwordHash;
-        this.displayName = displayName;
+        this.userName = userName;
     }
 
     public User() {
@@ -47,12 +47,12 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setUserName(String displayName) {
+        this.userName = userName;
     }
 }
 

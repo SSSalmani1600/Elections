@@ -3,7 +3,6 @@ package nl.hva.election_backend.service;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repo.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
-import nl.hva.election_backend.security.PasswordHasher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,10 +21,10 @@ public class AuthService {
     }
 
 
-    public User register(String email, String rawPassword, String displayName) {
+    public User register(String email, String rawPassword, String userName) {
         if (email == null || email.isBlank()
                 || rawPassword == null || rawPassword.isBlank()
-                || displayName == null || displayName.isBlank()) {
+                || userName == null || userName.isBlank()) {
             throw new IllegalArgumentException("Email, password en displayName zijn verplicht");
         }
 
@@ -48,7 +47,7 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(normalizedEmail);
-        user.setDisplayName(displayName.trim());
+        user.setUserName(userName.trim());
         user.setPasswordHash(passwordHash);
 
         return userRepo.save(user);

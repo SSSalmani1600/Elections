@@ -14,16 +14,10 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     // Find by username
-    Optional<User> findByUsername(String username);
+//    Optional<User> findByUsername(String username);
 
     // Find by email
     Optional<User> findByEmail(String email);
-
-    // Find all active users
-    List<User> findByActiveTrue();
-
-    // Find all users with a given role
-    List<User> findByRole(String role);
 
     // Check if a user exists by email
     boolean existsByEmail(String email);
