@@ -19,7 +19,7 @@ public class AuthService {
         if (!userRepo.existsByEmail("test@example.com")) {
             User mockUser = new User();
             mockUser.setEmail("test@example.com");
-            mockUser.setDisplayName("Testgebruiker");
+            mockUser.setUsername("Testgebruiker");
             mockUser.setPasswordHash(hasher.hash("password123"));
             userRepo.save(mockUser);
             System.out.println(" Mock user toegevoegd: test@example.com / password123");
@@ -71,7 +71,7 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(normalizedEmail);
-        user.setDisplayName(displayName.trim());
+        user.setUsername(displayName.trim());
         user.setPasswordHash(passwordHash);
 
 
