@@ -13,6 +13,7 @@ const toggleMenu = () => {
   menuIsOpen.value = !menuIsOpen.value
 }
 
+
 const toggleUserMenu = () => {
   userMenuOpen.value = !userMenuOpen.value
 }
@@ -58,12 +59,14 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else>
+
         <button
           @click.stop="toggleUserMenu"
           class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition"
         >
           <i class="pi pi-user text-lg"></i>
         </button>
+
 
         <Transition
           enter-active-class="transition ease-out duration-200"

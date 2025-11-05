@@ -144,7 +144,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
                 class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">Er konden geen partijen gevonden worden!</span>
           <div v-show="!hasError && visibleParties.length > 0"
                class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
-            <div v-for="party in visibleParties" :key="party"
+            <router-link :to="{path: '/partij/' + party}" v-for="party in visibleParties" :key="party"
                  class="bg-primary w-full h-fit rounded-lg">
               <a href="/"
                  class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300">
@@ -158,7 +158,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
                   </div>
                 </div>
               </a>
-            </div>
+            </router-link>
           </div>
           <IconSpinner v-if="loading"
                        class="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2"/>
