@@ -1,5 +1,6 @@
 package nl.hva.election_backend.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -67,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = jwtService.extractDisplayName(jwtToken);
             request.setAttribute("username", username);
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
+        } catch (JwtException e) {
             unauthorized(response, "internal_error", String.valueOf(e));
         }
     }
