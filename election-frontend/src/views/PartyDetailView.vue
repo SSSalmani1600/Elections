@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getParties } from '@/services/ElectionService.ts'
 import type { Candidate } from '@/types/api.ts'
-import { getWikipediaSummary } from '@/services/WikipediaService.ts'
+import { getWikipediaSummary, getWikipediaPerson } from '@/services/WikipediaService.ts'
 
 const route = useRoute()
 const partyName = ref<string>('')
@@ -15,6 +15,7 @@ const wikiSummary = ref<string>('')
 const wikiUrl = ref<string>('')
 const wikiImage = ref<string>('')
 const partyLeader = ref<Candidate | null>(null)
+const leaderImage = ref<string>('')
 
 onMounted(async () => {
   try {
@@ -32,6 +33,14 @@ onMounted(async () => {
       if (partyleader) {
         partyLeader.value = partyleader
         candidates.value = candidates.value.filter(c => c.candidateId !== '1')
+
+        const fullName = `${partyleader.firstName} ${partyleader.lastName}`
+        try {
+          const info = await getWikipediaPerson(fullName)
+          leaderImage.value = info.image
+        } catch (err) {
+          console.warn('Geen Wikipedia-profiel voor lijsttrekker:', err)
+        }
       }      console.log('Kandidaten gevonden:', candidates.value)
 
       try {
