@@ -126,7 +126,7 @@ const scrollRight = () => {
         </div>
       </header>
 
-      <section class="bg-[#131a2c] px-0 lg:px-12 py-12">
+      <section class="bg-[#0B132B] px-0 lg:px-12 py-12">
         <div
           class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-[1.8fr_0.8fr] gap-28 items-start"
         >
@@ -144,7 +144,7 @@ const scrollRight = () => {
 
           <div
             v-if="partyLeader"
-            class="bg-[#0f1422] border border-gray-700/30 rounded-2xl p-5 flex gap-4 items-center justify-center"
+            class="bg-[#040C25] border border-gray-700/30 rounded-2xl p-5 flex gap-4 items-center justify-center"
           >
             <img
               v-if="leaderImage"
@@ -173,7 +173,7 @@ const scrollRight = () => {
           <button
             v-if="candidates.length > 5"
             @click="scrollLeft"
-            class="absolute left--6 top-1/2 -translate-y-1/2 bg-[#1b203a] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+            class="absolute left--6 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
           >
             ◀
           </button>
@@ -186,7 +186,7 @@ const scrollRight = () => {
             <span
               v-for="cand in candidates"
               :key="cand.candidateId"
-              class="bg-[#1b203a] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
+              class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
             >
               {{ cand.firstName }} {{ cand.lastName }}
             </span>
@@ -195,7 +195,7 @@ const scrollRight = () => {
           <button
             v-if="candidates.length > 5"
             @click="scrollRight"
-            class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#1b203a] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+            class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
           >
             ▶
           </button>
@@ -206,7 +206,7 @@ const scrollRight = () => {
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
           <div class="flex flex-col gap-6">
             <div
-              class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
+              class="bg-[#0B132B] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
             >
               <h4 class="text-xl font-semibold mb-2">Standpunt 1</h4>
               <p class="text-gray-400 leading-relaxed">
@@ -215,7 +215,7 @@ const scrollRight = () => {
             </div>
 
             <div
-              class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
+              class="bg-[#0B132B] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30"
             >
               <h4 class="text-xl font-semibold mb-2">Standpunt 2</h4>
               <p class="text-gray-400 leading-relaxed">
@@ -226,7 +226,7 @@ const scrollRight = () => {
           </div>
 
           <div
-            class="bg-[#131a2c] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30 flex flex-col justify-center"
+            class="bg-[#0B132B] p-6 rounded-2xl shadow-md text-gray-200 border border-gray-700/30 flex flex-col justify-center"
           >
             <h4 class="text-xl font-semibold mb-2 flex items-center gap-2">
               <span class="text-orange-400 text-2xl">⭐</span> Standpunt 3
