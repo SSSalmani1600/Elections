@@ -38,14 +38,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <nav class="h-[100px] bg-background flex items-center justify-between px-6 sticky top-0 shadow-lg z-100">
+  <nav class="h-[100px] bg-background flex justify-between items-center lg:grid lg:grid-cols-12 px-6 sticky top-0 shadow-lg z-100">
 
-    <router-link to="/" class="flex items-center gap-2">
+    <router-link to="/" class="col-span-3 flex items-center gap-2">
       <img src="../assets/logo.svg" alt="Logo" class="h-8" />
     </router-link>
 
 
-    <div class="hidden lg:flex items-center justify-center gap-8">
+    <div class="col-span-6 hidden lg:flex items-center justify-center gap-8">
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
       <router-link to="/forum" class="nav-link">Forum</router-link>
@@ -54,7 +54,7 @@ onBeforeUnmount(() => {
     </div>
 
 
-    <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
+    <div class="col-span-3 ml-auto relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
       <template v-if="!isLoggedIn">
         <router-link to="/inloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
         <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
