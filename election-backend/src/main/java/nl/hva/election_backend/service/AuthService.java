@@ -4,7 +4,9 @@ import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repo.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class AuthService {
     private final UserRepository userRepo;
@@ -14,6 +16,7 @@ public class AuthService {
         this.userRepo = userRepo;
     }
 
+    @Transactional(readOnly = true)
     public User authenticate(String email, String password) {
         return userRepo.findByEmail(normalizeEmail(email))
                 .filter(u -> hasher.matches(password, u.getPasswordHash()))

@@ -46,11 +46,17 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        String jwtToken = Arrays.stream(request.getCookies())
-                .filter(cookie -> "jwt".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+        Cookie[] cookies = request.getCookies();
+        String jwtToken = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    jwtToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
         if (jwtToken == null) {
             unauthorized(response, "missing_token", "Request to secured endpoint requires token");

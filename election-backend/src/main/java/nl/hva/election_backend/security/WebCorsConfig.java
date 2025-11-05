@@ -20,7 +20,7 @@ public class WebCorsConfig {
         config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("WWW-Authenticate","Content-Type","Authorization"));
+        config.setExposedHeaders(List.of("WWW-Authenticate","Content-Type","Authorization", "Set-Cookie"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

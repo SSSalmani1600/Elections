@@ -9,7 +9,7 @@ public class LoginResponse {
         this.username = username;
     }
 
-    public String getDisplayName() {
+    public String getUsername() {
         return username;
     }
 

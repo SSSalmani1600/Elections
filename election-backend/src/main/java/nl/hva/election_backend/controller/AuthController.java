@@ -1,6 +1,5 @@
 package nl.hva.election_backend.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.dto.LoginRequest;
 import nl.hva.election_backend.dto.LoginResponse;
 import nl.hva.election_backend.dto.RegisterRequest;
@@ -29,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
@@ -47,9 +46,9 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
                 .secure(false)
-                .path("/")
                 .sameSite("Lax")
-                .maxAge(24 * 60 * 60)
+                .path("/")
+                .maxAge(86400)
                 .build();
 
         return ResponseEntity.ok()
