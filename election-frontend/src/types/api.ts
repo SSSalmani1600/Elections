@@ -8,7 +8,24 @@ export interface RegisterResponse {
   password: string;
   username: string;
 }
-export type ParserResponse = { parties: { name: string }[] }
+export type ParserResponse = {
+  parties: {
+    name: string;
+    candidates: Candidate[];
+  }[];
+};
+
+export interface Candidate {
+  firstName: string;
+  lastName: string;
+  initials: string;
+  gender: string;
+  localityName: string;
+  electionName: string;
+  partiesId: string;
+  candidateId: string;
+  votes: string;
+}
 
 export interface Candidate {
   firstName: string;
