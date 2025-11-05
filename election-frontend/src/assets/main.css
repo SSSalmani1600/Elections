@@ -85,3 +85,42 @@ strong {
   color: #000000;
 }
 
+.pagination-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition-duration: 200ms;
+}
+
+.pagination-btn:active {
+  color: #EF3054;
+}
+
+.pagination-btn[disabled] {
+  opacity: 60%;
+  cursor: not-allowed;
+}
+
+.pagination-btn[disabled]:active {
+  color: white;
+}
+
+.page-option {
+  padding: 6px 14px 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition-duration: 400ms;
+}
+
+.page-option:hover {
+  background-color: #27335a;
+}
+
+.active-page {
+  background: #EF3054;
+}
+
+.active-page:hover {
+  background-color: #EF3054;
+}

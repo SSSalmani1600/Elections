@@ -166,51 +166,21 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
 
         <div v-show="!hasError && visibleParties.length > 0"
              class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]">
-          <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><i
-            class="pi pi-arrow-left"></i> <span class="hidden md:block">Vorige</span>
+          <button class="pagination-btn" @click="currentPage--" :disabled="(currentPage === 1)"><span class="hidden md:block">Vorige</span>
           </button>
           <div class="flex items-center gap-1">
             <button v-for="page in pages" :key="page" :class="{'active-page' :page === currentPage}"
-                    @click="selectPage(page)" class="py-1.5 px-3.5 rounded-lg cursor-pointer">{{
+                    @click="selectPage(page)" class="page-option">{{
                 page
               }}
             </button>
           </div>
           <button class="pagination-btn" @click="currentPage++"
                   :disabled="(currentPage === totalPages)"><span
-            class="hidden md:block">Volgende</span> <i
-            class="pi pi-arrow-right"></i></button>
+            class="hidden md:block">Volgende</span></button>
         </div>
       </div>
     </div>
 
   </div>
 </template>
-
-<style scoped>
-.pagination-btn {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition-duration: 200ms;
-}
-
-.pagination-btn:active {
-  color: #EF3054;
-}
-
-.pagination-btn[disabled] {
-  cursor: default;
-  opacity: 60%;
-}
-
-.pagination-btn[disabled]:active {
-  color: white;
-}
-
-.active-page {
-  background: #EF3054;
-  transition-duration: 500ms;
-}
-</style>
