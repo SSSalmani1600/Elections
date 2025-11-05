@@ -5,15 +5,14 @@ const menuIsOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
 const token: string | null = localStorage.getItem('JWT')
-const isLoggedIn: boolean = token ? true : false
+const isLoggedIn: boolean = !!token
 const username: string = localStorage.getItem('username') || ''
 
-// mobiel menu
 const toggleMenu = () => {
   menuIsOpen.value = !menuIsOpen.value
 }
 
-// profielmenu
+
 const toggleUserMenu = () => {
   userMenuOpen.value = !userMenuOpen.value
 }
@@ -23,7 +22,7 @@ const logout = () => {
   location.reload()
 }
 
-// sluit dropdown als je buiten klikt
+
 const handleClickOutside = (event: MouseEvent) => {
   if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
     userMenuOpen.value = false
@@ -40,19 +39,21 @@ onBeforeUnmount(() => {
 
 <template>
   <nav class="h-[100px] bg-background flex items-center justify-between px-6 sticky top-0 shadow-lg z-100">
-    <!-- LOGO -->
+
     <router-link to="/" class="flex items-center gap-2">
       <img src="../assets/logo.svg" alt="Logo" class="h-8" />
     </router-link>
 
-    <!-- NAV LINKS -->
+
     <div class="hidden lg:flex items-center justify-center gap-8">
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
       <router-link to="/forum" class="nav-link">Forum</router-link>
+      <router-link to="/calendar">Verkiezing kalender</router-link>
+
     </div>
 
-    <!-- RECHTS (Login / User menu) -->
+
     <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
       <template v-if="!isLoggedIn">
         <router-link to="/inloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
@@ -60,7 +61,7 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else>
-        <!-- Gebruikersicoon -->
+
         <button
           @click.stop="toggleUserMenu"
           class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition"
@@ -68,7 +69,7 @@ onBeforeUnmount(() => {
           <i class="pi pi-user text-lg"></i>
         </button>
 
-        <!-- Dropdown-menu -->
+
         <Transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 translate-y-1"
