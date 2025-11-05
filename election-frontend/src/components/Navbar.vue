@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
       <router-link to="/forum" class="nav-link">Forum</router-link>
-      <router-link to="/calendar">Verkiezing kalender</router-link>
+      <router-link to="/calendar" class="nav-link">Verkiezing kalender</router-link>
 
     </div>
 
