@@ -104,7 +104,7 @@ const scrollRight = () => {
               v-if="wikiImage"
               :src="wikiImage"
               :alt="`Logo van ${partyName}`"
-              class="max-h-17 md:max-h-25 object-contain rounded-lg"
+              class="max-h-10 md:max-h-18 object-contain rounded-lg"
               style="width: auto"
             />
             <h2 class="text-5xl font-semibold">Partij {{ partyName }}</h2>
