@@ -156,7 +156,7 @@ const scrollRight = () => {
             <div>
               <p class="text-sm text-gray-400 uppercase tracking-wide mb-1">Partijleider</p>
               <h4 class="text-lg font-semibold">
-                {{ partyLeader.initials }} {{ partyLeader.lastName }}
+                {{ partyLeader.firstName }} {{ partyLeader.lastName }}
               </h4>
               <p class="text-gray-400">
                 {{ partyLeader.localityName }}
@@ -188,7 +188,7 @@ const scrollRight = () => {
               :key="cand.candidateId"
               class="bg-[#1b203a] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
             >
-              {{ cand.initials }} {{ cand.lastName }}
+              {{ cand.firstName }} {{ cand.lastName }}
             </span>
           </div>
 
