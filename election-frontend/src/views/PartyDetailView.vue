@@ -97,8 +97,8 @@ const scrollRight = () => {
     </div>
 
     <div v-else>
-      <header class="flex flex-col md:flex-row justify-between items-center px-8 py-16 gap-8">
-        <div>
+      <header class="flex flex-col md:flex-row justify-between px-8 pt-16 pb-0 gap-8">
+        <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3">
             <img
               v-if="wikiImage"
@@ -107,7 +107,6 @@ const scrollRight = () => {
               class="max-h-17 md:max-h-25 object-contain rounded-lg"
               style="width: auto"
             />
-
             <h2 class="text-5xl font-semibold">Partij {{ partyName }}</h2>
           </div>
 
@@ -115,13 +114,44 @@ const scrollRight = () => {
             Ontdek de standpunten van Partij
             <span class="font-bold text-white"> {{ partyName }}</span>
           </p>
-        </div>
 
-        <div class="flex justify-center md:justify-end mt-8 md:mt-0">
+          <div class="relative mt-8 max-w-[650px] w-full">
+            <button
+              v-if="candidates.length > 5"
+              @click="scrollLeft"
+              class="absolute left-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+            >
+              ◀
+            </button>
+
+            <div
+              ref="scrollContainer"
+              v-if="candidates.length"
+              class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10 rounded-xl"
+            >
+              <span
+                v-for="cand in candidates"
+                :key="cand.candidateId"
+                class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
+              >
+                {{ cand.firstName }} {{ cand.lastName }}
+              </span>
+            </div>
+
+            <button
+              v-if="candidates.length > 5"
+              @click="scrollRight"
+              class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 flex justify-end items-end">
           <img
             src="@/assets/detail-illustratie.png"
             alt="partij illustratie"
-            class="w-40 md:w-56 lg:w-64 object-contain scale-130"
+            class="w-80 md:w-96 lg:w-[460px] max-h-[360px] object-contain translate-y-[19px]"
           />
         </div>
       </header>
@@ -166,41 +196,41 @@ const scrollRight = () => {
         </div>
       </section>
 
-      <section class="px-8 mt-4">
-        <h3 class="text-3xl font-semibold mb-4 text-center">Kandidaten</h3>
+      <!--      <section class="px-8 mt-4">-->
+      <!--        <h3 class="text-3xl font-semibold mb-4 text-center">Kandidaten</h3>-->
 
-        <div class="relative max-w-[1200px] mx-auto">
-          <button
-            v-if="candidates.length > 5"
-            @click="scrollLeft"
-            class="absolute left--6 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
-          >
-            ◀
-          </button>
+      <!--        <div class="relative max-w-[1200px] mx-auto">-->
+      <!--          <button-->
+      <!--            v-if="candidates.length > 5"-->
+      <!--            @click="scrollLeft"-->
+      <!--            class="absolute left&#45;&#45;6 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"-->
+      <!--          >-->
+      <!--            ◀-->
+      <!--          </button>-->
 
-          <div
-            ref="scrollContainer"
-            v-if="candidates.length"
-            class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10"
-          >
-            <span
-              v-for="cand in candidates"
-              :key="cand.candidateId"
-              class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
-            >
-              {{ cand.firstName }} {{ cand.lastName }}
-            </span>
-          </div>
+      <!--          <div-->
+      <!--            ref="scrollContainer"-->
+      <!--            v-if="candidates.length"-->
+      <!--            class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10"-->
+      <!--          >-->
+      <!--            <span-->
+      <!--              v-for="cand in candidates"-->
+      <!--              :key="cand.candidateId"-->
+      <!--              class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"-->
+      <!--            >-->
+      <!--              {{ cand.firstName }} {{ cand.lastName }}-->
+      <!--            </span>-->
+      <!--          </div>-->
 
-          <button
-            v-if="candidates.length > 5"
-            @click="scrollRight"
-            class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
-          >
-            ▶
-          </button>
-        </div>
-      </section>
+      <!--          <button-->
+      <!--            v-if="candidates.length > 5"-->
+      <!--            @click="scrollRight"-->
+      <!--            class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"-->
+      <!--          >-->
+      <!--            ▶-->
+      <!--          </button>-->
+      <!--        </div>-->
+      <!--      </section>-->
 
       <section class="px-8 py-12 mt-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6">
