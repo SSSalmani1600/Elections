@@ -29,10 +29,10 @@ onMounted(async () => {
     if (foundParty) {
       partyName.value = foundParty.name
       candidates.value = foundParty.candidates ?? []
-      const partyleader = candidates.value.find(c => c.candidateId === '1')
+      const partyleader = candidates.value.find((c) => c.candidateId === '1')
       if (partyleader) {
         partyLeader.value = partyleader
-        candidates.value = candidates.value.filter(c => c.candidateId !== '1')
+        candidates.value = candidates.value.filter((c) => c.candidateId !== '1')
 
         const fullName = `${partyleader.firstName} ${partyleader.lastName}`
         try {
@@ -41,7 +41,8 @@ onMounted(async () => {
         } catch (err) {
           console.warn('Geen Wikipedia-profiel voor lijsttrekker:', err)
         }
-      }      console.log('Kandidaten gevonden:', candidates.value)
+      }
+      console.log('Kandidaten gevonden:', candidates.value)
 
       try {
         const summary = await getWikipediaSummary(foundParty.name)
@@ -104,7 +105,7 @@ const scrollRight = () => {
               :src="wikiImage"
               :alt="`Logo van ${partyName}`"
               class="max-h-17 md:max-h-25 object-contain rounded-lg"
-              style="width: auto;"
+              style="width: auto"
             />
 
             <h2 class="text-5xl font-semibold">Partij {{ partyName }}</h2>
@@ -125,40 +126,42 @@ const scrollRight = () => {
         </div>
       </header>
 
-      <section class="bg-[#131a2c] px-8 py-12">
-        <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
-        <p v-if="wikiSummary" class="text-gray-300 max-w-4xl leading-relaxed">
-          {{ wikiSummary }}
-        </p>
-        <div v-if="wikiUrl" class="mt-4">
-          <a :href="wikiUrl" target="_blank" class="text-[#EF3054] underline">
-            Lees verder op Wikipedia →
-          </a>
-        </div>
-        <p v-else class="text-gray-500 italic">
-          Geen Wikipedia-informatie gevonden voor {{ partyName }}.
-        </p>
-      </section>
-
-      <section v-if="partyLeader" class="px-8 py-8">
+      <section class="bg-[#131a2c] px-0 lg:px-12 py-12">
         <div
-          class="p-6 rounded-2xl flex items-center gap-4"
+          class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-[1.8fr_0.8fr] gap-28 items-start"
         >
-          <img
-            v-if="leaderImage"
-            :src="leaderImage"
-            :alt="`Foto van ${partyLeader.firstName} ${partyLeader.lastName}`"
-            class="max-h-40 object-contain rounded-xl shadow-lg"
-            style="width: auto;"
-          />
-          <span class="text-yellow-400 text-3xl"></span>
-          <div>
-            <h4 class="text-2xl font-semibold mb-1">
-              Partijleider: {{ partyLeader.initials }} {{ partyLeader.lastName }}
-            </h4>
-<!--            <p class="text-gray-400">-->
-<!--              {{ partyLeader.localityName }}-->
-<!--            </p>-->
+          <div class="pl-4 lg:pl-0">
+            <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
+            <p class="text-gray-300 leading-relaxed">
+              {{ wikiSummary }}
+            </p>
+            <div v-if="wikiUrl" class="mt-4">
+              <a :href="wikiUrl" target="_blank" class="text-[#EF3054] underline">
+                Lees verder op Wikipedia →
+              </a>
+            </div>
+          </div>
+
+          <div
+            v-if="partyLeader"
+            class="bg-[#0f1422] border border-gray-700/30 rounded-2xl p-5 flex gap-4 items-center justify-center"
+          >
+            <img
+              v-if="leaderImage"
+              :src="leaderImage"
+              :alt="`Foto van ${partyLeader.firstName} ${partyLeader.lastName}`"
+              class="max-h-40 object-contain rounded-xl shadow-lg"
+              style="width: auto"
+            />
+            <div>
+              <p class="text-sm text-gray-400 uppercase tracking-wide mb-1">Partijleider</p>
+              <h4 class="text-lg font-semibold">
+                {{ partyLeader.initials }} {{ partyLeader.lastName }}
+              </h4>
+              <p class="text-gray-400">
+                {{ partyLeader.localityName }}
+              </p>
+            </div>
           </div>
         </div>
       </section>
