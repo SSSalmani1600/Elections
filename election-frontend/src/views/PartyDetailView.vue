@@ -144,10 +144,17 @@ const scrollRight = () => {
         <div
           class="p-6 rounded-2xl flex items-center gap-4"
         >
+          <img
+            v-if="leaderImage"
+            :src="leaderImage"
+            :alt="`Foto van ${partyLeader.firstName} ${partyLeader.lastName}`"
+            class="max-h-40 object-contain rounded-xl shadow-lg"
+            style="width: auto;"
+          />
           <span class="text-yellow-400 text-3xl"></span>
           <div>
             <h4 class="text-2xl font-semibold mb-1">
-              Lijsttrekker: {{ partyLeader.initials }} {{ partyLeader.lastName }}
+              Partijleider: {{ partyLeader.initials }} {{ partyLeader.lastName }}
             </h4>
 <!--            <p class="text-gray-400">-->
 <!--              {{ partyLeader.localityName }}-->
