@@ -38,10 +38,10 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        String displayName = user.getUsername();
+        String username = user.getUsername();
         String token = jwtService.generateToken(user.getId().toString());
 
-        return ResponseEntity.ok(new LoginResponse(token, displayName));
+        return ResponseEntity.ok(new LoginResponse(token, username));
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
