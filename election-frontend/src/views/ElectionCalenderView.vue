@@ -144,7 +144,7 @@ onMounted(loadElections)
         class="flex items-center justify-center gap-4 mt-10"
       >
         <button
-          class="px-3 py-2 text-sm font-medium rounded-lg bg-[#1C2541] hover:bg-[#27335a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="pagination-btn"
           @click="goToPage(currentPage - 1)"
           :disabled="currentPage === 1"
         >
@@ -155,10 +155,9 @@ onMounted(loadElections)
           <button
             v-for="page in totalPages"
             :key="page"
-            class="px-3 py-2 text-sm font-medium rounded-lg transition"
+            class="page-option"
             :class="{
-              'bg-[var(--color-primary)] text-white': page === currentPage,
-              'bg-[#1C2541] hover:bg-[#27335a]': page !== currentPage
+              'active-page': page === currentPage
             }"
             @click="goToPage(page)"
           >
@@ -167,7 +166,7 @@ onMounted(loadElections)
         </div>
 
         <button
-          class="px-3 py-2 text-sm font-medium rounded-lg bg-[#1C2541] hover:bg-[#27335a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="pagination-btn"
           @click="goToPage(currentPage + 1)"
           :disabled="currentPage === totalPages"
         >
