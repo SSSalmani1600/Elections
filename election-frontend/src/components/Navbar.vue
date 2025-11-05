@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
       <router-link to="/forum" class="nav-link">Forum</router-link>
-      <router-link to="/calendar" class="nav-link">Verkiezing kalender</router-link>
+      <router-link to="/calendar" class="nav-link">Verkiezingskalender</router-link>
 
     </div>
 
@@ -126,23 +126,24 @@ onBeforeUnmount(() => {
           </button>
 
           <router-link to="/verkiezingen" class="nav-link" @click="toggleMenu"
-            >Verkiezingen</router-link
+          >Verkiezingen</router-link
           >
           <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
           <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
+          <router-link to="/calendar" class="nav-link" @click="toggleMenu">Verkiezingskalender</router-link>
 
           <template v-if="!isLoggedIn">
             <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu"
-              >Inloggen</router-link
+            >Inloggen</router-link
             >
             <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu"
-              >Registreren</router-link
+            >Registreren</router-link
             >
           </template>
           <template v-else>
             <p class="text-gray-200">👋 Hallo, {{ username }}</p>
             <router-link to="/account" class="btn btn-primary" @click="toggleMenu"
-              >Mijn account</router-link
+            >Mijn account</router-link
             >
             <button @click="logout" class="btn btn-secondary cursor-pointer">Uitloggen</button>
           </template>
