@@ -2,6 +2,7 @@ package nl.hva.election_backend.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.service.JwtService;
@@ -21,7 +22,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/auth/",
             "/api/parties",
             "/api/elections/",
-            "/api/users"
+            "/api/users",
+            "/api/discussions"
     };
 
     @Override
@@ -43,34 +45,31 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review
-        if (uri.startsWith("/api/discussions")
-                && ("GET".equalsIgnoreCase(request.getMethod()) || "POST".equalsIgnoreCase(request.getMethod()))) {
-            filterChain.doFilter(request, response);
+        String jwtToken = Arrays.stream(request.getCookies())
+                .filter(cookie -> "jwt".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (jwtToken == null) {
+            unauthorized(response, "missing_token", "Request to secured endpoint requires token");
             return;
         }
 
-        // Normale JWT check
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring("Bearer ".length());
-            try {
-                if (token.isEmpty() || !jwtService.validateToken(token)) {
-                    unauthorized(response, "invalid_token", "Invalid or expired JWT token");
-                    return;
-                }
-                String user = jwtService.extractDisplayName(token);
-                request.setAttribute("userName", user);
-                filterChain.doFilter(request, response);
-                return;
-            } catch (Exception e) {
-                unauthorized(response, "internal_error", String.valueOf(e));
+        try {
+            boolean validToken = jwtService.validateToken(jwtToken);
+
+            if (!validToken) {
+                unauthorized(response, "invalid_token", "Invalid or expired JWT token");
                 return;
             }
-        }
 
-        // Als geen geldige header → 401
-        unauthorized(response, "missing_token", "Authorization: Bearer <token> required");
+            String username = jwtService.extractDisplayName(jwtToken);
+            request.setAttribute("username", username);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            unauthorized(response, "internal_error", String.valueOf(e));
+        }
     }
 
     private void unauthorized(HttpServletResponse response, String code, String message) throws IOException {
