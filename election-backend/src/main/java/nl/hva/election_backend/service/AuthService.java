@@ -13,6 +13,15 @@ public class AuthService {
 
     public AuthService(InMemoryUserRepository userRepo) {
         this.userRepo = userRepo;
+
+        if (!userRepo.existsByEmail("test@example.com")) {
+            User mockUser = new User();
+            mockUser.setEmail("test@example.com");
+            mockUser.setDisplayName("Testgebruiker");
+            mockUser.setPasswordHash(hasher.hash("password123"));
+            userRepo.save(mockUser);
+            System.out.println(" Mock user toegevoegd: test@example.com / password123");
+        }
     }
 
     public User authenticate(String email, String password) {

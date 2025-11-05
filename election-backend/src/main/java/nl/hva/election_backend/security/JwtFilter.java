@@ -16,12 +16,18 @@ import java.util.Arrays;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService;
+
+    public JwtFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     String[] whiteListURLs = {
             "/api/auth/",
             "/api/parties",
             "/api/elections/",
-            "/api/users"
+            "/api/users",
+            "/api/next-elections",
     };
 
     @Override
@@ -36,13 +42,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // White listed endpoints altijd doorlaten
         String uri = request.getRequestURI();
-        for (String url : whiteListURLs) {
-            if (uri.startsWith(url)) {
+        System.out.println("[JwtFilter] Incoming request URI: " + uri);
+
+        String[] whiteListPatterns = {
+                ".*/api/auth(/.*)?",
+                ".*/api/parties(/.*)?",
+                ".*/api/elections(/.*)?",
+                ".*/api/next-elections(/.*)?"
+        };
+
+        for (String pattern : whiteListPatterns) {
+            if (uri.matches(pattern)) {
                 filterChain.doFilter(request, response);
                 return;
             }
         }
-
         // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review
         if (uri.startsWith("/api/discussions")
                 && ("GET".equalsIgnoreCase(request.getMethod()) || "POST".equalsIgnoreCase(request.getMethod()))) {
@@ -81,3 +95,4 @@ public class JwtFilter extends OncePerRequestFilter {
         response.flushBuffer();
     }
 }
+

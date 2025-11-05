@@ -7,8 +7,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      email: email,
-      password: password,
+      email,
+      password,
     }),
   })
 
@@ -16,8 +16,14 @@ export async function login(email: string, password: string): Promise<LoginRespo
     throw new Error(`Login failed (${res.status})`)
   }
 
-  return (await res.json()) as LoginResponse
+  const data = (await res.json()) as LoginResponse
+
+  // ✅ Token opslaan zodat je hem later kunt gebruiken
+  localStorage.setItem('token', data.token)
+
+  return data
 }
+
 
 export async function register(email: string, password: string, username: string): Promise<RegisterResponse> {
   const res = await fetch("http://localhost:8080/api/auth/register", {
