@@ -80,19 +80,48 @@ async function main() {
 }
 
 onMounted(async () => {
-  // Initialize map
-  map = L.map(mapEl.value, {
-    zoomControl: false,
+  map = L.map(mapEl.value as HTMLElement, {
+    zoomControl: true,
     attributionControl: false,
     dragging: false,
     scrollWheelZoom: false,
     doubleClickZoom: false,
     boxZoom: false,
     keyboard: false,
-    tap: false, // mobile tap-zoom
+    tap: false,
     touchZoom: false,
-    preferCanvas: false, // keep SVG so your CSS scale works
+    preferCanvas: false,
   }).setView([52.2, 5.3], 7)
+
+  const nlBounds = L.latLngBounds([50.5, 3.2], [53.7, 7.3])
+  // "Viscosity" makes the map resist leaving the bounds
+  map.setMaxBounds(nlBounds.pad(0.5))
+  ;(map as L.Map).options.maxBoundsViscosity = 0.9
+
+  const container = map.getContainer()
+
+  container.tabIndex = 0
+
+  const enableInteractions = () => {
+    map.dragging.enable()
+    map.scrollWheelZoom.enable()
+    map.touchZoom.enable()
+    map.doubleClickZoom.enable()
+  }
+  const disableInteractions = () => {
+    map.dragging.disable()
+    map.scrollWheelZoom.disable()
+    map.touchZoom.disable()
+    map.doubleClickZoom.disable()
+  }
+
+  // Turn interactions on when pointer enters, off when it leaves
+  container.addEventListener('mouseenter', enableInteractions)
+  container.addEventListener('mouseleave', disableInteractions)
+
+  // (Mobile) when a gesture starts inside and ends outside, stop it at the edge
+  container.addEventListener('touchend', disableInteractions)
+  container.addEventListener('touchcancel', disableInteractions)
 
   // Basemap
   try {
