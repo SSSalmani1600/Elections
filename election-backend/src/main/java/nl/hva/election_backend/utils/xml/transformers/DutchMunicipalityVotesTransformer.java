@@ -36,13 +36,13 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         String stationId = data.get(TagAndAttributeNames.REPORTING_UNIT_IDENTIFIER);
 
         // laat info zien in console
-        System.out.printf("  🗳️ Party=%s | votes=%d | region=%s | station=%s%n",
+        System.out.printf("   Party=%s | votes=%d | region=%s | station=%s%n",
                 partyName, votes, municipalityName, stationId);
 
         // zoek partij in election
         Party party = election.getPartyByName(partyName);
         if (party == null) {
-            System.out.println("  ⚠️ Geen partij gevonden voor: " + partyName);
+            System.out.println("   Geen partij gevonden voor: " + partyName);
             return;
         }
 
@@ -77,13 +77,13 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
         String stationId = data.get(TagAndAttributeNames.REPORTING_UNIT_IDENTIFIER);
 
         // laat info zien in console
-        System.out.printf("  👤 Candidate=%s | votes=%d | region=%s | station=%s%n",
+        System.out.printf("   Candidate=%s | votes=%d | region=%s | station=%s%n",
                 candidateName, votes, municipalityName, stationId);
 
         // zoek kandidaat in election
         Candidate candidate = election.getCandidateByName(candidateName);
         if (candidate == null) {
-            System.out.println("  ⚠️ Geen kandidaat gevonden voor: " + candidateName);
+            System.out.println("   Geen kandidaat gevonden voor: " + candidateName);
             return;
         }
 
