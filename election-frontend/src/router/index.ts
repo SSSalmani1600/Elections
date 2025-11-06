@@ -51,6 +51,7 @@ const router = createRouter({
       path: '/discussions/:id',
       name: 'discussion-detail',
       component: DiscussionDetailView,
+    },
       {
           path: '/forum',
           name: 'forum',
