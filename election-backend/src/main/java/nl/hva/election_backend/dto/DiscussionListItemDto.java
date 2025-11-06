@@ -1,13 +1,13 @@
-package nl.hva.election_backend.discussion;
+package nl.hva.election_backend.dto;
+
 
 import java.time.Instant;
 
-public record DiscussionDetailDto(
+// dit is data van 1 discussie, wordt naar frontend gestuurd
+public record DiscussionListItemDto(
         String id,
         String title,
         String author,
-        String body,
-        Instant createdAt,
         Instant lastActivityAt,
         int reactionsCount
 ) {}

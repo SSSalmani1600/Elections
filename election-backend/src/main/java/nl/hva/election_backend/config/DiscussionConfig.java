@@ -1,7 +1,9 @@
-package nl.hva.election_backend.discussion;
+package nl.hva.election_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import nl.hva.election_backend.repo.InMemoryDiscussionRepository;
+
 
 @Configuration
 public class DiscussionConfig {
