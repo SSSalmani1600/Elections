@@ -7,7 +7,7 @@ import PartyDetailView from '@/views/PartyDetailView.vue'
 import PartiesView from "@/views/PartiesView.vue";
 import DiscussionsView from '@/views/DiscussionsView.vue'
 import DiscussionDetailView from '@/views/DiscussionDetailView.vue'
-
+import ElectionCalendarView from '@/views/ElectionCalenderView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +51,15 @@ const router = createRouter({
       path: '/discussions/:id',
       name: 'discussion-detail',
       component: DiscussionDetailView,
+      {
+          path: '/forum',
+          name: 'forum',
+          component: DiscussionsView,
+      },
+    {
+      path: '/calendar',
+      name: 'calendar',
+      component: ElectionCalendarView,
     },
   ],
 })

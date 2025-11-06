@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("api/elections")
-public class ElectionController {
+public class ParserElectionController {
     private final DutchElectionService electionService;
 
-    public ElectionController(DutchElectionService electionService) {
+    public ParserElectionController(DutchElectionService electionService) {
         this.electionService = electionService;
     }
 

@@ -1,29 +1,28 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const menuIsOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
-const token: string | null = localStorage.getItem('JWT')
-const isLoggedIn: boolean = token ? true : false
-const username: string = localStorage.getItem('username') || ''
 
-// mobiel menu
+
+const auth = useAuthStore()
+
 const toggleMenu = () => {
   menuIsOpen.value = !menuIsOpen.value
 }
 
-// profielmenu
+
 const toggleUserMenu = () => {
   userMenuOpen.value = !userMenuOpen.value
 }
 
+
 const logout = () => {
-  localStorage.setItem('JWT', '')
-  location.reload()
+  auth.logout()
 }
 
-// sluit dropdown als je buiten klikt
 const handleClickOutside = (event: MouseEvent) => {
   if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
     userMenuOpen.value = false
@@ -40,27 +39,27 @@ onBeforeUnmount(() => {
 
 <template>
   <nav class="h-[100px] bg-background flex items-center justify-between px-6 sticky top-0 shadow-lg z-100">
-    <!-- LOGO -->
+
     <router-link to="/" class="flex items-center gap-2">
       <img src="../assets/logo.svg" alt="Logo" class="h-8" />
     </router-link>
 
-    <!-- NAV LINKS -->
     <div class="hidden lg:flex items-center justify-center gap-8">
       <router-link to="/verkiezingen" class="nav-link">Verkiezingen</router-link>
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
-      <router-link to="/discussions" class="nav-link">Forum</router-link>
+      <router-link to="/forum" class="nav-link">Forum</router-link>
+      <router-link to="/calendar" class="nav-link">Verkiezingskalender</router-link>
     </div>
 
-    <!-- RECHTS (Login / User menu) -->
     <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
-      <template v-if="!isLoggedIn">
+
+      <template v-if="!auth.isLoggedIn">
         <router-link to="/inloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
         <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
       </template>
 
       <template v-else>
-        <!-- Gebruikersicoon -->
+
         <button
           @click.stop="toggleUserMenu"
           class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition"
@@ -68,7 +67,7 @@ onBeforeUnmount(() => {
           <i class="pi pi-user text-lg"></i>
         </button>
 
-        <!-- Dropdown-menu -->
+
         <Transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 translate-y-1"
@@ -82,7 +81,7 @@ onBeforeUnmount(() => {
             class="absolute top-full right-0 mt-3 w-48 bg-[#1c1f2b] shadow-lg rounded-lg border border-gray-700 py-2 z-50"
           >
             <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
-              👋 Hallo, <strong>{{ username }}</strong>
+              👋 Hallo, <strong>{{ auth.user }}</strong>
             </p>
             <router-link
               to="/account"
@@ -124,30 +123,24 @@ onBeforeUnmount(() => {
             <i class="pi pi-times"></i>
           </button>
 
-          <router-link to="/verkiezingen" class="nav-link" @click="toggleMenu"
-            >Verkiezingen</router-link
-          >
+          <router-link to="/verkiezingen" class="nav-link" @click="toggleMenu">Verkiezingen</router-link>
           <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
-          <router-link to="/discussions" class="nav-link" @click="toggleMenu">Forum</router-link>
+          <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
+          <router-link to="/calendar" class="nav-link" @click="toggleMenu">Verkiezingskalender</router-link>
 
-          <template v-if="!isLoggedIn">
-            <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu"
-              >Inloggen</router-link
-            >
-            <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu"
-              >Registreren</router-link
-            >
+          <template v-if="!auth.isLoggedIn">
+            <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu">Inloggen</router-link>
+            <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu">Registreren</router-link>
           </template>
           <template v-else>
-            <p class="text-gray-200">👋 Hallo, {{ username }}</p>
-            <router-link to="/account" class="btn btn-primary" @click="toggleMenu"
-              >Mijn account</router-link
-            >
+            <p class="text-gray-200">👋 Hallo, {{ auth.user }}</p>
+            <router-link to="/account" class="btn btn-primary" @click="toggleMenu">Mijn account</router-link>
             <button @click="logout" class="btn btn-secondary cursor-pointer">Uitloggen</button>
           </template>
         </div>
       </div>
     </Transition>
+
     <Transition
       enter-active-class="transition-opacity duration-300 ease-in-out"
       enter-from-class="opacity-0"
@@ -156,7 +149,11 @@ onBeforeUnmount(() => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="menuIsOpen" @click="toggleMenu" class="bg-black/50 w-screen h-screen fixed top-0 left-0 hidden max-lg:block"></div>
+      <div
+        v-if="menuIsOpen"
+        @click="toggleMenu"
+        class="bg-black/50 w-screen h-screen fixed top-0 left-0 hidden max-lg:block"
+      ></div>
     </Transition>
 
   </nav>

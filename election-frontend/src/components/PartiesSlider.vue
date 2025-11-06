@@ -128,7 +128,7 @@ onMounted(async () => {
         }}</span>
       <div class="swiper">
         <div class="swiper-wrapper overflow-y-auto">
-          <router-link to="/" v-for="(party, index) in data" :key="party"
+          <router-link :to="{path: '/partij/' + party}" v-for="(party, index) in data" :key="party"
                        class="swiper-slide p-4 px-10 h-fit w-full flex items-center justify-between bg-background text-white rounded-xl z-20">
             <div class="flex items-center gap-4 overflow-hidden w-full">
               <div class="w-[60px] h-[60px] shrink-0">

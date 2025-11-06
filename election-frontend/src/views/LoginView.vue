@@ -5,67 +5,109 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
+const agree = ref(false)
 const email = ref('')
 const password = ref('')
 
 const error = reactive({
-    email: '',
-    password: '',
+  email: '',
+  password: '',
 })
 
 function isValidEmail(): void {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!regex.test(email.value)) {
-        error.email = 'Voer een geldig email adres in.'
-    } else if (!email.value) {
-        error.email = 'Email is verplicht.'
-    } else {
-        error.email = ''
-    }
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!regex.test(email.value)) {
+    error.email = 'Voer een geldig email adres in.'
+  } else if (!email.value) {
+    error.email = 'Email is verplicht.'
+  } else {
+    error.email = ''
+  }
 }
 
 async function loginHandler(): Promise<void> {
-    isValidEmail()
-    error.password = !password.value ? 'Wachtwoord is verplicht.' : ''
+  isValidEmail()
+  error.password = !password.value ? 'Wachtwoord is verplicht.' : ''
 
-    if ((error.email || error.password) !== '') return
+  if ((error.email || error.password) !== '') return
 
-    try {
-        const data: LoginResponse = await login(email.value, password.value)
-        localStorage.setItem('JWT', data.token)
-        router.replace('/')
-    } catch (err: unknown) {
-        console.log(err)
-        error.email = 'Inloggen mislukt. Controleer je gegevens.'
-    }
+  try {
+    const data: LoginResponse = await login(email.value, password.value)
+    localStorage.setItem('JWT', data.token)
+    router.replace('/')
+  } catch (err: unknown) {
+    console.log(err)
+    error.email = 'Inloggen mislukt. Controleer je gegevens.'
+  }
 }
 </script>
 
 <template>
-    <form @submit.prevent="loginHandler()" class="flex flex-col justify-around items-center p-24">
-        <h1 class="text-white text-3xl pb-8">Inloggen</h1>
-        <div class="flex flex-col gap-8 w-[500px]">
-            <div class="flex flex-col">
-                <label for="Email" class="sr-only">Email</label>
-                <input v-model="email" @input="error.email = ''" type="text" name="email" id="" placeholder="Email"
-                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]" />
-                <span v-if="error.email" class="text-red-500 text-sm mt-3"> {{ error.email }}</span>
-            </div>
-            <div class="flex flex-col">
-                <label for="Password" class="sr-only">Password</label>
-                <input v-model="password" @input="error.password = ''" type="password" name="password" id=""
-                    placeholder="Wachtwoord"
-                    class="outline-[#191919] outline-[8px] rounded-t-[10px] border-[1px] border-[#262626] text-[20px] text-white bg-[#141414] py-2 px-4 placeholder-[#676767]" />
-                <span v-if="error.password" class="text-red-500 text-sm mt-3">
-                    {{ error.password }}</span>
-            </div>
-            <button type="submit"
-                class="bg-[#EF3054] text-white p-3 text-[16px] rounded-[8px] cursor-pointer w-[90%] self-center">
-                Log in
-            </button>
+  <div class="h-[calc(100vh-100px)] bg-[#1C2541] flex flex-col items-center justify-center px-4">
+    <div
+      class="bg-[#0B132B] p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-6 text-white"
+    >
+      <h1 class="text-3xl font-bold text-center">Inloggen</h1>
+
+      <form @submit.prevent="loginHandler" class="flex flex-col gap-5">
+        <!-- Email -->
+        <div class="flex flex-col gap-2">
+          <label for="email" class="text-sm font-medium text-gray-300">E-mail</label>
+          <input
+            v-model="email"
+            @input="error.email = ''"
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
+            class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
+            placeholder="E-mail"
+          />
+          <span v-if="error.email" class="text-[#EF3054] text-sm mt-1">{{ error.email }}</span>
         </div>
-    </form>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-2">
+          <label for="password" class="text-sm font-medium text-gray-300">Wachtwoord</label>
+          <input
+            v-model="password"
+            @input="error.password = ''"
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="current-password"
+            class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
+            placeholder="Wachtwoord"
+          />
+          <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
+            {{ error.password }}</span
+          >
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <input id="agree" type="checkbox" v-model="agree" class="w-4 h-4 accent-[#EF3054]" />
+          <label for="agree">
+            Ik ga akkoord met de
+            <span class="text-[#EF3054] cursor-pointer">voorwaarden</span>
+            en
+            <span class="text-[#EF3054] cursor-pointer">privacyverklaring</span>.
+          </label>
+        </div>
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300"
+        >
+          Log in
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <p class="text-sm text-gray-300 text-center">
+        Nog geen account?
+        <router-link to="/register" class="text-[#EF3054] hover:underline">Registreren</router-link>
+      </p>
+    </div>
+  </div>
 </template>
 
 <style scoped></style>
