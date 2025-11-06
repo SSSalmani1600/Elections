@@ -152,8 +152,8 @@ onMounted(async () => {
           </div>
 
         </div>
-        <div class="swiper-button-prev navigation-btn"><i class="pi pi-angle-left"></i></div>
-        <div class="swiper-button-next navigation-btn"><i class="pi pi-angle-right"></i></div>
+        <button class="swiper-button-prev navigation-btn"><i class="pi pi-angle-left"></i></button>
+        <button class="swiper-button-next navigation-btn"><i class="pi pi-angle-right"></i></button>
 
         <div class="swiper-pagination"></div>
       </div>
@@ -191,6 +191,11 @@ onMounted(async () => {
   width: 28px;
   height: 28px;
   margin-top: 0;
+  transition-duration: 200ms;
+}
+
+.navigation-btn:active {
+  color: #EF3054;
 }
 
 .navigation-btn i {
