@@ -42,6 +42,7 @@ onMounted(async () => {
       pauseOnMouseEnter: true,
       delay: 4000,
     },
+    loop: true,
     spaceBetween: 20,
     slidesPerGroup: 1,
     pagination: {
