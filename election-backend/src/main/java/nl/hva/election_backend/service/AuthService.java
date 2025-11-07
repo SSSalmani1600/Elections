@@ -6,11 +6,19 @@ import nl.hva.election_backend.security.BCryptPasswordHasher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+
 @Transactional
 @Service
 public class AuthService {
     private final UserRepository userRepo;
     private final BCryptPasswordHasher hasher = new BCryptPasswordHasher();
+    private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
+            "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
 
     public AuthService(UserRepository userRepo) {
         this.userRepo = userRepo;
@@ -23,6 +31,25 @@ public class AuthService {
                 .orElse(null);
     }
 
+    public String generateRefreshToken() throws Exception {
+        SecureRandom rnd = new SecureRandom();
+
+        byte[] bytes = new byte[32];
+        rnd.nextBytes(bytes);
+        String b64 = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] digest = md.digest(b64.getBytes(StandardCharsets.UTF_8));
+        return bytesToHex(digest);
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 
     public User register(String email, String rawPassword, String username) {
         if (email == null || email.isBlank()
