@@ -1,6 +1,6 @@
 package nl.hva.election_backend.utils.xml;
 
-import nl.hva.election_backend.utils.PathUtils;
+import nl.hva.election_backend.utils.xml.AbstractParserTests;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
@@ -15,30 +15,25 @@ class MunicipalityVotesParserTests extends AbstractParserTests {
 
     @Test
     void testTotal2023() throws IOException, XMLStreamException, ParserConfigurationException, SAXException {
-        List<Map<String, String>> expectedDataList = new LinkedList<>();
+        List<Map<String, String>> expectedDataList  = new LinkedList<>();
         createExpectedDataList(expectedDataList, "Telling_TK2023_gemeente_Velsen-Partial-Copy.eml.xml");
         createExpectedDataList(expectedDataList, "Telling_TK2023_gemeente_Velsen-Partial.eml.xml");
 
-        // correcte parseResults aanroep
-        electionProcessor.parseResults(
-                PathUtils.getResourcePath("TK2023-Partial/Municipality")
-        );
+        electionProcessor.parseResults("TK2023", nl.hva.ict.sm3.backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/Municipality")));
 
         compareMaps(expectedDataList, transformer.data);
-
         Set<Integer> usedResults = new HashSet<>();
         for (Map<String, String> data : transformer.data) {
             usedResults.add(expectedDataList.indexOf(data));
         }
         usedResults.remove(-1);
-
         assertEquals(expectedDataList.size(), usedResults.size());
-        assertEquals(0, transformer.regionCalls);
-        assertEquals(0, transformer.partyCalls);
-        assertEquals(0, transformer.candidateCalls);
-        assertEquals(12, transformer.partyVoteCalls);
-        assertEquals(22, transformer.candidateVoteCalls);
-        assertEquals(6, transformer.metadataCalls);
+        assertEquals(0, transformer.regionCalls, "VotesTransformer.registerRegion should NOT have been called!");
+        assertEquals(0, transformer.partyCalls, "VotesTransformer.registerParty should NOT have been called!");
+        assertEquals(0, transformer.candidateCalls, "The calls to VotesTransformer.registerCandidate don't match!");
+        assertEquals(12, transformer.partyVoteCalls, "The calls to VotesTransformer.registerPartyVote don't match!");
+        assertEquals(22, transformer.candidateVoteCalls, "The calls to VotesTransformer.registerCandidateVote don't match!");
+        assertEquals(6, transformer.metadataCalls, "The calls to VotesTransformer.registerMeta don't match!");
     }
 
     private void createExpectedDataList(List<Map<String, String>> expectedDataList, String fileName) throws IOException {
@@ -60,36 +55,37 @@ class MunicipalityVotesParserTests extends AbstractParserTests {
         baseData.put("ContestName", "Haarlem");
         baseData.put("aggregated", "true");
 
+        // 0
         Map<String, String> partyData = new HashMap<>(baseData);
         partyData.put("AffiliationIdentifier-Id", "1");
         partyData.put("RegisteredName", "VVD");
         partyData.put("ValidVotes", "7097");
         expectedDataList.add(Map.copyOf(partyData));
-
+        // 1
         Map<String, String> candidateData = new HashMap<>(baseData);
         candidateData.put("CandidateIdentifier-Id", "1");
         candidateData.put("ValidVotes", "6261");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 2
         candidateData.put("CandidateIdentifier-Id", "2");
         candidateData.put("ValidVotes", "267");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 3
         partyData = new HashMap<>(baseData);
         partyData.put("AffiliationIdentifier-Id", "2");
         partyData.put("RegisteredName", "D66");
         partyData.put("ValidVotes", "2672");
         expectedDataList.add(Map.copyOf(partyData));
-
+        // 4
         candidateData = new HashMap<>(baseData);
         candidateData.put("CandidateIdentifier-Id", "1");
         candidateData.put("ValidVotes", "1811");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 5
         candidateData.put("CandidateIdentifier-Id", "2");
         candidateData.put("ValidVotes", "81");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 6
         Map<String, String> metadata = new HashMap<>(baseData);
         metadata.put("Cast", "52889");
         metadata.put("TotalCounted", "41214");
@@ -109,42 +105,43 @@ class MunicipalityVotesParserTests extends AbstractParserTests {
         expectedDataList.add(Map.copyOf(metadata));
 
         baseData.put("aggregated", "false");
+
         Map<String, String> pollingStationData = new HashMap<>(baseData);
         pollingStationData.put("ReportingUnitIdentifier-Id", "0453::SB1");
         pollingStationData.put("ReportingUnitIdentifier", "Stembureau Gemeentehuis (postcode: 1971 EN)");
-
+        // 7
         partyData = new HashMap<>(pollingStationData);
         partyData.put("AffiliationIdentifier-Id", "1");
         partyData.put("RegisteredName", "VVD");
         partyData.put("ValidVotes", "263");
         expectedDataList.add(Map.copyOf(partyData));
-
+        // 8
         candidateData = new HashMap<>(pollingStationData);
         candidateData.put("CandidateIdentifier-Id", "1");
         candidateData.put("ValidVotes", "231");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 9
         candidateData = new HashMap<>(pollingStationData);
         candidateData.put("CandidateIdentifier-Id", "2");
         candidateData.put("ValidVotes", "7");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 10
         partyData = new HashMap<>(pollingStationData);
         partyData.put("AffiliationIdentifier-Id", "2");
         partyData.put("RegisteredName", "D66");
         partyData.put("ValidVotes", "104");
         expectedDataList.add(Map.copyOf(partyData));
-
+        // 11
         candidateData = new HashMap<>(pollingStationData);
         candidateData.put("CandidateIdentifier-Id", "1");
         candidateData.put("ValidVotes", "68");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 12
         candidateData = new HashMap<>(pollingStationData);
         candidateData.put("CandidateIdentifier-Id", "2");
         candidateData.put("ValidVotes", "0");
         expectedDataList.add(Map.copyOf(candidateData));
-
+        // 13
         metadata = new HashMap<>(pollingStationData);
         metadata.put("Cast", "1758");
         metadata.put("TotalCounted", "2315");
@@ -154,6 +151,63 @@ class MunicipalityVotesParserTests extends AbstractParserTests {
         metadata.put("UncountedVotes-geldige volmachtbewijzen", "250");
         metadata.put("UncountedVotes-geldige kiezerspassen", "11");
         metadata.put("UncountedVotes-toegelaten kiezers", "2338");
+        metadata.put("UncountedVotes-meer getelde stembiljetten", "0");
+        metadata.put("UncountedVotes-minder getelde stembiljetten", "0");
+        metadata.put("UncountedVotes-meegenomen stembiljetten", "0");
+        metadata.put("UncountedVotes-te weinig uitgereikte stembiljetten", "0");
+        metadata.put("UncountedVotes-te veel uitgereikte stembiljetten", "0");
+        metadata.put("UncountedVotes-geen verklaring", "0");
+        metadata.put("UncountedVotes-andere verklaring", "0");
+        expectedDataList.add(Map.copyOf(metadata));
+
+        pollingStationData = new HashMap<>(baseData);
+        pollingStationData.put("ReportingUnitIdentifier-Id", "0453::SB2");
+        pollingStationData.put("ReportingUnitIdentifier", "Stembureau Woon en zorgcentrum Huis ter Hagen (postcode: 1985 CV)");
+        // 14
+        partyData = new HashMap<>(pollingStationData);
+        partyData.put("AffiliationIdentifier-Id", "1");
+        partyData.put("RegisteredName", "VVD");
+        partyData.put("ValidVotes", "328");
+        expectedDataList.add(Map.copyOf(partyData));
+        // 15
+        candidateData = new HashMap<>(pollingStationData);
+        candidateData.put("CandidateIdentifier-Id", "1");
+        candidateData.put("ValidVotes", "282");
+        expectedDataList.add(Map.copyOf(candidateData));
+        // 16
+        candidateData = new HashMap<>(pollingStationData);
+        candidateData.put("CandidateIdentifier-Id", "2");
+        candidateData.put("ValidVotes", "15");
+        expectedDataList.add(Map.copyOf(candidateData));
+        // 17
+        partyData = new HashMap<>(pollingStationData);
+        partyData.put("AffiliationIdentifier-Id", "2");
+        partyData.put("RegisteredName", "D66");
+        partyData.put("ValidVotes", "165");
+        expectedDataList.add(Map.copyOf(partyData));
+        // 18
+        candidateData = new HashMap<>(pollingStationData);
+        candidateData.put("CandidateIdentifier-Id", "1");
+        candidateData.put("ValidVotes", "114");
+        expectedDataList.add(Map.copyOf(candidateData));
+        // 19
+        metadata = new HashMap<>(pollingStationData);
+        metadata.put("Cast", "1359");
+        metadata.put("TotalCounted", "1263");
+        metadata.put("RejectedVotes-ongeldig", "4");
+        metadata.put("RejectedVotes-blanco", "1");
+        metadata.put("UncountedVotes-geldige stempassen", "1138");
+        metadata.put("UncountedVotes-geldige volmachtbewijzen", "128");
+        metadata.put("UncountedVotes-geldige kiezerspassen", "2");
+        metadata.put("UncountedVotes-toegelaten kiezers", "1268");
+        metadata.put("UncountedVotes-meer getelde stembiljetten", "0");
+        metadata.put("UncountedVotes-minder getelde stembiljetten", "0");
+        metadata.put("UncountedVotes-meegenomen stembiljetten", "0");
+        metadata.put("UncountedVotes-te weinig uitgereikte stembiljetten", "0");
+        metadata.put("UncountedVotes-te veel uitgereikte stembiljetten", "0");
+        metadata.put("UncountedVotes-geen verklaring", "0");
+        metadata.put("UncountedVotes-andere verklaring", "0");
         expectedDataList.add(Map.copyOf(metadata));
     }
+
 }
