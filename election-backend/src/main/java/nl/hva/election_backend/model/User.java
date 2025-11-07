@@ -1,19 +1,30 @@
 package nl.hva.election_backend.model;
 
-public class User {
-    private Long id;
-    private String email;
-    private String passwordHash;
-    private String displayName;
+import jakarta.persistence.*;
 
-    public User(String email, String passwordHash, String displayName) {
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    public User() {}
+
+    public User(String email, String passwordHash, String username) {
         this.email = email;
         this.passwordHash = passwordHash;
-        this.displayName = displayName;
-    }
-
-    public User() {
-
+        this.username = username;
     }
 
     public Long getId() {
@@ -22,6 +33,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -39,13 +58,4 @@ public class User {
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 }
-

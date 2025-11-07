@@ -1,5 +1,24 @@
 # Retrospectives
 
+## Sprint 3
+
+_Datum: 6-11-2025_
+
+<img src="./images/retrospectives/retrospective-3.png" alt="alt Retrospective screenshot" width="300"/>
+
+### Concrete verbeterpunten
+
+- Als er een merge request is aangemaakt, wordt er duidelijk gereageerd hierop met wie de merge request gaat goed keuren.
+- Branch namen gestrucutreerd hetzelfde houden "feat/naam"
+    
+### Teamleden aanwezig
+
+- Niek
+- Daan
+- Nabil
+- Afnaan
+- Manal
+
 ## Sprint 2
 
 _Datum: 9-10-2025_

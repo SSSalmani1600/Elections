@@ -11,15 +11,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
-public class    JwtFilter extends OncePerRequestFilter {
-    private final JwtService jwtService = new JwtService();
+public class JwtFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+
+    public JwtFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     String[] whiteListURLs = {
-            "/nl/hva/election_backend/api/auth/",
-            "/nl/hva/election_backend/api/parties",
-            "/nl/hva/election_backend/api/elections/",
+            "/api/auth/",
+            "/api/parties",
+            "/api/elections/",
+            "/api/users",
+            "/api/next-elections",
     };
 
     @Override
@@ -34,21 +42,23 @@ public class    JwtFilter extends OncePerRequestFilter {
 
         // White listed endpoints altijd doorlaten
         String uri = request.getRequestURI();
-        for (String url : whiteListURLs) {
-            if (uri.startsWith(url)) {
+        System.out.println("[JwtFilter] Incoming request URI: " + uri);
+
+        String[] whiteListPatterns = {
+                ".*/api/auth(/.*)?",
+                ".*/api/parties(/.*)?",
+                ".*/api/elections(/.*)?",
+                ".*/api/next-elections(/.*)?"
+        };
+
+        for (String pattern : whiteListPatterns) {
+            if (uri.matches(pattern)) {
                 filterChain.doFilter(request, response);
                 return;
             }
         }
-
-        // ✅ Debug endpoints ook doorlaten (voor test van XML parser)
-        if (uri.startsWith("/debug")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         // ✅ Alleen GET en POST naar /api/discussions publiek maken voor demo/sprint review
-        if (uri.startsWith("/nl/hva/election_backend/api/discussions")
+        if (uri.startsWith("/api/discussions")
                 && ("GET".equalsIgnoreCase(request.getMethod()) || "POST".equalsIgnoreCase(request.getMethod()))) {
             filterChain.doFilter(request, response);
             return;
@@ -85,3 +95,4 @@ public class    JwtFilter extends OncePerRequestFilter {
         response.flushBuffer();
     }
 }
+

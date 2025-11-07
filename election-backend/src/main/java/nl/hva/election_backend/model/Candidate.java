@@ -29,6 +29,20 @@ public class Candidate {
         this.candidateId = candidateId;
     }
 
+    public Candidate(Candidate copy) {
+        this(
+                copy.getFirstName(),
+                copy.getLastName(),
+                copy.getInitials(),
+                copy.getGender(),
+                copy.getLocalityName(),
+                copy.getElectionName(),
+                copy.getPartiesId(),
+                copy.getCandidateId()
+        );
+    }
+
+
     public boolean isElected() {
         return isElected;
     }

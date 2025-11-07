@@ -38,17 +38,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        String displayName = user.getDisplayName();
+        String username = user.getUsername();
         String token = jwtService.generateToken(user.getId().toString());
 
-        return ResponseEntity.ok(new LoginResponse(token, displayName));
+        return ResponseEntity.ok(new LoginResponse(token, username));
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
             User user = authService.register(req.getEmail(), req.getPassword(), req.getDisplayName());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getDisplayName()));
+                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUsername()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (IllegalStateException e) {
