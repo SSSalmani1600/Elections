@@ -8,8 +8,10 @@ import {Input} from "@/components/ui/input";
 import IconSpinner from "@/components/icons/IconSpinner.vue";
 import type {User} from "@/types/api.ts";
 import {getAllUsers} from "@/services/UserService.ts";
+import {getWikipediaPartyData} from "@/services/WikipediaService.ts";
 
 const data = ref<string[]>([]);
+const partyWithInfo = ref<{name: string, img: string, summary: string}[]>([])
 const users = ref<User[]>([]);
 const loading = ref(false);
 const hasError = ref<boolean>(false);
@@ -21,6 +23,18 @@ onMounted(async () => {
   updatePageSize();
   try {
     data.value = await getParties() as unknown as string[];
+
+    const promises = data.value.map(async (partyName) => {
+      const wikiInfo = await getWikipediaPartyData(partyName);
+      return {
+        name: partyName,
+        img: wikiInfo?.img || "",
+        summary: wikiInfo?.summary || ""
+      }
+    })
+
+    partyWithInfo.value = await Promise.all(promises);
+
     users.value = await getAllUsers();
     console.log(users.value);
   } catch (err: any) {
@@ -78,7 +92,7 @@ const pages = computed(() => {
 const filteredList = computed(() => {
   currentPage.value = 1;
   return inputText.value.trim() === ""
-    ? data.value
+    ? partyWithInfo.value
     : results.value.map(r => r.item)
 })
 
@@ -144,17 +158,15 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
                 class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit">Er konden geen partijen gevonden worden!</span>
           <div v-show="!hasError && visibleParties.length > 0"
                class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2">
-            <router-link :to="{path: '/partij/' + party}" v-for="party in visibleParties" :key="party"
+            <router-link :to="{path: '/partij/' + party.name}" v-for="party in visibleParties" :key="party"
                  class="bg-primary w-full h-fit rounded-lg">
               <a href="/"
                  class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300">
-                <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto">
+                <img :src="party.img" width="120px" alt="" class="mb-auto">
                 <div class="overflow-hidden">
                   <div class="flex flex-col max-w-[250px]">
-                    <span class="text-lg font-bold truncate">{{ party }}</span>
-                    <p class="text-text-muted  line-clamp-3"> simply dummy text of the printing and
-                      typesetting industry. Lorem Ipsum has been the industry's standard dummy text
-                      ever since the 1500s, </p>
+                    <span class="text-lg font-bold truncate">{{ party.name }}</span>
+                    <p class="text-text-muted  line-clamp-3">{{ party.summary }}</p>
                   </div>
                 </div>
               </a>
