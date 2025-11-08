@@ -19,7 +19,7 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     @Override
     public void registerPartyVotes(boolean aggregated, Map<String, String> data) {
         // laat zien dat functie is gestart + wat er binnenkomt
-        System.out.println("🟩 [DEBUG] registerPartyVotes() aangeroepen");
+        System.out.println(" [DEBUG] registerPartyVotes() aangeroepen");
         System.out.println("  aggregated = " + aggregated);
         System.out.println("  data keys  = " + data.keySet());
 
@@ -60,7 +60,7 @@ public class DutchMunicipalityVotesTransformer implements VotesTransformer {
     @Override
     public void registerCandidateVotes(boolean aggregated, Map<String, String> data) {
         // laat zien dat functie is gestart + wat er binnenkomt
-        System.out.println("🟦 [DEBUG] registerCandidateVotes() aangeroepen");
+        System.out.println(" [DEBUG] registerCandidateVotes() aangeroepen");
         System.out.println("  aggregated = " + aggregated);
         System.out.println("  data keys  = " + data.keySet());
 
