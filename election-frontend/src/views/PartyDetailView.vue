@@ -135,7 +135,7 @@ const scrollRight = () => {
                 :key="cand.candidateId"
                 class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
               >
-                {{ cand.firstName }} {{ cand.lastName }}
+                {{ cand.firstName }} {{ cand.namePrefix }} {{ cand.lastName }}
               </span>
             </div>
 
