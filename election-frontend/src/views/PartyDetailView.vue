@@ -47,8 +47,7 @@ onMounted(async () => {
       try {
         const summary = await getWikipediaSummary(foundParty.name)
         console.log('Wikipedia parsed summary:', summary)
-        wikiSummary.value =
-          summary.summary || 'Geen Wikipedia-samenvatting beschikbaar voor deze partij.'
+        wikiSummary.value = (summary.summary || '').replace(/\n/g, '<br><br>')
         wikiUrl.value = summary.url || ''
         wikiImage.value = summary.image || ''
       } catch (wikiErr) {
@@ -162,9 +161,7 @@ const scrollRight = () => {
         >
           <div class="pl-4 lg:pl-0">
             <h3 class="text-4xl font-semibold mb-4">Over {{ partyName }}</h3>
-            <p class="text-gray-300 leading-relaxed">
-              {{ wikiSummary }}
-            </p>
+            <p class="text-gray-300" v-html="wikiSummary"></p>
             <div v-if="wikiUrl" class="mt-4">
               <a :href="wikiUrl" target="_blank" class="text-[#EF3054] underline">
                 Lees verder op Wikipedia →
