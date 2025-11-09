@@ -12,11 +12,15 @@ import {getWikipediaPartyData} from "@/services/WikipediaService.ts";
 
 const data = ref<string[]>([]);
 const partyWithInfo = ref<{name: string, img: string, summary: string}[]>([])
-const users = ref<User[]>([]);
 const loading = ref(false);
 const hasError = ref<boolean>(false);
 const inputText = ref<string>("");
-const {results} = useFuse(inputText, data);
+const { results } = useFuse(inputText, partyWithInfo, {
+  fuseOptions: {
+    keys: ['name'],
+    threshold: 0.3,
+  },
+});
 
 onMounted(async () => {
   loading.value = true;
@@ -34,16 +38,12 @@ onMounted(async () => {
     })
 
     partyWithInfo.value = await Promise.all(promises);
-
-    users.value = await getAllUsers();
-    console.log(users.value);
   } catch (err: any) {
     console.error(err.message)
     hasError.value = true;
 
   } finally {
     loading.value = false;
-    console.log(loading.value)
   }
 })
 
