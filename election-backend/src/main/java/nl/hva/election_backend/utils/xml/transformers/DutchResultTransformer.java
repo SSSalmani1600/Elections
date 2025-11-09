@@ -62,21 +62,23 @@ public class DutchResultTransformer implements VotesTransformer, TagAndAttribute
         System.out.printf("National candidate result: %s%n", electionData);
 
 
-        String candidateName = electionData.get(NAME_LINE);
         String namePrefix = electionData.get(NAME_PREFIX);
         String firstName = electionData.get(FIRST_NAME);
         String lastName = electionData.get(LAST_NAME);
         String fullName = (namePrefix == null || namePrefix.isBlank())
                 ? firstName + " " + lastName
-                : firstName + " " + namePrefix + " " + lastName;        String isElected = electionData.get(ELECTED);
+                : firstName + " " + namePrefix + " " + lastName;
+        String isElected = electionData.get(ELECTED);
         String shortCode = electionData.get(CANDIDATE_IDENTIFIER + "-" + SHORT_CODE);
-        boolean isBoolean = false;
-        isBoolean = Objects.equals(isElected, "yes");
+        boolean isBoolean = Objects.equals(isElected, "yes");
 
         Candidate candidate = election.getCandidateByName(fullName);
-        candidate.setElected(isBoolean);
-        candidate.setShortCode(shortCode);
-
+        if (candidate != null) {
+            candidate.setElected(isBoolean);
+            candidate.setShortCode(shortCode);
+        } else {
+            System.err.printf("Candidate not found for fullName='%s'%n", fullName);
+        }
 
     }
 
