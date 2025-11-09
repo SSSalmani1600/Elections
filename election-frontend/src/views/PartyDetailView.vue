@@ -34,7 +34,9 @@ onMounted(async () => {
         partyLeader.value = partyleader
         candidates.value = candidates.value.filter((c) => c.candidateId !== '1')
 
-        const fullName = `${partyleader.firstName} ${partyleader.namePrefix} ${partyleader.lastName}`
+        const fullName = partyleader.namePrefix
+          ? `${partyleader.firstName} ${partyleader.namePrefix} ${partyleader.lastName}`
+          : `${partyleader.firstName} ${partyleader.lastName}`
         try {
           const info = await getWikipediaPerson(fullName)
           leaderImage.value = info.image
