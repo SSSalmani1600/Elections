@@ -63,10 +63,12 @@ public class DutchResultTransformer implements VotesTransformer, TagAndAttribute
 
 
         String candidateName = electionData.get(NAME_LINE);
+        String namePrefix = electionData.get(NAME_PREFIX);
         String firstName = electionData.get(FIRST_NAME);
         String lastName = electionData.get(LAST_NAME);
-        String fullName = firstName + " " + lastName;
-        String isElected = electionData.get(ELECTED);
+        String fullName = (namePrefix == null || namePrefix.isBlank())
+                ? firstName + " " + lastName
+                : firstName + " " + namePrefix + " " + lastName;        String isElected = electionData.get(ELECTED);
         String shortCode = electionData.get(CANDIDATE_IDENTIFIER + "-" + SHORT_CODE);
         boolean isBoolean = false;
         isBoolean = Objects.equals(isElected, "yes");
