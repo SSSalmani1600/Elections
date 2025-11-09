@@ -1,4 +1,4 @@
-package com.example.election.model;
+package nl.hva.election_backend.model;
 
 public class Reaction {
     private String author;

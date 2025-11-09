@@ -11,19 +11,11 @@ import java.util.Optional;
 public class AuthService {
 
     private final TestRepository userRepo;
-    private final BCryptPasswordHasher hasher = new BCryptPasswordHasher();
+    private final BCryptPasswordHasher hasher;
 
-    public AuthService(TestRepository userRepo) {
+    public AuthService(TestRepository userRepo, BCryptPasswordHasher hasher) {
         this.userRepo = userRepo;
-
-        if (!userRepo.existsByEmail("test@example.com")) {
-            User mockUser = new User();
-            mockUser.setEmail("test@example.com");
-            mockUser.setUsername("Testgebruiker");
-            mockUser.setPasswordHash(hasher.hash("password123"));
-            userRepo.save(mockUser);
-            System.out.println(" Mock user toegevoegd: test@example.com / password123");
-        }
+        this.hasher = hasher;
     }
 
 
