@@ -34,7 +34,7 @@ onMounted(async () => {
         partyLeader.value = partyleader
         candidates.value = candidates.value.filter((c) => c.candidateId !== '1')
 
-        const fullName = `${partyleader.firstName} ${partyleader.lastName}`
+        const fullName = `${partyleader.firstName} ${partyleader.namePrefix} ${partyleader.lastName}`
         try {
           const info = await getWikipediaPerson(fullName)
           leaderImage.value = info.image
@@ -183,7 +183,7 @@ const scrollRight = () => {
             <div>
               <p class="text-sm text-gray-400 uppercase tracking-wide mb-1">Partijleider</p>
               <h4 class="text-lg font-semibold">
-                {{ partyLeader.firstName }} {{ partyLeader.lastName }}
+                {{ partyLeader.firstName }} {{ partyLeader.namePrefix }} {{ partyLeader.lastName }}
               </h4>
               <p class="text-gray-400">
                 {{ partyLeader.localityName }}
