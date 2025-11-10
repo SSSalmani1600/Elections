@@ -116,11 +116,11 @@ const scrollRight = () => {
             <span class="font-bold text-white"> {{ partyName }}</span>
           </p>
 
-          <div class="relative mt-8 max-w-[650px] w-full">
+          <div class="relative mt-8 flex items-center w-full">
             <button
               v-if="candidates.length > 5"
               @click="scrollLeft"
-              class="absolute left-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+              class="bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md mx-2"
             >
               ◀
             </button>
@@ -128,21 +128,25 @@ const scrollRight = () => {
             <div
               ref="scrollContainer"
               v-if="candidates.length"
-              class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-10 rounded-xl"
+              class="flex gap-3 overflow-x-auto scrollbar-hide py-3 px-2 rounded-xl max-w-[580px] w-full justify-start"
             >
-              <span
+              <a
                 v-for="cand in candidates"
                 :key="cand.candidateId"
-                class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap cursor-pointer hover:bg-[#253054] transition text-sm md:text-base"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="bg-[#0B132B] px-4 py-2 rounded-full whitespace-nowrap hover:bg-[#253054] transition text-sm md:text-base"
               >
-                {{ cand.firstName }} {{ cand.namePrefix }} {{ cand.lastName }}
-              </span>
+                {{ cand.firstName }}
+                <span v-if="cand.namePrefix"> {{ cand.namePrefix }}</span>
+                {{ cand.lastName }}
+              </a>
             </div>
 
             <button
               v-if="candidates.length > 5"
               @click="scrollRight"
-              class="absolute right-0 top-1/2 -translate-y-1/2 bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md z-10"
+              class="bg-[#0B132B] hover:bg-[#253054] text-white p-2 rounded-full shadow-md mx-2"
             >
               ▶
             </button>
