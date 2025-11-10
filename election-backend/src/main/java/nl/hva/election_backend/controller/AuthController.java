@@ -1,9 +1,6 @@
 package nl.hva.election_backend.controller;
 
-import nl.hva.election_backend.dto.LoginRequest;
-import nl.hva.election_backend.dto.LoginResponse;
-import nl.hva.election_backend.dto.RegisterRequest;
-import nl.hva.election_backend.dto.RegisterResponse;
+import nl.hva.election_backend.dto.*;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -34,16 +31,14 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
         }
 
-        User user = authService.authenticate(req.getEmail(), req.getPassword());
+        AuthenticationResponse authResponse = authService.authenticate(req.getEmail(), req.getPassword());
+        User user = authResponse.getUser();
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        String username = user.getUsername();
-        String token = jwtService.generateToken(user.getId().toString());
-
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+        ResponseCookie cookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -53,7 +48,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new LoginResponse(username));
+                .body(new LoginResponse(user.getUsername()));
     }
 
     @PostMapping("/register")

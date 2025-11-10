@@ -13,6 +13,9 @@ public class AuthenticationResponse {
         this.user = user;
     }
 
+    public AuthenticationResponse() {
+    }
+
     public String getAccessToken() {
         return accessToken;
     }
