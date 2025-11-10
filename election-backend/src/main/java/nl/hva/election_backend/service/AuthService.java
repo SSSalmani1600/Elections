@@ -2,6 +2,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.AuthenticationResponse;
 import nl.hva.election_backend.model.User;
+import nl.hva.election_backend.repo.RefreshTokenRepository;
 import nl.hva.election_backend.repo.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import org.slf4j.Logger;
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 
 @Transactional
 @Service
@@ -21,13 +24,15 @@ public class AuthService {
     private final UserRepository userRepo;
     private final BCryptPasswordHasher hasher;
     private final JwtService jwtService;
+    private final RefreshTokenRepository refreshRepo;
     private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
             "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
 
-    public AuthService(UserRepository userRepo, BCryptPasswordHasher hasher, JwtService jwtService) {
+    public AuthService(UserRepository userRepo, BCryptPasswordHasher hasher, JwtService jwtService, RefreshTokenRepository refreshRepo) {
         this.userRepo = userRepo;
         this.hasher = hasher;
         this.jwtService = jwtService;
+        this.refreshRepo = refreshRepo;
     }
 
     @Transactional(readOnly = true)
@@ -46,6 +51,8 @@ public class AuthService {
         } catch (Exception e) {
             log.error("e: ", e);
         }
+
+        refreshRepo.save(user.getId(), refreshToken, Instant.now().plusSeconds(15 * 60 * 1000));
 
         return new AuthenticationResponse(accessToken, refreshToken, user);
     }
