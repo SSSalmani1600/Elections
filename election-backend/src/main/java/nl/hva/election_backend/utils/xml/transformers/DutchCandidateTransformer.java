@@ -27,6 +27,7 @@ public class DutchCandidateTransformer implements CandidateTransformer, TagAndAt
     @Override
     public void registerCandidate(Map<String, String> electionData) {
         String firstName = electionData.get(FIRST_NAME);
+        String namePrefix = electionData.get(NAME_PREFIX);
         String lastName = electionData.get(LAST_NAME);
         String initials = electionData.get(NAME_LINE);
         String gender = electionData.get(GENDER);
@@ -34,7 +35,7 @@ public class DutchCandidateTransformer implements CandidateTransformer, TagAndAt
         String electionName = electionData.get(ELECTION_NAME);
         String affiliationName = (electionData.get(REGISTERED_NAME));
         String candidateId = electionData.get(CANDIDATE_IDENTIFIER_ID);
-        Candidate candidate = new Candidate(firstName, lastName, initials, gender, localityName, electionName, affiliationName, candidateId);
+        Candidate candidate = new Candidate(firstName, namePrefix, lastName, initials, gender, localityName, electionName, affiliationName, candidateId);
         election.getParties().stream()
                 .filter(a -> a.getName().equals(affiliationName))
                 .findFirst()
