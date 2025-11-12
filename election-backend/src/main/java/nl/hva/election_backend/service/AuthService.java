@@ -1,6 +1,7 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.AuthenticationResponse;
+import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repo.RefreshTokenRepository;
 import nl.hva.election_backend.repo.UserRepository;
@@ -35,7 +36,7 @@ public class AuthService {
         this.refreshRepo = refreshRepo;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthenticationResponse authenticate(String email, String password) {
         User user = userRepo.findByEmail(normalizeEmail(email))
                 .filter(u -> hasher.matches(password, u.getPasswordHash()))
@@ -44,17 +45,19 @@ public class AuthService {
         if (user == null) return new AuthenticationResponse();
 
         String accessToken = "";
-        String refreshToken = "";
+        String refreshTokenHash = "";
         try {
-            refreshToken = generateRefreshToken();
+            refreshTokenHash = generateRefreshToken();
             accessToken = jwtService.generateToken(user.getId().toString());
         } catch (Exception e) {
             log.error("e: ", e);
         }
 
-        refreshRepo.save(user.getId(), refreshToken, Instant.now().plusSeconds(15 * 60 * 1000));
+        RefreshToken refreshToken = new RefreshToken(user.getId(), refreshTokenHash, Instant.now().plusSeconds(15 * 60 * 1000));
 
-        return new AuthenticationResponse(accessToken, refreshToken, user);
+        refreshRepo.saveAndFlush(refreshToken);
+
+        return new AuthenticationResponse(accessToken, refreshTokenHash, user);
     }
 
     public String generateRefreshToken() throws Exception {

@@ -1,6 +1,8 @@
 package nl.hva.election_backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,42 +19,118 @@ import java.util.UUID;
         }
 )
 public class RefreshToken {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    // Match your users.id type: BIGINT in your DB error
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // Optional: link to a device table if you have one
     @Column(name = "device_id")
     private Long deviceId;
 
-    @Column(name = "family_id", nullable = false, columnDefinition = "uuid")
+    @Generated
+    @Column(name = "family_id", nullable = false)
     private UUID familyId;
 
     // Store a SHA-256 (hex/base64) of the refresh token, not the raw token
     @Column(name = "token_hash", nullable = false, length = 64)
     private String tokenHash;
 
+    @Generated
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
-    @Column(name = "replaced_by", columnDefinition = "uuid")
+    @Column(name = "replaced_by", columnDefinition = "default")
     private UUID replacedBy;
 
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
-    // Keep JSON as TEXT for portability; you can switch to JSONB with Hibernate 6 if you want
-    @Lob
-    @Column(name = "meta")
-    private String meta;
-
     /* getters/setters/constructors… */
+    public RefreshToken(Long userId, String tokenHash, Instant expiresAt) {
+        this.userId = userId;
+        this.tokenHash = tokenHash;
+        this.expiresAt = expiresAt;
+    }
+
+    public RefreshToken() {
+
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public UUID getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(UUID familyId) {
+        this.familyId = familyId;
+    }
+
+    public String getTokenHash() {
+        return tokenHash;
+    }
+
+    public void setTokenHash(String tokenHash) {
+        this.tokenHash = tokenHash;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public UUID getReplacedBy() {
+        return replacedBy;
+    }
+
+    public void setReplacedBy(UUID replacedBy) {
+        this.replacedBy = replacedBy;
+    }
+
+    public Instant getRevokedAt() {
+        return revokedAt;
+    }
+
+    public void setRevokedAt(Instant revokedAt) {
+        this.revokedAt = revokedAt;
+    }
 }
