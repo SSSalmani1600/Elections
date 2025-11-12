@@ -4,9 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import nl.hva.election_backend.dto.TokenValidationResponse;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,9 +53,23 @@ public class JwtService {
         return claims.getSubject();
     }
 
-    public boolean validateToken(String token) {
+    public TokenValidationResponse validateToken(String token) {
         Claims claims = extractAllClaims(token);
-        if (!claims.getIssuer().equals("ga-stemmen.nl")) return false;
-        return !isTokenExpired(token);
+        if (!claims.getIssuer().equals("ga-stemmen.nl")) {
+            return new TokenValidationResponse(false, false);
+        }
+        if (isTokenExpired(token)) {
+            return new TokenValidationResponse(false, true);
+        };
+
+        Date expirationDate = claims.getExpiration();
+        long remainingTime = expirationDate.getTime() - (new Date().getTime());
+        long totalTime =  expirationDate.getTime() - claims.getIssuedAt().getTime();
+
+        if (remainingTime / totalTime <= 25) {
+            return new TokenValidationResponse(true, true);
+        }
+
+        return new TokenValidationResponse(true, false);
     }
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.service.JwtService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
@@ -23,7 +25,6 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/auth/",
             "/api/parties",
             "/api/elections/",
-            "/api/users",
             "/api/discussions"
     };
 
@@ -64,10 +65,14 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
-            boolean validToken = jwtService.validateToken(jwtToken);
+            TokenValidationResponse tokenResponse = jwtService.validateToken(jwtToken);
 
-            if (!validToken) {
+            if (!tokenResponse.isValid()) {
                 unauthorized(response, "invalid_token", "Invalid or expired JWT token");
+                return;
+            }
+
+            if (tokenResponse.shouldRefresh()) {
                 return;
             }
 
