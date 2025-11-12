@@ -38,7 +38,15 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(86400)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -47,7 +55,7 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
                 .body(new LoginResponse(user.getUsername()));
     }
 

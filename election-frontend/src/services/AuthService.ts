@@ -10,6 +10,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
       email: email,
       password: password,
     }),
+
+    credentials: 'include',
   })
 
   if (!res.ok) {
