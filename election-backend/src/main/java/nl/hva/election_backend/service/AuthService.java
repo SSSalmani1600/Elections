@@ -47,7 +47,7 @@ public class AuthService {
         String accessToken = "";
         String refreshTokenHash = "";
         try {
-            refreshTokenHash = generateRefreshToken();
+            refreshTokenHash = jwtService.generateRefreshToken();
             accessToken = jwtService.generateToken(user.getId().toString());
         } catch (Exception e) {
             log.error("e: ", e);
@@ -58,26 +58,6 @@ public class AuthService {
         refreshRepo.saveAndFlush(refreshToken);
 
         return new AuthenticationResponse(accessToken, refreshTokenHash, user);
-    }
-
-    public String generateRefreshToken() throws Exception {
-        SecureRandom rnd = new SecureRandom();
-
-        byte[] bytes = new byte[32];
-        rnd.nextBytes(bytes);
-        String b64 = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] digest = md.digest(b64.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(digest);
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 
     public User register(String email, String rawPassword, String username) {
