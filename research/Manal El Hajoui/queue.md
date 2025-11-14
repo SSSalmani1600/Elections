@@ -47,3 +47,13 @@ However, the flexibility does have a small drawback. Every element in the Linked
 
 LinkedList is the most effective when your program removes or adds elements in a different position, not just in the beginning or end. For example, if a program needs to frequently change the order of tasks or insert new items in between existing ones, the LinkedList is a good choice (W3Schools, 2024). 
 
+**Sub-question 3:**
+_How does the ArrayDeque class differ from LinkedList in internal structure and operational efficiency when used as a queue?_
+
+The ArrayDeque is another class that could be used to create a queue. Unlike the LinkedList, that connects elements like a chain, the ArrayDeque stores its elements in a resizable array, like a row of boxes next to each other. When the array becomes full, it automatically grows to make room for new elements (JavaGuides, 2023).
+
+Because everything is stored next to each other in memory, the ArrayDeque is faster when adding or removing elements from the start of the end of the queue. This makes it more efficient than the LinkedList for most queue operations (Oracle, 2024).
+
+However, the ArrayDeque does not not allow null elements since those are used internally to mark empty spots in the array. It’s also less flexible for inserting or removing elements in the middle of the queue, something the LinkedList handles better.
+
+In general, the ArrayDeque is most effective when the program mainly adds or removes elements from the beginning or end of the queue. For example, it is ideal for managing tasks or storing temporary data that changes often but doesn’t need rearranging (JavaTPoint, 2024).
