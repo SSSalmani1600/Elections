@@ -27,8 +27,23 @@ How do the LinkedList and ArrayDeque implementations of the Java Queue Interface
 
 
 **Sub-question 1:**
-What is the role and structure of the Queue Interface in the Java Collection Framework, and how does it manage element ordering (FIFO and LIFO)?
-The Queue interface is part of the Java Collection Framework and is used to store elements in a specific order. A queue helps programs decide which task should be handled first. For example, in a printer queue, the first document that was sent to the printer will also be printed first.
-By default, a queue follows the FIFO (First In, First Out) principle — the first item added is also the first one to be removed (W3Schools, 2024). However, some types of queues can work differently, such as LIFO (Last In, First Out), where the last item added is the first one to be removed (Oracle, 2024).
+_What is the role and structure of the Queue Interface in the Java Collection Framework, and how does it manage element ordering (FIFO and LIFO)?_
+
+The Queue interface is part of the Java Collection Framework and is used to store elements in a specific order.
+A queue helps programs decide which task should be handled first. For example, in a printer queue, the first document that was sent to the printer will also be printed first.
+
+
+By default, a queue follows the FIFO (First In, First Out) principle, the first item added is also the first one to be removed (W3Schools, 2024). However, some types of queues can work differently, such as LIFO (Last In, First Out), where the last item added is the first one to be removed (Oracle, 2024).
 Each queue has a head, which is the next element to be processed, and a tail, where new elements are added. Some queues, like priority queues, may handle elements in a different order, depending on what is most important. This makes the Queue interface very flexible, because different programs can use it in the way that best fits their needs (Oracle, 2024).
+
+**Sub-question 2:**
+_How does the LinkedList class implement the Queue Interface, and in which situations is it most effective to use it?_
+
+The LinkedList is one of the classes in Java that can be used to create a queue. According to Oracle (2024), It is flexible because it could work as a list (where you access elements by position) and as a queue (where elements are processed in order).
+
+Inside the LinkedList, all the elements are connected to each other like a chain. In the chain, each item knows which element comes before or comes after. This type of connection is called a doubly linked list (JavaGuides, 2023). Because of this structure, adding or removing elements in the middle of the list is fast and easy.
+
+However, the flexibility does have a small drawback. Every element in the LinkedList needs to store two pieces of information, one for the previous element and one for the next. The LinkedList uses more memory compared to other types (JavaGuides, 2023).
+
+LinkedList is the most effective when your program removes or adds elements in a different position, not just in the beginning or end. For example, if a program needs to frequently change the order of tasks or insert new items in between existing ones, the LinkedList is a good choice (W3Schools, 2024). 
 
