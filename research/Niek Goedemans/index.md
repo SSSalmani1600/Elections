@@ -116,3 +116,6 @@ of the tree, either one or two rotations are needed.
   case 1 will be used.
 
 Both recoloring and rotation can be combined with eachother, when both of the conditions are met.
+
+### Testing
+
