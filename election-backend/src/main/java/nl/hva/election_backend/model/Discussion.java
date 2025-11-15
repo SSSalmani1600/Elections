@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-// dit is 1 discussie, gewoon simpele data (nog geen database)
+// dit is een discussie, gewoon simpele data (nog geen database)
 public final class Discussion {
     private final String id; // unieke id
     private final String title; // titel van discussie
