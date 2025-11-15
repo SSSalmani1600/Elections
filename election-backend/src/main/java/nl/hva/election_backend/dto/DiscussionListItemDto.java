@@ -3,7 +3,7 @@ package nl.hva.election_backend.dto;
 
 import java.time.Instant;
 
-// dit is data van 1 discussie, wordt naar frontend gestuurd
+// dit is data van discussie, wordt naar frontend gestuurd
 public record DiscussionListItemDto(
         String id,
         String title,
