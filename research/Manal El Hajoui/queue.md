@@ -15,9 +15,14 @@ How do the LinkedList, ArrayDeque and priority queue implementations of the Java
 **Sub-Questions:**
 
 1. What is the structure of the Queue Interface in the Java Collection Framework
+----
 2.  How does the LinkedList class implement the Queue Interface, and in which situations is it most effective to use it?
+----
 3. How does the ArrayDeque class implement the Queue Interface, and in which situations is it most effective to use it?
-4. How do the results from my own Queue implementation compare to existing Java documentation and performance benchmarks?
+----
+4. How does PriorityQueue implement the Queue Interface, and in which situations is priority-based ordering more effective?
+----
+5. How do the results from my own Queue implementation compare to existing Java documentation and performance benchmarks?
 
 
 
@@ -27,14 +32,15 @@ How do the LinkedList, ArrayDeque and priority queue implementations of the Java
 
 
 **Sub-question 1:**
-_What is the role and structure of the Queue Interface in the Java Collection Framework, and how does it manage element ordering (FIFO and LIFO)?_
+_What is the structure of the Queue Interface in the Java Collection Framework_
 
 The Queue interface is part of the Java Collection Framework and is used to store elements in a specific order.
 A queue helps programs decide which task should be handled first. For example, in a printer queue, the first document that was sent to the printer will also be printed first.
 
 
-By default, a queue follows the FIFO (First In, First Out) principle, the first item added is also the first one to be removed (W3Schools, 2024). However, some types of queues can work differently, such as LIFO (Last In, First Out), where the last item added is the first one to be removed (Oracle, 2024).
+Most queues follow the FIFO (First In, First Out) principle, the first item added is also the first one to be removed (W3Schools, 2024). However, some types of queues can work differently, such as LIFO (Last In, First Out), where the last item added is the first one to be removed (Oracle, 2024).
 Each queue has a head, which is the next element to be processed, and a tail, where new elements are added. Some queues, like priority queues, may handle elements in a different order, depending on what is most important. This makes the Queue interface very flexible, because different programs can use it in the way that best fits their needs (Oracle, 2024).
+
 
 **Sub-question 2:**
 _How does the LinkedList class implement the Queue Interface, and in which situations is it most effective to use it?_
@@ -57,3 +63,19 @@ Because everything is stored next to each other in memory, the ArrayDeque is fas
 However, the ArrayDeque does not not allow null elements since those are used internally to mark empty spots in the array. It’s also less flexible for inserting or removing elements in the middle of the queue, something the LinkedList handles better.
 
 In general, the ArrayDeque is most effective when the program mainly adds or removes elements from the beginning or end of the queue. For example, it is ideal for managing tasks or storing temporary data that changes often but doesn’t need rearranging (JavaTPoint, 2024).
+
+**Sub-question 4:**
+_How does PriorityQueue implement the Queue Interface, and in which situations is priority-based ordering more effective?_
+
+A PriorityQueue does not work like a normal waiting line. In a regular queue, the first person who joins the line is also the first one to be helped (FIFO). Sometimes the last person to join is helped first (LIFO), like a stack of plates. But a PriorityQueue works differently: it behaves like a priority line, where the most important item is helped first, even if it arrived later (Oracle, 2024a; GeeksforGeeks, 2025).
+
+You can think of it like a hospital emergency room:
+the patient with the most urgent problem is treated before someone with a minor issue.
+
+Inside Java, PriorityQueue keeps items in an order where the most important item automatically moves to the front (Oracle, 2024a). This makes it useful in situations where the order of arrival is not the most important factor. For example, some computer systems must always handle urgent tasks before normal tasks. It is also used in map systems that calculate the shortest path between two locations. A well-known method for this is Dijkstra’s algorithm, which always chooses the next closest point to move toward (Dijkstra, 1959).
+
+Because Java offers both normal queues (FIFO), stack-like queues (LIFO), and priority-based queues, developers can choose the type that fits the situation best (Oracle, 2024b). This makes the Queue interface flexible and useful in many different programs.
+
+
+**Sub-question 5:**
+_How do my own performance measurements compare to official Java documentation and benchmark results?_
