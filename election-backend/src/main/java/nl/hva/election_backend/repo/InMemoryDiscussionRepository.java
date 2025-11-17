@@ -20,7 +20,7 @@ public class InMemoryDiscussionRepository {
 
 
     public InMemoryDiscussionRepository() {
-        // Gebruik één referentietijdstip zodat lastActivityAt > createdAt
+        // Gebruik één referentietijdstip zodat lastActivityAt  createdAt
         Instant now = Instant.now();
 
         // voorbeeld discussies
