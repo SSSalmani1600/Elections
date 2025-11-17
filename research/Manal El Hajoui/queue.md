@@ -10,7 +10,7 @@ To better understand how different Queue implementations behave and perform, thi
 
 **Main research question:**
 
-How do the LinkedList and ArrayDeque implementations of the Java Queue Interface differ in terms of performance, memory usage, and suitability across various use cases?
+How do the LinkedList, ArrayDeque and priority queue implementations of the Java Queue Interface differ in terms of performance, memory usage, and suitability across various use cases?
 
 **Sub-Questions:**
 
