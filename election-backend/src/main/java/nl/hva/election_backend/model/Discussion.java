@@ -16,7 +16,7 @@ public final class Discussion {
     private final Instant lastActivityAt; // laatste activiteit
     private final int reactionsCount; // hoeveel reacties
 
-    // constructor, maakt discussie aan met waardes
+    // constructor maakt discussie aan met waardes
     private Discussion(
             String id,
             String title,
