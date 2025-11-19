@@ -123,7 +123,7 @@ It also uses more memory because of the pointer overhead.
 
 ---
 
-## 3.4 Performance Test Results (Markdown Version)
+## 3.4 Performance Test Results 
 
 To validate the theoretical differences between ArrayList and LinkedList, four dataset sizes were tested:
 
