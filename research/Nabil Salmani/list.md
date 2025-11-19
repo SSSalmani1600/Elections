@@ -143,7 +143,7 @@ Below are the results exactly as measured.
 
 ---
 
-## **📊 Size: 100**
+## ** Size: 100**
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
@@ -157,7 +157,7 @@ At 100 elements, both implementations are too small to show meaningful differenc
 
 ---
 
-## **📊 Size: 10.000**
+## ** Size: 10.000**
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
@@ -171,7 +171,7 @@ LinkedList is already faster at start-based operations, while its random access 
 
 ---
 
-## **📊 Size: 100.000**
+## ** Size: 100.000**
 
 | Test Case                  | ArrayList | LinkedList |
 |----------------------------|-----------|------------|
@@ -189,7 +189,7 @@ Performance differences become extreme:
 
 ---
 
-## **📊 Size: 1.000.000**
+## ** Size: 1.000.000**
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
@@ -206,7 +206,7 @@ At one million elements:
 
 ---
 
-## **🧠 Overall Performance Analysis**
+## ** Overall Performance Analysis**
 
 - **ArrayList** is the best choice for most applications. It scales extremely well in reading and appending operations.
 - **LinkedList** is only useful when working heavily at the beginning of the list.
@@ -216,7 +216,7 @@ At one million elements:
 
 ---
 
-## **📌 Final Recommendation**
+## ** Final Recommendation**
 
 Use **ArrayList** in almost all real-world cases.  
 Use **LinkedList** only when you repeatedly insert/remove at the start and do not use random access.
