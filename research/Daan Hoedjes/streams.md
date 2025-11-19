@@ -376,10 +376,10 @@ In conclusion, The Java Stream API massively improves the way collections are pr
 
 # 8. Sources
 
-_Stream (Java Platform SE 8 )._ (2025, October 20). Oracle. https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
+Oracle. (2025, October 20). _(Java Platform SE 8 )._ https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
 
-_Jadeglobal._ (2023, January 11). _Introduction to Java 8 Stream API - Jade Global._ https://www.jadeglobal.com/blog/introduction-java-eight-stream-api
+Jade Global. (2023, January 11). _Introduction to Java 8 Stream API._ https://www.jadeglobal.com/blog/introduction-java-eight-stream-api
 
-_IBM Developer._ (2024, September 26). https://developer.ibm.com/articles/j-java-streams-3-brian-goetz/
+IBM Developer. (2024, September 26). _Java streams (part 3): Interview with Brian Goetz._ https://developer.ibm.com/articles/j-java-streams-3-brian-goetz/
 
-_Using Java streams in Java 8 and beyond._ (2024, September 24). JRebel. https://www.jrebel.com/blog/java-streams-in-java-8
+JRebel. (2024, September 24). _Using Java streams in Java 8 and beyond._ https://www.jrebel.com/blog/java-streams-in-java-8
