@@ -99,6 +99,21 @@ The PriorityQueue performs less efficiently because of its internal reordering, 
 
 For developers, the recommendation is to use the ArrayDeque for most queue operations, LinkedList for flexible list-like structures, and the PriorityQueue when handeling priority based tasks.  
 
+**References**
+
+* Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. Numerische Mathematik, 1(1), 269–271. https://doi.org/10.1007/BF01386390
+
+* GeeksforGeeks. (2025). Java PriorityQueue – Implementation and Examples. Retrieved from https://www.geeksforgeeks.org/
+
+* JavaGuides. (2023). Java Queue Interface with Examples. Retrieved from https://www.javaguides.net/
+
+* JavaTPoint. (2024). ArrayDeque in Java. Retrieved from https://www.javatpoint.com/
+
+* Oracle. (2024a). Class PriorityQueue (Java SE 21 & JDK 21). Retrieved from https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+
+* Oracle. (2024b). Interface Queue (Java SE 21 & JDK 21). Retrieved from https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
+
+* W3Schools. (2024). Java Queue. Retrieved from https://www.w3schools.com/java/java_queue.asp
 
 
 
