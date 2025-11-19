@@ -10,8 +10,8 @@
 
 **Main Question:**
 
-> How do different Java Map implementations like `HashMap`, `LinkedHashMap`, and `TreeMap` work, and how do they compare
-> in performance?
+> How do the Java Map implementations `HashMap`, `LinkedHashMap`, and `TreeMap` work, and how do they compare
+> in speed with the methods put(), get() and remove()?
 
 **Sub-Questions:**
 
@@ -32,7 +32,7 @@ the value of every key can be duplicates. Each implementation of `Map` also has 
 But what is the difference between the 3 different most used implementations (**`HashMap`**, **`LinkedHashMap`** and *
 *`TreeMap`**)?
 
-### HashMap
+### How does a `HashMap` store and find data?
 
 `HashMap` is one of the most commonly used implementations of the Map interface in Java. It stores key–value pairs just
 like every other implementation, but uses `hashing` to achieve fast lookups.
@@ -60,7 +60,7 @@ lookup time from O(n) to O(log n).
 The average-case time complexity for put(), get() and remove() operations is O(1), which makes HashMap very efficient
 for general use.
 
-### LinkedHashMap
+### What extra features does a `LinkedHashMap` add, and how does that affect speed?
 
 With the normal HashMap the data stores in a chaotic, but fast unsorted way. With the LinkedHashMap this data is stored
 and sorted by either `insertion-order` or `acces-order`, depending on what you want.
@@ -73,7 +73,7 @@ to add pointer events for "next" and "previous" for each node.
 A LinkedHashMap can be useful if you want to implement it for LRU-caches (with acces-order), or when you just want it to
 have a predictable outcome.
 
-### TreeMap
+### How does a `TreeMap` keep keys sorted, and what is the cost of that?
 
 A `TreeMap` is another common way to store key–value pairs in Java. What makes it special is that it automatically keeps
 the keys in `sorted` order. The sorting can be alphabetical, numerical, or any order you choose with a `Comparator`.
@@ -117,5 +117,36 @@ of the tree, either one or two rotations are needed.
 
 Both recoloring and rotation can be combined with eachother, when both of the conditions are met.
 
-### Testing
+### Which implementation is the fastest for adding, finding, and removing data?
 
+I have made a test with JMH (Java Microbenching Harness) to figure out which implementation the fastest is with adding,
+finding and removing data. These are the results. The higher the score, the better it performed in my test.
+
+### Conclusion
+
+Every map implementation stores data with `key value pairs`. Both HashMap and LinkedHashMap uses **hashing** to get the
+O(1) speed, but **LinkedHashMap** is slightly slower than the HashMap because it needs to `maintain an order` like insertion
+order or access order. TreeMap uses the Red-Black Tree algorithm to sort data, and therefore get the O(log n) speed.
+
+According to my test with **JMH**, LinkedHashMap is the fastest most of the time. But theoretically this is wrong, because
+LinkedHashMap has to maintain the specified order. This makes the LinkedHashMap slightly slower than the HashMap, but
+still a lot faster than the TreeMap. Because both LinkedHashMap and HashMap perform at O(1) speed and the TreeMap does
+not.
+
+So for adding, finding and removing data is the HashMap theoretically the winner. Then LinkedHashMap is on
+the second place and TreeMap on the third spot.
+
+### References
+
+1. GeeksforGeeks. (2025, November 3). Introduction to Red-Black Tree. Retrieved from 
+https://www.geeksforgeeks.org/dsa/introduction-to-red-black-tree/
+2. GeeksforGeeks. (2025, November 13). Internal Working of HashMap in Java. Retrieved from 
+https://www.geeksforgeeks.org/java/internal-working-of-hashmap-java/
+3. Oracle. (n.d.). Map (Java Platform SE 8). Retrieved from 
+https://docs.oracle.com/javase/8/docs/api/java/util/Map.html
+4. Oracle. (n.d.). LinkedHashMap (Java Platform SE 8). Retrieved from 
+https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html
+5. Oracle. (n.d.). HashMap (Java Platform SE 8). Retrieved from 
+https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
+6. Oracle. (n.d.). TreeMap (Java Platform SE 8). Retrieved from 
+https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html
