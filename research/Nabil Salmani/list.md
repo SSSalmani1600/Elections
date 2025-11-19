@@ -37,7 +37,7 @@ Belangrijke begrippen binnen dit onderzoek:
 
 Deze begrippen bepalen de performance van de datastructuren.
 
-## 2.2 Relevante ICT-normen (ISO 25010)
+## 2.2 Relevante ICT-normen
 - **Performance efficiency** – de gekozen datastructuur moet efficiënt zijn.
 - **Maintainability** – voorspelbaar, duidelijk gedrag.
 - **Correctness** – moet voldoen aan het List-contract van Java (Oracle, 2024).
