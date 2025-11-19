@@ -92,10 +92,11 @@ Here is the table for your test results:
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
-| Add at end (100k)       |           |            |
-| Insert at start (50k)   |           |            |
-| Random get (50k)        |           |            |
-| Remove at start (50k)   |           |            |
+| Add at end (100k)       | 3 ms      | 2 ms       |
+| Insert at start (50k)   | 93 ms     | 2 ms       |
+| Random get (50k)        | 2 ms      | 1082 ms    |
+| Remove at start (50k)   | 98 ms     | 1 ms       |
+
 
 ### What we expect:
 - ArrayList = **faster** for reading items and adding at end
