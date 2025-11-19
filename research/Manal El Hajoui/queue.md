@@ -79,3 +79,17 @@ Because Java offers both normal queues (FIFO), stack-like queues (LIFO), and pri
 
 **Sub-question 5:**
 _How do my own performance measurements compare to official Java documentation and benchmark results?_
+
+Based on my performance test results, the _ArrayDeque_ showed the most stable and efficient performance when adding elements to the queue. 
+The graph shows the average add-time remained consistently low, with only a few small spikes. This aligns with the java documentation (Oracle, 2024) ans other benchmark sources (JavaGuides, 2023), which describes the _ArrayDeque_ fast for queue operations because it stores elements in a resizeable array located next to each other in memory. 
+
+In contrast to the _ArrayDeque_, the _LinkedList_ showed several performance spikes. These occasional delays are caused by its internal structure, a chain of nodes linked next to each other, which requires additional elements. This supports the idea that the _LinkedList_ is less efficient for frequent add/remove operations but remains useful when flexible insertion positions are needed (W3Schools, 2024). 
+
+The _PriorityQueue_ had the highest and most frequent spikes in add-time. This is the expected, since it reorders elements internally after each insertion to maintain its priority order. While it is slower for large amounts of data, it offers clear advantages in scenarios where the order of importance matters more than speed, such as scheduling urgent tasks or pathfinding algorithms (GeeksforGeeks, 2025).
+
+Overall my results confirm the existing documentation:
+_ArrayDeque:_ Best overall performance and lowest memory overhead.
+_LinkedList:_ Slower but flexible for dynamic insertions.
+_PriorityQueue:_ Less efficient for raw performance but essential for priority based processing.
+
+
