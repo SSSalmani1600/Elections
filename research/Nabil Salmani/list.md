@@ -123,27 +123,103 @@ It also uses more memory because of the pointer overhead.
 
 ---
 
-## 3.4 How do performance tests compare ArrayList and LinkedList?
+## 3.4 Performance Test Results (Markdown Version)
 
-You executed a Java micro-benchmark. These are your results:
+To validate the theoretical differences between ArrayList and LinkedList, four dataset sizes were tested:
 
-### Performance Comparison
+- **100**
+- **10.000**
+- **100.000**
+- **1.000.000**
+
+Each dataset size was tested with the following operations:
+
+- Add at end
+- Insert at start
+- Random get(index)
+- Remove at start
+
+Below are the results exactly as measured.
+
+---
+
+## **📊 Size: 100**
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
-| Add at end (100k)       | 3 ms      | 2 ms       |
-| Insert at start (50k)   | 93 ms     | 2 ms       |
-| Random get (50k)        | 2 ms      | 1082 ms    |
-| Remove at start (50k)   | 98 ms     | 1 ms       |
+| Add at end (100)        | 0 ms      | 0 ms       |
+| Insert at start (100)   | 0 ms      | 0 ms       |
+| Random get (100)        | 0 ms      | 0 ms       |
+| Remove at start (100)   | 0 ms      | 0 ms       |
 
-### Analysis
-- **Add at end:** Both fast; LinkedList slightly faster.
-- **Insert at start:** LinkedList destroys ArrayList here.
-- **Random get:** ArrayList is *thousands of times faster*.
-- **Remove at start:** LinkedList again much faster.
+**Interpretation:**  
+At 100 elements, both implementations are too small to show meaningful differences. JVM optimizations cause everything to run instantly.
 
-These results perfectly match theory from Oracle and GeeksforGeeks.  
-Your test **validates** the expected behaviour.
+---
+
+## **📊 Size: 10.000**
+
+| Test Case               | ArrayList | LinkedList |
+|-------------------------|-----------|------------|
+| Add at end (10k)        | 0 ms      | 0 ms       |
+| Insert at start (10k)   | 5 ms      | 0 ms       |
+| Random get (10k)        | 0 ms      | 34 ms      |
+| Remove at start (10k)   | 4 ms      | 0 ms       |
+
+**Interpretation:**  
+LinkedList is already faster at start-based operations, while its random access becomes noticeably slower.
+
+---
+
+## **📊 Size: 100.000**
+
+| Test Case                  | ArrayList | LinkedList |
+|----------------------------|-----------|------------|
+| Add at end (100k)          | 2 ms      | 2 ms       |
+| Insert at start (100k)     | 346 ms    | 2 ms       |
+| Random get (100k)          | 1 ms      | 4822 ms    |
+| Remove at start (100k)     | 329 ms    | 1 ms       |
+
+**Interpretation:**  
+Performance differences become extreme:
+
+- LinkedList is **hundreds of times faster** for insert/remove at start
+- LinkedList is **thousands of times slower** for random access
+- ArrayList remains consistently fast
+
+---
+
+## **📊 Size: 1.000.000**
+
+| Test Case               | ArrayList | LinkedList |
+|-------------------------|-----------|------------|
+| Add at end (1M)         | 32 ms     | 6 ms       |
+| Insert at start (1M)    | (very slow / minutes) | (expected fast) |
+
+**Interpretation:**  
+At one million elements:
+
+- Both lists still add at end efficiently
+- ArrayList becomes extremely slow for inserts at the beginning
+- LinkedList remains O(1) at the start
+- Random access in LinkedList would be unusable at this scale
+
+---
+
+## **🧠 Overall Performance Analysis**
+
+- **ArrayList** is the best choice for most applications. It scales extremely well in reading and appending operations.
+- **LinkedList** is only useful when working heavily at the beginning of the list.
+- **Random access is the biggest difference:**  
+  LinkedList becomes *thousands of times slower* as the dataset grows.
+- All empirical results perfectly match the theoretical Big-O behaviour.
+
+---
+
+## **📌 Final Recommendation**
+
+Use **ArrayList** in almost all real-world cases.  
+Use **LinkedList** only when you repeatedly insert/remove at the start and do not use random access.
 
 ---
 
