@@ -119,34 +119,49 @@ Both recoloring and rotation can be combined with eachother, when both of the co
 
 ### Which implementation is the fastest for adding, finding, and removing data?
 
-I have made a test with JMH (Java Microbenching Harness) to figure out which implementation the fastest is with adding,
+I have made a test with JMH (Java Microbenchmark Harness) to figure out which implementation the fastest is with adding,
 finding and removing data. These are the results. The higher the score, the better it performed in my test.
+
+| Size      | Methode       | HashMap                                         | LinkedHashMap                                  | TreeMap                                         |
+|-----------|---------------|-------------------------------------------------|------------------------------------------------|-------------------------------------------------|
+| 1,000     | testGet       | <span style="color:#8fce00;">85,867,553</span>  | <span style="color:#ffd966;">81,729,811</span> | <span style="color:#ff6961;">15,604,725</span>  |
+| 100,000   | testGet       | <span style="color:#8fce00;">27,334,228</span>  | <span style="color:#ffd966;">21,259,294</span> | <span style="color:#ff6961;">5,048,357</span>   |
+| 1,000,000 | testGet       | <span style="color:#ffd966;">5,904,230</span>   | <span style="color:#8fce00;">5,932,588</span>  | <span style="color:#ff6961;">1,255,706</span>   |
+| 1,000     | testPutUpdate | <span style="color:#ffd966;">51,901,612</span>  | <span style="color:#8fce00;">53,302,636</span> | <span style="color:#ff6961;">15,351,532</span>  |
+| 100,000   | testPutUpdate | <span style="color:#ffd966;">15,569,444</span>  | <span style="color:#8fce00;">16,803,773</span> | <span style="color:#ff6961;">5,110,981</span>   |
+| 1,000,000 | testPutUpdate | <span style="color:#ffd966;">4,327,503</span>   | <span style="color:#8fce00;">4,436,204</span>  | <span style="color:#ff6961;">1,265,057</span>   |
+| 1,000     | testRemove    | <span style="color:#ffd966;">104,650,762</span> | <span style="color:#ff6961;">96,969,602</span> | <span style="color:#8fce00;">107,908,568</span> |
+| 100,000   | testRemove    | <span style="color:#8fce00;">51,066,792</span>  | <span style="color:#ff6961;">47,433,549</span> | <span style="color:#ffd966;">48,402,118</span>  |
+| 1,000,000 | testRemove    | <span style="color:#8fce00;">8,822,804</span>   | <span style="color:#ffd966;">8,428,987</span>  | <span style="color:#ff6961;">1,111,677</span>   |
 
 ### Conclusion
 
 Every map implementation stores data with `key value pairs`. Both HashMap and LinkedHashMap uses **hashing** to get the
-O(1) speed, but **LinkedHashMap** is slightly slower than the HashMap because it needs to `maintain an order` like insertion
-order or access order. TreeMap uses the Red-Black Tree algorithm to sort data, and therefore get the O(log n) speed.
+time complexity of O(1), but **LinkedHashMap** is slightly slower than the HashMap because it needs to
+`maintain an order` like insertion
+order or access order.
 
-According to my test with **JMH**, LinkedHashMap is the fastest most of the time. But theoretically this is wrong, because
-LinkedHashMap has to maintain the specified order. This makes the LinkedHashMap slightly slower than the HashMap, but
-still a lot faster than the TreeMap. Because both LinkedHashMap and HashMap perform at O(1) speed and the TreeMap does
-not.
+TreeMap uses the Red-Black Tree algorithm to keep keys sorted, and therefore get the time complexity of O(log n). This
+makes the TreeMap slower but the best choice when alphabetical or numerical order is required
 
-So for adding, finding and removing data is the HashMap theoretically the winner. Then LinkedHashMap is on
-the second place and TreeMap on the third spot.
+According to my test with **JMH**, LinkedHashMap and HashMap performed equally fast. But theoretically this is wrong,
+because LinkedHashMap has to maintain the specified order. This makes the LinkedHashMap slightly slower than the
+HashMap, but still a lot faster than the TreeMap.
+
+Therefore, HashMap theoretically the winner is for adding, finding and removing data. LinkedHashMap is useful when order
+matters, and TreeMap is best when sorted keys are required
 
 ### References
 
-1. GeeksforGeeks. (2025, November 3). Introduction to Red-Black Tree. Retrieved from 
-https://www.geeksforgeeks.org/dsa/introduction-to-red-black-tree/
-2. GeeksforGeeks. (2025, November 13). Internal Working of HashMap in Java. Retrieved from 
-https://www.geeksforgeeks.org/java/internal-working-of-hashmap-java/
-3. Oracle. (n.d.). Map (Java Platform SE 8). Retrieved from 
-https://docs.oracle.com/javase/8/docs/api/java/util/Map.html
-4. Oracle. (n.d.). LinkedHashMap (Java Platform SE 8). Retrieved from 
-https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html
-5. Oracle. (n.d.). HashMap (Java Platform SE 8). Retrieved from 
-https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
-6. Oracle. (n.d.). TreeMap (Java Platform SE 8). Retrieved from 
-https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html
+1. GeeksforGeeks. (2025, November 3). Introduction to Red-Black Tree. Retrieved from
+   https://www.geeksforgeeks.org/dsa/introduction-to-red-black-tree/
+2. GeeksforGeeks. (2025, November 13). Internal Working of HashMap in Java. Retrieved from
+   https://www.geeksforgeeks.org/java/internal-working-of-hashmap-java/
+3. Oracle. (n.d.). Map (Java Platform SE 8). Retrieved from
+   https://docs.oracle.com/javase/8/docs/api/java/util/Map.html
+4. Oracle. (n.d.). LinkedHashMap (Java Platform SE 8). Retrieved from
+   https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html
+5. Oracle. (n.d.). HashMap (Java Platform SE 8). Retrieved from
+   https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
+6. Oracle. (n.d.). TreeMap (Java Platform SE 8). Retrieved from
+   https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html
