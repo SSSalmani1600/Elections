@@ -1,0 +1,90 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+public class ListPerformanceTest {
+
+    private static final int SIZE = 100_000;
+    private static final int GET_OPERATIONS = 50_000;
+
+    public static void main(String[] args) {
+        System.out.println("=== ArrayList vs LinkedList Benchmark ===");
+
+        testAddAtEnd();
+        testInsertAtStart();
+        testRandomGet();
+        testRemoveAtStart();
+    }
+
+    private static void testAddAtEnd() {
+        long a = measure(() -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < SIZE; i++) list.add(i);
+        });
+
+        long b = measure(() -> {
+            List<Integer> list = new LinkedList<>();
+            for (int i = 0; i < SIZE; i++) list.add(i);
+        });
+
+        System.out.println("Add at end: ArrayList=" + a + "ms, LinkedList=" + b + "ms");
+    }
+
+    private static void testInsertAtStart() {
+        long a = measure(() -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < SIZE; i++) list.add(0, i);
+        });
+
+        long b = measure(() -> {
+            List<Integer> list = new LinkedList<>();
+            for (int i = 0; i < SIZE; i++) list.add(0, i);
+        });
+
+        System.out.println("Insert at start: ArrayList=" + a + "ms, LinkedList=" + b + "ms");
+    }
+
+    private static void testRandomGet() {
+        List<Integer> arrayList = new ArrayList<>();
+        List<Integer> linkedList = new LinkedList<>();
+        for (int i = 0; i < SIZE; i++) {
+            arrayList.add(i);
+            linkedList.add(i);
+        }
+
+        Random r = new Random();
+
+        long a = measure(() -> {
+            for (int i = 0; i < GET_OPERATIONS; i++) arrayList.get(r.nextInt(SIZE));
+        });
+
+        long b = measure(() -> {
+            for (int i = 0; i < GET_OPERATIONS; i++) linkedList.get(r.nextInt(SIZE));
+        });
+
+        System.out.println("Random get: ArrayList=" + a + "ms, LinkedList=" + b + "ms");
+    }
+
+    private static void testRemoveAtStart() {
+        long a = measure(() -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < SIZE; i++) list.add(i);
+            for (int i = 0; i < SIZE; i++) list.remove(0);
+        });
+
+        long b = measure(() -> {
+            List<Integer> list = new LinkedList<>();
+            for (int i = 0; i < SIZE; i++) list.add(i);
+            for (int i = 0; i < SIZE; i++) list.remove(0);
+        });
+
+        System.out.println("Remove at start: ArrayList=" + a + "ms, LinkedList=" + b + "ms");
+    }
+
+    private static long measure(Runnable r) {
+        long s = System.nanoTime();
+        r.run();
+        return (System.nanoTime() - s) / 1_000_000;
+    }
+}
