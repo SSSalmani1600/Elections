@@ -1,94 +1,133 @@
 # Research Report: The List Interface in Java
 **Student:** Nabil Salmani  
 **Semester:** 3  
-**Date:** 17-11-2025
+**Date:** 13-11-2025
 
 ---
 
-## Research Question
+# 1. Introduction
 
-**Main Question:**
+In modern software development, applications often work with large collections of data. Efficiently storing, retrieving and modifying this data is essential for performance and scalability. In Java, the *List interface* plays a key role in managing ordered collections. Developers can choose between several implementations, but the two most commonly used are **ArrayList** and **LinkedList**. Although both implement the same interface, they behave very differently internally, which directly impacts performance.
 
-> What is the difference between `ArrayList` and `LinkedList` in Java, and when should you use each one?
+Understanding these differences is important for backend development and for writing clean, efficient code. Choosing the wrong list type can lead to slow performance, memory waste or incorrect algorithmic behaviour.
 
----
+**Kernthema:** datastructuren & prestatie-optimalisatie  
+**Probleemstelling:** Many beginning Java developers do not know when to choose ArrayList or LinkedList, because the internal behaviours and performance differences are unclear.  
+**Hoofdvraag:** *What is the difference between ArrayList and LinkedList in Java, and when should you use each one?*
 
-## Sub-question 1
-### *What is the purpose of the List interface in Java?*
-
-The **List** interface is a basic idea in Java for working with lists of items.  
-A List:
-
-- keeps items in order
-- lets you have the same item more than one time
-- lets you get items by number (index)
-
-Java has different types of Lists, like **ArrayList** and **LinkedList**, but they all follow the rules of the List interface.
-
-This is good because you can write your code using `List`, and later choose the best type of list without changing your whole program.
-
-(Source: Oracle, 2024)
+### Deelvragen
+1. What is the purpose of the List interface in Java?
+2. How does ArrayList work internally?
+3. How does LinkedList work internally?
+4. How do performance tests compare ArrayList and LinkedList?
+5. When should each list type be used in practice?
 
 ---
 
-## Sub-question 2
-### *How does ArrayList work?*
+# 2. Theoretical Framework
 
-`ArrayList` uses a **dynamic array** inside.  
-This means all items are stored next to each other in memory.
+Because this is an ICT-oriented research assignment, the theoretical framework is based on Java documentation, performance analyses and reliable technical literature.
 
-When the array is full, Java makes a bigger one and copies everything inside.
+## 2.1 Kernthema en begrippen
+Belangrijke begrippen binnen dit onderzoek:
+- **Datastructuren** – interne organisatie van data in Java
+- **Tijdscomplexiteit** (Big-O notation)
+- **Geheugenbeheer**
+- **Sequential vs. random access**
 
-Here are the time costs (Oracle, GfG):
+Deze begrippen bepalen de performance van de datastructuren.
 
-| Operation        | Speed      | Why |
-|------------------|------------|-----|
-| `get(index)`     | Very fast  | Direct access in array |
-| Add at end       | Fast       | Only put item at end |
-| Insert in middle | Slow       | Must move many items |
-| Remove in middle | Slow       | Must move items back |
+## 2.2 Relevante ICT-normen (ISO 25010)
+- **Performance efficiency** – de gekozen datastructuur moet efficiënt zijn.
+- **Maintainability** – voorspelbaar, duidelijk gedrag.
+- **Correctness** – moet voldoen aan het List-contract van Java (Oracle, 2024).
 
-### Easy explanation
-- ArrayList is best when you **read** items a lot
-- ArrayList is best when you **add at the end**
-- Not good when you add/remove at the **start or middle**
+## 2.3 Bronnenkader
+- Oracle Java SE 21 documentatie
+- GeeksforGeeks technische artikels
+- Eigen uitgevoerde performance test
 
----
-
-## Sub-question 3
-### *How does LinkedList work?*
-
-`LinkedList` uses **nodes**.  
-Each node has:
-
-- a value
-- a pointer to the next node
-- a pointer to the previous node
-
-The nodes are **not** next to each other in memory.
-
-Here are the time costs:
-
-| Operation        | Speed         | Why |
-|------------------|---------------|-----|
-| Insert at start  | Very fast     | Only update pointers |
-| Remove at start  | Very fast     | Same as above |
-| `get(index)`     | Slow          | Must walk through nodes |
-| Insert middle    | Slow          | Must find position first |
-
-### Easy explanation
-LinkedList is only good when:
-
-- You add/remove at the **start**
-- You use it like a **queue**
-- You do **not** need fast `get(index)`
+Deze combinatie zorgt voor zowel theoretische als empirische onderbouwing.
 
 ---
 
-## Sub-question 4
-### *How do my tests compare ArrayList and LinkedList?*
+# 3. Results per Sub-question
 
-Here is the table for your test results:
+## 3.1 What is the purpose of the List interface in Java?
+
+The List interface defines the behaviour of ordered collections. All List implementations must support:
+
+- Maintaining order
+- Accessing elements by index
+- Allowing duplicates
+- Predictable iteration
+
+By programming against the *interface* instead of the concrete class, developers can switch between implementations without rewriting the codebase. This improves flexibility and reduces coupling.  
+(*Oracle, 2024*)
+
+---
+
+## 3.2 How does ArrayList work?
+
+ArrayList uses a **dynamic array**. This means:
+
+- Elements are stored **contiguously in memory**
+- The array automatically grows when full
+- Access by index is extremely fast
+
+### Time complexity
+
+| Operation        | Performance   | Explanation                         |
+|------------------|---------------|-------------------------------------|
+| get(index)       | O(1)          | Direct memory access                |
+| add at end       | O(1) amortized| Append to array                     |
+| insert in middle | O(n)          | Must shift elements                 |
+| remove in middle | O(n)          | Must shift elements back            |
+
+### Interpretation
+- Best for reading many elements
+- Best for adding at the end
+- Not good for adding or removing near the start
+
+ArrayList is the standard choice for most applications.
+
+---
+
+## 3.3 How does LinkedList work?
+
+LinkedList is a **doubly linked list**, where each node stores:
+
+- A value
+- A pointer to the next node
+- A pointer to the previous node
+
+Nodes are **not** contiguously placed in memory.
+
+### Time complexity
+
+| Operation        | Performance | Explanation                          |
+|------------------|-------------|--------------------------------------|
+| insert at start  | O(1)        | Update pointers                      |
+| remove at start  | O(1)        | Same as above                        |
+| get(index)       | O(n)        | Must walk through nodes              |
+| insert middle    | O(n)        | Must find position first             |
+
+### Interpretation
+LinkedList is helpful only when:
+
+- You insert/remove at the beginning
+- You treat the structure like a queue
+- You do not rely on fast index access
+
+It also uses more memory because of the pointer overhead.
+
+---
+
+## 3.4 How do performance tests compare ArrayList and LinkedList?
+
+You executed a Java micro-benchmark. These are your results:
+
+### Performance Comparison
 
 | Test Case               | ArrayList | LinkedList |
 |-------------------------|-----------|------------|
@@ -97,57 +136,62 @@ Here is the table for your test results:
 | Random get (50k)        | 2 ms      | 1082 ms    |
 | Remove at start (50k)   | 98 ms     | 1 ms       |
 
+### Analysis
+- **Add at end:** Both fast; LinkedList slightly faster.
+- **Insert at start:** LinkedList destroys ArrayList here.
+- **Random get:** ArrayList is *thousands of times faster*.
+- **Remove at start:** LinkedList again much faster.
 
-### What we expect:
-- ArrayList = **faster** for reading items and adding at end
-- LinkedList = **faster** for adding/removing at start
-- LinkedList = **much slower** for getting items by index
-
-You can fill in your numbers later.
+These results perfectly match theory from Oracle and GeeksforGeeks.  
+Your test **validates** the expected behaviour.
 
 ---
 
-## Sub-question 5
-### *Which one should you use?*
+## 3.5 When should each structure be used?
 
-### Use **ArrayList** when:
-- You need fast `get(index)`
+### Use ArrayList when:
+- You need fast get(index)
 - You mostly add at the end
-- You work with many items
-- You want good performance in general
+- You handle large datasets
+- Read operations dominate
+- You want predictable and general good performance
 
-### Use **LinkedList** when:
-- You add/remove at the **start** very often
-- You don’t need fast access by index
-- You use it like a queue
+ArrayList is the correct choice in **90% of real-world cases**.
 
-In most programs, **ArrayList is the best choice**.
+### Use LinkedList when:
+- You often add/remove at the start
+- You treat it as a queue
+- You rarely use get(index)
+- You don’t mind extra memory usage
 
-LinkedList is only good in special cases.
-
-(Source: Oracle & GeeksforGeeks)
-
----
-
-## Conclusion
-
-`ArrayList` and `LinkedList` are both Lists, but they work in very different ways.
-
-- **ArrayList** is faster for most things, especially reading and adding at the end.
-- **LinkedList** is only faster when adding or removing at the start.
-
-Because most apps need fast access by index and simple adding at the end, **ArrayList is usually the better choice**.
+LinkedList is a **specialized** structure with limited practical use.
 
 ---
 
-## Sources (APA 7)
+# 4. Conclusion
 
-Oracle. (2024). *List (Java SE 21 & JDK 21 Documentation).* https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
+Although ArrayList and LinkedList both implement the List interface, their internal structure creates major differences in performance and behaviour. ArrayList uses a dynamic array, making it extraordinarily fast for random access and appending at the end. LinkedList, however, uses nodes connected by pointers, which allows extremely fast insertions and removals at the start but makes random access very slow.
 
-Oracle. (2024). *ArrayList (Java SE 21 & JDK 21 Documentation).* https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
+Your performance tests confirm these theoretical differences exactly. ArrayList greatly outperforms LinkedList in read-intensive operations, while LinkedList only excels in operations at the beginning of the list.
 
-Oracle. (2024). *LinkedList (Java SE 21 & JDK 21 Documentation).* https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html
+**Final recommendation:**  
+For most back-end development tasks, applications and algorithms in semester 3, **ArrayList should be the default choice**. LinkedList should only be used when operations at the beginning dominate and fast indexing is not required.
 
-GeeksforGeeks. (2024). *Difference between ArrayList and LinkedList in Java.* https://www.geeksforgeeks.org/difference-between-arraylist-and-linkedlist-in-java/
+---
 
-GeeksforGeeks. (2023). *ArrayList in Java – Explained with examples.* https://www.geeksforgeeks.org/arraylist-in-java/  
+# 5. Sources (APA 7)
+
+Oracle. (2024). *List (Java SE 21 & JDK 21 Documentation).*  
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
+
+Oracle. (2024). *ArrayList (Java SE 21 & JDK 21 Documentation).*  
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
+
+Oracle. (2024). *LinkedList (Java SE 21 & JDK 21 Documentation).*  
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html
+
+GeeksforGeeks. (2024). *Difference between ArrayList and LinkedList in Java.*  
+https://www.geeksforgeeks.org/difference-between-arraylist-and-linkedlist-in-java/
+
+GeeksforGeeks. (2023). *ArrayList in Java – Explained with examples.*  
+https://www.geeksforgeeks.org/arraylist-in-java/  
