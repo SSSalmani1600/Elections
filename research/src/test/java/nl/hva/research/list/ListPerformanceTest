@@ -1,0 +1,129 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        int[] sizes = {100, 10_000, 100_000, 1_000_000};
+
+        System.out.println("=== PERFORMANCE TEST ArrayList vs LinkedList ===\n");
+
+        for (int size : sizes) {
+            System.out.println("------------ Size: " + size + " ------------\n");
+
+            testAddAtEnd(size);
+            testInsertAtStart(size);
+            testRandomGet(size);
+            testRemoveAtStart(size);
+
+            System.out.println("-----------------------------------------------\n");
+        }
+
+        System.out.println("=== EINDE TEST ===");
+    }
+
+    // ------------------------------------------------------------
+    // ADD AT END
+    // ------------------------------------------------------------
+
+    private static void testAddAtEnd(int size) {
+        System.out.println("Test: Add at end (" + size + ")");
+
+        long start, end;
+
+        List<Integer> arrayList = new ArrayList<>();
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) arrayList.add(i);
+        end = System.nanoTime();
+        System.out.println("ArrayList:  " + (end - start) / 1_000_000 + " ms");
+
+        List<Integer> linkedList = new LinkedList<>();
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) linkedList.add(i);
+        end = System.nanoTime();
+        System.out.println("LinkedList: " + (end - start) / 1_000_000 + " ms\n");
+    }
+
+    // ------------------------------------------------------------
+    // INSERT AT START
+    // ------------------------------------------------------------
+
+    private static void testInsertAtStart(int size) {
+        System.out.println("Test: Insert at start (" + size + ")");
+
+        long start, end;
+
+        List<Integer> arrayList = new ArrayList<>();
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) arrayList.add(0, i);
+        end = System.nanoTime();
+        System.out.println("ArrayList:  " + (end - start) / 1_000_000 + " ms");
+
+        List<Integer> linkedList = new LinkedList<>();
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) linkedList.add(0, i);
+        end = System.nanoTime();
+        System.out.println("LinkedList: " + (end - start) / 1_000_000 + " ms\n");
+    }
+
+    // ------------------------------------------------------------
+    // RANDOM GET()
+    // ------------------------------------------------------------
+
+    private static void testRandomGet(int size) {
+        System.out.println("Test: Random get (" + size + ")");
+
+        Random random = new Random();
+
+        List<Integer> arrayList = new ArrayList<>(size);
+        List<Integer> linkedList = new LinkedList<>();
+
+        for (int i = 0; i < size; i++) {
+            arrayList.add(i);
+            linkedList.add(i);
+        }
+
+        long start, end;
+
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) arrayList.get(random.nextInt(size));
+        end = System.nanoTime();
+        System.out.println("ArrayList:  " + (end - start) / 1_000_000 + " ms");
+
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) linkedList.get(random.nextInt(size));
+        end = System.nanoTime();
+        System.out.println("LinkedList: " + (end - start) / 1_000_000 + " ms\n");
+    }
+
+    // ------------------------------------------------------------
+    // REMOVE AT START
+    // ------------------------------------------------------------
+
+    private static void testRemoveAtStart(int size) {
+        System.out.println("Test: Remove at start (" + size + ")");
+
+        long start, end;
+
+        List<Integer> arrayList = new ArrayList<>(size);
+        List<Integer> linkedList = new LinkedList<>();
+
+        for (int i = 0; i < size; i++) {
+            arrayList.add(i);
+            linkedList.add(i);
+        }
+
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) arrayList.remove(0);
+        end = System.nanoTime();
+        System.out.println("ArrayList:  " + (end - start) / 1_000_000 + " ms");
+
+        start = System.nanoTime();
+        for (int i = 0; i < size; i++) linkedList.remove(0);
+        end = System.nanoTime();
+        System.out.println("LinkedList: " + (end - start) / 1_000_000 + " ms\n");
+    }
+}
