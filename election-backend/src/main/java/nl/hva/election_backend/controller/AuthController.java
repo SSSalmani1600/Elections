@@ -1,6 +1,7 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.*;
+import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -73,6 +74,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody String token) {
+        RefreshToken newRefreshToken = jwtService.refreshToken(token);
 
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken.getTokenHash())
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(86400)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).build();
+    }
 }
 
