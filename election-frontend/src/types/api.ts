@@ -58,3 +58,9 @@ export interface User {
   email: string;
   password: string;
 }
+export interface AdminStats {
+  totalUsers: number;
+  reportedPosts: number;
+  pendingReviews: number;
+}
+
