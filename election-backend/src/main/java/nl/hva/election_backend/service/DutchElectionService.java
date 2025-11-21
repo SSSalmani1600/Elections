@@ -1,15 +1,19 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.entity.ElectionEntity;
 import nl.hva.election_backend.model.Election;
+import nl.hva.election_backend.repository.ElectionRepository;
 import nl.hva.election_backend.utils.xml.DutchElectionParser;
 import nl.hva.election_backend.utils.xml.transformers.*;
 import nl.hva.election_backend.utils.PathUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * A demo service for demonstrating how an EML-XML parser can be used inside a backend application.<br/>
@@ -19,15 +23,29 @@ import java.io.IOException;
 @Service
 public class DutchElectionService {
     private Election election;
+    private final PartyService partyService;
+    private final ElectionRepository electionRepository;
+
+    public DutchElectionService(PartyService partyService, ElectionRepository electionRepository) {
+        this.partyService = partyService;
+        this.electionRepository = electionRepository;
+    }
 
     public Election readResults(String electionId, String folderName) {
         System.out.println("Processing files...");
 
-        Election election = new Election(electionId);
+        this.election = new Election(electionId);
+        int year = Integer.parseInt(electionId.replaceAll("\\D", ""));
+        System.out.println("Election year - " + year);
+        ElectionEntity electionEntity = electionRepository.findById(year)
+                .orElseGet(() -> electionRepository.save(
+                        new ElectionEntity(year, electionId, "Tweede Kamerverkiezing", LocalDate.of(year, 11, 22))
+                ));
+
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
         DutchElectionParser electionParser = new DutchElectionParser(
-                new DutchDefinitionTransformer(election),
+                new DutchDefinitionTransformer(election, partyService),
                 new DutchCandidateTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
