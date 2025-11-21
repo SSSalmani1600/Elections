@@ -35,12 +35,17 @@ public class DutchElectionService {
         System.out.println("Processing files...");
 
         this.election = new Election(electionId);
+        System.out.println(this.election);
+
         int year = Integer.parseInt(electionId.replaceAll("\\D", ""));
+
+
         System.out.println("Election year - " + year);
         ElectionEntity electionEntity = electionRepository.findById(year)
                 .orElseGet(() -> electionRepository.save(
-                        new ElectionEntity(year, electionId, "Tweede Kamerverkiezing", LocalDate.of(year, 11, 22))
+                        new ElectionEntity(year, electionId, "Tweede Kamerverkiezing", null)
                 ));
+        System.out.println("Dutch Election results: " + election);
 
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
@@ -58,12 +63,14 @@ public class DutchElectionService {
             // Please note that you can also specify an absolute path to the folder!
             electionParser.parseResults(electionId, PathUtils.getResourcePath("/%s".formatted(folderName)));
             // Do what ever you like to do
-            System.out.println("Dutch Election results: " + election);
+            electionEntity.setDate(LocalDate.parse(election.getDate()));
+            electionRepository.save(electionEntity);
             // Now is also the time to send the election information to a database for example.
 
             this.election = election;
             return this.election;
-        } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException | SAXException e) {
+        } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException |
+                 SAXException e) {
             // FIXME You should do here some proper error handling! The code below is NOT how you handle errors properly!
             System.err.println("Failed to process the election results!");
             e.printStackTrace();

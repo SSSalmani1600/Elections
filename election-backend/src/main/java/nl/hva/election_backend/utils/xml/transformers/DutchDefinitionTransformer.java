@@ -1,6 +1,7 @@
 package nl.hva.election_backend.utils.xml.transformers;
 
 
+import nl.hva.election_backend.entity.PartyEntity;
 import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.model.Election;
 import nl.hva.election_backend.service.PartyService;
@@ -27,7 +28,7 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
         this.election = election;
         this.partyService = partyService;
     }
-    
+
     @Override
     public void registerRegion(Map<String, String> electionData) {
         if (election.getType() == null && electionData.containsKey(ELECTION_NAME)) {
@@ -41,11 +42,10 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
     @Override
     public void registerParty(Map<String, String> electionData) {
         String name = electionData.get(REGISTERED_APPELLATION);
-        System.out.println("Party: " + name);
 
         int year = Integer.parseInt(election.getDate().substring(0, 4));
-
-        partyService.saveIfNotExists(name, year);
+        PartyEntity saveParty = partyService.saveIfNotExists(name, year);
+        System.out.println("Party saved: " + saveParty.getYear() + " - " + saveParty.getId());
     }
 
 }

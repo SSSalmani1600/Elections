@@ -7,15 +7,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class PartyService {
 
-    private final PartyRepository repository;
+    private final PartyRepository partyRepository;
 
     public PartyService(PartyRepository repository) {
-        this.repository = repository;
+        this.partyRepository = repository;
     }
 
-    public void saveIfNotExists(String name, int year) {
-        repository.findByNameAndYear(name, year)
-                .orElseGet(() -> repository.save(new PartyEntity(name, year)));
+    public PartyEntity saveIfNotExists(String name, int year) {
+        return partyRepository
+                .findByNameAndYear(name, year)
+                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year)));
     }
 
 }

@@ -20,14 +20,15 @@ public class PartyEntity {
     public PartyEntity(String name, int year) {
         this.name = name;
         this.year = year;
-        this.party_id = generatePartyId(name);
+        this.party_id = generatePartyId(name, year);
     }
 
-    private String generatePartyId(String name) {
-        return name.toUpperCase()
+    private String generatePartyId(String name, int year) {
+        return (name.toUpperCase()
                 .replaceAll("[^A-Z0-9]+", "_")
                 .replaceAll("_+", "_")
-                .replaceAll("^_|_$", ""); // geen dubbele underscores
+                .replaceAll("^_|_$", "")
+                + "_" + year);
     }
 
     public String getId() { return party_id; }
