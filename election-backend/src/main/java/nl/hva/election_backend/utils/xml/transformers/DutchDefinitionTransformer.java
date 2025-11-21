@@ -27,9 +27,14 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
     
     @Override
     public void registerRegion(Map<String, String> electionData) {
-        System.out.println("Committee: " + electionData);
-    }
+        if (election.getType() == null && electionData.containsKey(ELECTION_NAME)) {
+            election.setType(electionData.get(ELECTION_NAME));
+            election.setDate(electionData.get(ELECTION_DATE));
+            System.out.println("Election metadata loaded: " + election);
+        }
 
+        System.out.println("Committee/Region: " + electionData);
+    }
     @Override
     public void registerParty(Map<String, String> electionData) {
         System.out.println("Party: " + electionData);
