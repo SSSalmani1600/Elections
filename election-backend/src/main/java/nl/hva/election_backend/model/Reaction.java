@@ -1,5 +1,3 @@
-// Model van 1 reactie (wie, wat, wanneer).
-//Wordt gebruikt bij discussies.
 package nl.hva.election_backend.model;
 
 // dit is reactie op discussie

@@ -29,18 +29,7 @@ export interface Candidate {
 
 export interface Candidate {
   firstName: string;
-  lastName: string;
-  initials: string;
-  gender: string;
-  localityName: string;
-  electionName: string;
-  partiesId: string;
-  candidateId: string;
-  votes: string;
-}
-
-export interface Candidate {
-  firstName: string;
+  namePrefix?: string;
   lastName: string;
   initials: string;
   gender: string;

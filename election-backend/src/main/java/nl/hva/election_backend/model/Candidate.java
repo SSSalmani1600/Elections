@@ -6,6 +6,7 @@ import java.util.Map;
 public class Candidate {
     private final String firstName;
     private final String lastName;
+    private final String namePrefix;
     private final String initials;
     private final String gender;
     private final String localityName;
@@ -18,9 +19,10 @@ public class Candidate {
     private final Map<String, Integer> votesByMunicipality = new HashMap<>();
     private final Map<String, Integer> votesByStation = new HashMap<>();
 
-    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
+    public Candidate(String firstName, String namePrefix, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.namePrefix = namePrefix;
         this.initials = initials;
         this.gender = gender;
         this.localityName = localityName;
@@ -32,6 +34,7 @@ public class Candidate {
     public Candidate(Candidate copy) {
         this(
                 copy.getFirstName(),
+                copy.getNamePrefix(),
                 copy.getLastName(),
                 copy.getInitials(),
                 copy.getGender(),
@@ -63,9 +66,12 @@ public class Candidate {
         return firstName;
     }
 
+    public String getNamePrefix() {return namePrefix;}
+
     public String getLastName() {
         return lastName;
     }
+
 
     public String getInitials() {
         return initials;
@@ -92,8 +98,12 @@ public class Candidate {
     }
 
     public String getFullName() {
-        return firstName + " " + lastName;
+        if (namePrefix == null || namePrefix.isBlank()) {
+            return firstName + " " + lastName;
+        }
+        return firstName + " " + namePrefix + " " + lastName;
     }
+
 
     public int getVotes() {
         return votes;
