@@ -20,7 +20,12 @@ import java.util.Date;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService;
+
+    public JwtFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     String[] whiteListURLs = {
             "/api/auth/",
             "/api/parties",

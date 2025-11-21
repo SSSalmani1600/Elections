@@ -5,7 +5,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import nl.hva.election_backend.dto.TokenValidationResponse;
+import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.repo.RefreshTokenRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.*;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class JwtService {
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
     private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
             "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
     private final String issuer = "ga-stemmen.nl";
@@ -101,5 +102,37 @@ public class JwtService {
         }
 
         return new TokenValidationResponse(true, false);
+    }
+
+    private boolean isRefreshTokenValid(String tokenHash) {
+        Instant now = Instant.now();
+        return refreshRepo.existsByTokenHashAndRevokedAtIsNullAndExpiresAtAfter(tokenHash, now);
+    }
+
+    public RefreshToken refreshToken(String refreshToken) {
+        Optional<RefreshToken> oldRefreshToken = refreshRepo.findByTokenHash(refreshToken);
+        if (oldRefreshToken.isEmpty()) {
+            return null;
+        };
+
+        if (!isRefreshTokenValid(refreshToken)) {
+            return null;
+        }
+
+        try {
+            String newTokenHash = this.generateRefreshToken();
+            Instant newExpiryDate = Instant.now().plusSeconds(15 * 60 * 1000);
+            RefreshToken newRefreshToken =
+                    new RefreshToken(oldRefreshToken.get().getUserId(), newTokenHash, newExpiryDate);
+            oldRefreshToken.get().setRevokedAt(Instant.now());
+            newRefreshToken.setFamilyId(oldRefreshToken.get().getFamilyId());
+
+            refreshRepo.saveAllAndFlush(java.util.List.of(oldRefreshToken.get(), newRefreshToken));
+            return newRefreshToken;
+        } catch(Exception e) {
+            log.error("e: ", e);
+        }
+
+        return null;
     }
 }
