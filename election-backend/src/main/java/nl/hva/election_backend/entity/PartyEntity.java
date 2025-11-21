@@ -20,7 +20,14 @@ public class PartyEntity {
     public PartyEntity(String name, int year) {
         this.name = name;
         this.year = year;
-        this.party_id = year + "_" + name;
+        this.party_id = generatePartyId(name);
+    }
+
+    private String generatePartyId(String name) {
+        return name.toUpperCase()
+                .replaceAll("[^A-Z0-9]+", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^_|_$", ""); // geen dubbele underscores
     }
 
     public String getId() { return party_id; }
