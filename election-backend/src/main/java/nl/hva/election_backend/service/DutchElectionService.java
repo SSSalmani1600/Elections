@@ -23,10 +23,6 @@ public class DutchElectionService {
     public Election readResults(String electionId, String folderName) {
         System.out.println("Processing files...");
 
-        if (election == null) {
-            election = new Election(electionId);
-        }
-
         Election election = new Election(electionId);
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
