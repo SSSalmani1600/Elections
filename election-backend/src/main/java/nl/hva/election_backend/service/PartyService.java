@@ -5,6 +5,7 @@ import nl.hva.election_backend.repository.PartyRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -23,7 +24,8 @@ public class PartyService {
     }
 
     public Set<PartyEntity> getParties() {
-        return partyRepository.findAll();
+        List<PartyEntity> partyList = partyRepository.findAll();
+        return new HashSet<>(partyList);
     }
 
 }
