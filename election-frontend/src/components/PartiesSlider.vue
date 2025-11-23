@@ -12,8 +12,9 @@ import 'swiper/css/autoplay';
 import { Autoplay, Grid, Navigation, Pagination } from "swiper/modules";
 import { getParties } from "@/services/PartyService.ts";
 import type {SwiperEvents} from "swiper/types";
+import type { Party2 } from '@/types/api.ts'
 
-const data = ref<string[]>([]);
+const data = ref<Party2[]>([]);
 const loading = ref(false);
 const error = ref<string>("");
 
@@ -144,7 +145,7 @@ onMounted(async () => {
         <div class="swiper">
           <div class="swiper-wrapper">
             <router-link
-              :to="{ path: '/partij/' + party }"
+              :to="{ path: '/partij/' + party.name }"
               v-for="(party, index) in data"
               :key="party"
               class="swiper-slide p-4 px-10 h-fit w-full flex items-center justify-between bg-background text-white rounded-xl z-20"
@@ -164,7 +165,7 @@ onMounted(async () => {
                     alt=""
                   />
                 </div>
-                <span class="font-semibold truncate text-white">{{ party }}</span>
+                <span class="font-semibold truncate text-white">{{ party.name }}</span>
               </div>
             </router-link>
           </div>
