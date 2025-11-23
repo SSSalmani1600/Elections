@@ -23,7 +23,7 @@ onMounted(async () => {
   loading.value = true
   updatePageSize()
   try {
-    const fetchedData = await getParties()
+    const fetchedData = Array.from(await getParties())
     data.value = fetchedData
     console.log(data.value[0])
     fuseInstance = new Fuse(fetchedData, fuseConfig)
@@ -165,7 +165,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
             <router-link
               :to="{ path: '/partij/' + party.name }"
               v-for="party in visibleParties"
-              :key="party"
+              :key="party.name"
               class="bg-primary w-full h-fit rounded-lg"
             >
               <a
