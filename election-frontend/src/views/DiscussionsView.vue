@@ -62,33 +62,35 @@ async function createDiscussion() {
   formError.value = null
 
   try {
+    // ⚠️ backend verwacht userId, niet author
+    const userId = Number(localStorage.getItem('userId') ?? 1) // tijdelijk 1 voor test
+
     const res = await fetch('http://localhost:8080/api/discussions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: formTitle.value.trim(),
         body: formBody.value.trim(),
-        author: localStorage.getItem('username') || 'Onbekend',
+        category: 'algemeen',
+        userId, // <-- BELANGRIJK
       }),
     })
 
     if (!res.ok) {
-      throw new Error('Kon nieuw topic niet aanmaken')
+      const msg = await res.text().catch(() => '')
+      throw new Error(msg || `Kon nieuw topic niet aanmaken (status ${res.status})`)
     }
 
     const data = await res.json()
 
-    // nieuwe topic bovenaan lijst zetten
-    const newItem: DiscussionListItem = {
+    // zet nieuwe topic bovenaan in de lijst
+    discussions.value.unshift({
       id: data.id,
       title: data.title,
-      author: data.author,
+      author: data.author,              // komt uit backend via users
       lastActivityAt: data.lastActivityAt,
       reactionsCount: data.reactionsCount,
-    }
-    discussions.value.unshift(newItem)
+    })
 
     closeModal()
   } catch (e) {
@@ -97,6 +99,7 @@ async function createDiscussion() {
     submitting.value = false
   }
 }
+
 </script>
 
 <template>

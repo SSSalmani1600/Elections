@@ -1,24 +1,36 @@
-// Model van 1 discussie (titel, auteur, tekst, tijden, aantal reacties).
-//Weet hoe het zichzelf moet aanmaken of updaten.
 package nl.hva.election_backend.model;
 
 import java.time.Instant;
-import java.util.Objects;
-import java.util.UUID;
 
-// dit is 1 discussie, gewoon simpele data (nog geen database)
-public final class Discussion {
-    private final String id; // unieke id
-    private final String title; // titel van discussie
-    private final String author; // wie heeft gepost
-    private final String body; // tekst zelf
-    private final String category; // categorie
-    private final Instant createdAt; // wanneer gemaakt
-    private final Instant lastActivityAt; // laatste activiteit
-    private final int reactionsCount; // hoeveel reacties
+public class Discussion {
 
-    // constructor, maakt discussie aan met waardes
-    private Discussion(
+    private String id;          // id als string (wordt long in DB)
+    private String title;
+    private String body;
+    private String category;
+    private Long userId;        // <-- BELANGRIJK
+    private String author;      // username (alleen voor frontend)
+    private Instant createdAt;
+    private Instant lastActivityAt;
+    private int reactionsCount;
+
+    public Discussion() {}
+
+    /** Nieuwe discussie aanmaken vanuit controller */
+    public static Discussion create(String title, String body, String category, Long userId) {
+        Discussion d = new Discussion();
+        d.title = title;
+        d.body = body;
+        d.category = category != null ? category : "algemeen";
+        d.userId = userId;
+        d.createdAt = Instant.now();
+        d.lastActivityAt = Instant.now();
+        d.reactionsCount = 0;
+        return d;
+    }
+
+    /** Mapping vanuit Entity */
+    public static Discussion fromEntity(
             String id,
             String title,
             String author,
@@ -28,77 +40,35 @@ public final class Discussion {
             Instant lastActivityAt,
             int reactionsCount
     ) {
-        this.id = Objects.requireNonNull(id); // id mag niet null zijn
-        this.title = validateNonBlank(title, "title"); // check of titel ingevuld is
-        this.author = validateNonBlank(author, "author"); // check of naam er is
-        this.body = validateNonBlank(body, "body"); // check of tekst niet leeg is
-        this.category = category != null ? category : "algemeen"; // default category
-        this.createdAt = Objects.requireNonNull(createdAt); // check op null
-        this.lastActivityAt = Objects.requireNonNull(lastActivityAt); // ook checken
-        if (lastActivityAt.isBefore(createdAt)) { // kan niet eerder zijn dan gemaakt
-            throw new IllegalArgumentException("lastActivityAt < createdAt");
-        }
-        this.reactionsCount = Math.max(0, reactionsCount); // geen negatieve reacties
+        Discussion d = new Discussion();
+        d.id = id;
+        d.title = title;
+        d.author = author;
+        d.body = body;
+        d.category = category;
+        d.createdAt = createdAt;
+        d.lastActivityAt = lastActivityAt;
+        d.reactionsCount = reactionsCount;
+        return d;
     }
 
-    // checkt of tekst leeg is
-    private static String validateNonBlank(String s, String field) {
-        if (s == null || s.isBlank()) throw new IllegalArgumentException(field + " is leeg");
-        return s.trim(); // haalt extra spaties weg
-    }
+    // --------- GETTERS ----------
 
-    // maakt nieuwe discussie aan
-    public static Discussion create(String title, String author, String body) {
-        Instant now = Instant.now(); // tijd van nu
-        return new Discussion(UUID.randomUUID().toString(), title, author, body, "algemeen", now, now, 0);
-    }
-
-    // maakt discussie aan vanuit database entity (met bestaande id)
-    public static Discussion fromEntity(String id, String title, String author, String body, String category,
-                                        Instant createdAt, Instant lastActivityAt, int reactionsCount) {
-        return new Discussion(id, title, author, body, category, createdAt, lastActivityAt, reactionsCount);
-    }
-    
-    // Overload without category for backward compatibility
-    public static Discussion fromEntity(String id, String title, String author, String body,
-                                        Instant createdAt, Instant lastActivityAt, int reactionsCount) {
-        return fromEntity(id, title, author, body, "algemeen", createdAt, lastActivityAt, reactionsCount);
-    }
-
-    // maakt nieuwe versie met nieuwe activiteit en reacties
-    public Discussion withActivity(Instant lastActivityAt, int reactionsCount) {
-        return new Discussion(
-                this.id,
-                this.title,
-                this.author,
-                this.body,
-                this.category,
-                this.createdAt,
-                Objects.requireNonNull(lastActivityAt),
-                Math.max(0, reactionsCount)
-        );
-    }
-
-    // getters, halen info op
     public String getId() { return id; }
     public String getTitle() { return title; }
-    public String getAuthor() { return author; }
     public String getBody() { return body; }
     public String getCategory() { return category; }
+    public Long getUserId() { return userId; }     // <-- nu bestaat dit
+    public String getAuthor() { return author; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastActivityAt() { return lastActivityAt; }
     public int getReactionsCount() { return reactionsCount; }
 
-    // checkt of 2 discussies zelfde id hebben
-    @Override public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Discussion d)) return false;
-        return id.equals(d.id);
-    }
+    // --------- SETTERS (nodig voor service) ----------
 
-    @Override public int hashCode() { return id.hashCode(); }
-
-    @Override public String toString() {
-        return "Discussion{id='%s', title='%s'}".formatted(id, title);
-    }
+    public void setId(String id) { this.id = id; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    public void setLastActivityAt(Instant lastActivityAt) { this.lastActivityAt = lastActivityAt; }
+    public void setCategory(String category) { this.category = category; }
+    public void setReactionsCount(int count) { this.reactionsCount = count; }
 }
