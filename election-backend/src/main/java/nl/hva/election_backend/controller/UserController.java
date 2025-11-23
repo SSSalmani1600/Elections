@@ -1,7 +1,7 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.model.User;
-import nl.hva.election_backend.repo.TestRepository;
+import nl.hva.election_backend.repository.TestRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

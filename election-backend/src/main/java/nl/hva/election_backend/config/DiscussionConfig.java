@@ -2,7 +2,7 @@ package nl.hva.election_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import nl.hva.election_backend.repo.InMemoryDiscussionRepository;
+import nl.hva.election_backend.repository.InMemoryDiscussionRepository;
 
 
 @Configuration
