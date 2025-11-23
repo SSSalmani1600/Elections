@@ -50,6 +50,12 @@ public final class Discussion {
         return new Discussion(UUID.randomUUID().toString(), title, author, body, now, now, 0);
     }
 
+    // maakt discussie aan vanuit database entity (met bestaande id)
+    public static Discussion fromEntity(String id, String title, String author, String body,
+                                        Instant createdAt, Instant lastActivityAt, int reactionsCount) {
+        return new Discussion(id, title, author, body, createdAt, lastActivityAt, reactionsCount);
+    }
+
     // maakt nieuwe versie met nieuwe activiteit en reacties
     public Discussion withActivity(Instant lastActivityAt, int reactionsCount) {
         return new Discussion(

@@ -1,16 +1,13 @@
 package nl.hva.election_backend.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import nl.hva.election_backend.repo.InMemoryDiscussionRepository;
 
-
+/**
+ * Configuration for discussions.
+ * JPA repositories are automatically discovered by Spring, so no manual bean configuration is needed.
+ */
 @Configuration
 public class DiscussionConfig {
-
-    @Bean
-    public InMemoryDiscussionRepository discussionRepository() {
-        // registreert je in-memory repo als Spring bean
-        return new InMemoryDiscussionRepository();
-    }
+    // In-memory repository has been replaced with JPA repositories (DiscussionRepository, ReactionRepository)
+    // These are automatically discovered and registered by Spring Data JPA
 }
