@@ -48,10 +48,6 @@ public class PartyEntity {
         this.name = name;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
