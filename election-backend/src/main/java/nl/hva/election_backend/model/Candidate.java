@@ -1,8 +1,12 @@
 package nl.hva.election_backend.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Candidate {
     private final String firstName;
     private final String lastName;
+    private final String namePrefix;
     private final String initials;
     private final String gender;
     private final String localityName;
@@ -12,10 +16,13 @@ public class Candidate {
     private boolean isElected = false;
     private String candidateId;
     private int votes;
+    private final Map<String, Integer> votesByMunicipality = new HashMap<>();
+    private final Map<String, Integer> votesByStation = new HashMap<>();
 
-    public Candidate(String firstName, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
+    public Candidate(String firstName, String namePrefix, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.namePrefix = namePrefix;
         this.initials = initials;
         this.gender = gender;
         this.localityName = localityName;
@@ -27,6 +34,7 @@ public class Candidate {
     public Candidate(Candidate copy) {
         this(
                 copy.getFirstName(),
+                copy.getNamePrefix(),
                 copy.getLastName(),
                 copy.getInitials(),
                 copy.getGender(),
@@ -58,9 +66,12 @@ public class Candidate {
         return firstName;
     }
 
+    public String getNamePrefix() {return namePrefix;}
+
     public String getLastName() {
         return lastName;
     }
+
 
     public String getInitials() {
         return initials;
@@ -87,8 +98,12 @@ public class Candidate {
     }
 
     public String getFullName() {
-        return firstName + " " + lastName;
+        if (namePrefix == null || namePrefix.isBlank()) {
+            return firstName + " " + lastName;
+        }
+        return firstName + " " + namePrefix + " " + lastName;
     }
+
 
     public int getVotes() {
         return votes;
@@ -104,5 +119,13 @@ public class Candidate {
 
     public void setCandidateId(String candidateId) {
         this.candidateId = candidateId;
+    }
+
+    public Map<String, Integer> getVotesByMunicipality() {
+        return votesByMunicipality;
+    }
+
+    public Map<String, Integer> getVotesByStation() {
+        return votesByStation;
     }
 }

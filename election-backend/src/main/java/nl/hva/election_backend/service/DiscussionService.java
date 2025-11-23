@@ -4,7 +4,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.model.Discussion;
-import nl.hva.election_backend.repo.InMemoryDiscussionRepository;
+import nl.hva.election_backend.repository.InMemoryDiscussionRepository;
 import org.springframework.stereotype.Service;
 import nl.hva.election_backend.dto.ReactionDto;
 import java.time.Instant;
