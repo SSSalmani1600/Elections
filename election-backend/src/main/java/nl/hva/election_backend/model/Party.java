@@ -2,6 +2,8 @@ package nl.hva.election_backend.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Party {
     private String name;
@@ -9,6 +11,8 @@ public class Party {
     private int votes;
     private Set<Candidate> candidates = new HashSet<>();
     private Set<ElectedCandidates> electedCandidates = new HashSet<>();
+    private final Map<String, Integer> votesByMunicipality = new HashMap<>();
+    private final Map<String, Integer> votesByStation = new HashMap<>();
 
     public Party(String name) {
         this.name = name;
@@ -59,5 +63,13 @@ public class Party {
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
+    }
+
+    public Map<String, Integer> getVotesByMunicipality() {
+        return votesByMunicipality;
+    }
+
+    public Map<String, Integer> getVotesByStation() {
+        return votesByStation;
     }
 }

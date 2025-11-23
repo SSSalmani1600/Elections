@@ -79,3 +79,41 @@ Because Java offers both normal queues (FIFO), stack-like queues (LIFO), and pri
 
 **Sub-question 5:**
 _How do my own performance measurements compare to official Java documentation and benchmark results?_
+
+Based on my performance test results, the _ArrayDeque_ showed the most stable and efficient performance when adding elements to the queue. 
+The graph shows the average add-time remained consistently low, with only a few small spikes. This aligns with the java documentation (Oracle, 2024) ans other benchmark sources (JavaGuides, 2023), which describes the _ArrayDeque_ fast for queue operations because it stores elements in a resizeable array located next to each other in memory. 
+
+In contrast to the _ArrayDeque_, the _LinkedList_ showed several performance spikes. These occasional delays are caused by its internal structure, a chain of nodes linked next to each other, which requires additional elements. This supports the idea that the _LinkedList_ is less efficient for frequent add/remove operations but remains useful when flexible insertion positions are needed (W3Schools, 2024). 
+
+The _PriorityQueue_ had the highest and most frequent spikes in add-time. This is the expected, since it reorders elements internally after each insertion to maintain its priority order. While it is slower for large amounts of data, it offers clear advantages in scenarios where the order of importance matters more than speed, such as scheduling urgent tasks or pathfinding algorithms (GeeksforGeeks, 2025).
+
+Overall my results confirm the existing documentation:
+_ArrayDeque:_ Best overall performance and lowest memory overhead.
+_LinkedList:_ Slower but flexible for dynamic insertions.
+_PriorityQueue:_ Less efficient for raw performance but essential for priority based processing.
+
+**Conclusion:**
+
+The comparison with the LinkedList, ArrayDeque and the PriorityQueue shows that the ArrayDeque the most efficient application is of the Java Queue interface for the most general use cases. It provides fast and consistent performance with low memory usage. The LinkedList is slower but does offer flexibility when frequent insertions or removals occur in the middle of the collection.
+The PriorityQueue performs less efficiently because of its internal reordering, but is essential in scenarios where task priority is more important than speed is.
+
+For developers, the recommendation is to use the ArrayDeque for most queue operations, LinkedList for flexible list-like structures, and the PriorityQueue when handeling priority based tasks.  
+
+**References**
+
+* Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. Numerische Mathematik, 1(1), 269–271. https://doi.org/10.1007/BF01386390
+
+* GeeksforGeeks. (2025). Java PriorityQueue – Implementation and Examples. Retrieved from https://www.geeksforgeeks.org/
+
+* JavaGuides. (2023). Java Queue Interface with Examples. Retrieved from https://www.javaguides.net/
+
+* JavaTPoint. (2024). ArrayDeque in Java. Retrieved from https://www.javatpoint.com/
+
+* Oracle. (2024a). Class PriorityQueue (Java SE 21 & JDK 21). Retrieved from https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+
+* Oracle. (2024b). Interface Queue (Java SE 21 & JDK 21). Retrieved from https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
+
+* W3Schools. (2024). Java Queue. Retrieved from https://www.w3schools.com/java/java_queue.asp
+
+
+

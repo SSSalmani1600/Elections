@@ -1,0 +1,22 @@
+package nl.hva.election_backend.service;
+
+import nl.hva.election_backend.entity.PartyEntity;
+import nl.hva.election_backend.repository.PartyRepository;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PartyService {
+
+    private final PartyRepository partyRepository;
+
+    public PartyService(PartyRepository repository) {
+        this.partyRepository = repository;
+    }
+
+    public PartyEntity saveIfNotExists(String name, int year) {
+        return partyRepository
+                .findByNameAndYear(name, year)
+                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year)));
+    }
+
+}

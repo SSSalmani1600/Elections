@@ -31,15 +31,25 @@ public class Election {
     }
 
     public Election(String electionId) {
+        this.id = electionId;
     }
 
     public String getType() { return type; }
     public String getDate() { return date; }
     public String getStatus() { return status; }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
-        return "You have to create a proper election model yourself!";
+        return "Election{id='%s', type='%s', date='%s', parties=%d}"
+                .formatted(id, type, date, parties.size());
     }
 
     public String getId() {
