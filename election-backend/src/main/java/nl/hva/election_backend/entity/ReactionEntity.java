@@ -15,21 +15,21 @@ public class ReactionEntity {
     @JoinColumn(name = "discussion_id", nullable = false)
     private DiscussionEntity discussion;
 
-    @Column(name = "author", nullable = false)
-    private String author;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
     private Instant createdAt;
 
     public ReactionEntity() {
     }
 
-    public ReactionEntity(DiscussionEntity discussion, String author, String message, Instant createdAt) {
+    public ReactionEntity(DiscussionEntity discussion, Long userId, String message, Instant createdAt) {
         this.discussion = discussion;
-        this.author = author;
+        this.userId = userId;
         this.message = message;
         this.createdAt = createdAt;
     }
@@ -51,12 +51,12 @@ public class ReactionEntity {
         this.discussion = discussion;
     }
 
-    public String getAuthor() {
-        return author;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getMessage() {

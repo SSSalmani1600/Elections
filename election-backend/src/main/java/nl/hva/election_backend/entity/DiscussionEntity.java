@@ -9,50 +9,55 @@ import java.util.List;
 public class DiscussionEntity {
 
     @Id
-    @Column(name = "id", nullable = false, unique = true)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "author", nullable = false)
-    private String author;
-
     @Column(name = "body", nullable = false, columnDefinition = "TEXT")
     private String body;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
     private Instant createdAt;
 
-    @Column(name = "last_activity_at", nullable = false)
+    @Column(name = "last_activity_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
     private Instant lastActivityAt;
 
     @Column(name = "reactions_count", nullable = false)
     private int reactionsCount;
 
-    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ReactionEntity> reactions;
 
     public DiscussionEntity() {
     }
 
-    public DiscussionEntity(String id, String title, String author, String body, 
+    public DiscussionEntity(Long id, String title, String body, String category, Long userId,
                           Instant createdAt, Instant lastActivityAt, int reactionsCount) {
         this.id = id;
         this.title = title;
-        this.author = author;
         this.body = body;
+        this.category = category;
+        this.userId = userId;
         this.createdAt = createdAt;
         this.lastActivityAt = lastActivityAt;
         this.reactionsCount = reactionsCount;
     }
 
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -64,20 +69,28 @@ public class DiscussionEntity {
         this.title = title;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
     public String getBody() {
         return body;
     }
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Instant getCreatedAt() {

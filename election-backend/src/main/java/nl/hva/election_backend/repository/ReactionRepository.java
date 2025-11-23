@@ -12,8 +12,8 @@ import java.util.List;
 public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> {
     
     @Query("SELECT r FROM ReactionEntity r WHERE r.discussion.id = :discussionId ORDER BY r.createdAt ASC")
-    List<ReactionEntity> findByDiscussionId(@Param("discussionId") String discussionId);
+    List<ReactionEntity> findByDiscussionId(@Param("discussionId") Long discussionId);
     
-    long countByDiscussionId(String discussionId);
+    long countByDiscussionId(Long discussionId);
 }
 

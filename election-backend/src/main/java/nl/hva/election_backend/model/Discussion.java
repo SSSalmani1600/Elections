@@ -6,22 +6,24 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-// dit is een discussie, gewoon simpele data (nog geen database)
+// dit is 1 discussie, gewoon simpele data (nog geen database)
 public final class Discussion {
     private final String id; // unieke id
     private final String title; // titel van discussie
     private final String author; // wie heeft gepost
     private final String body; // tekst zelf
+    private final String category; // categorie
     private final Instant createdAt; // wanneer gemaakt
     private final Instant lastActivityAt; // laatste activiteit
     private final int reactionsCount; // hoeveel reacties
 
-    // constructor maakt discussie aan met waardes
+    // constructor, maakt discussie aan met waardes
     private Discussion(
             String id,
             String title,
             String author,
             String body,
+            String category,
             Instant createdAt,
             Instant lastActivityAt,
             int reactionsCount
@@ -30,6 +32,7 @@ public final class Discussion {
         this.title = validateNonBlank(title, "title"); // check of titel ingevuld is
         this.author = validateNonBlank(author, "author"); // check of naam er is
         this.body = validateNonBlank(body, "body"); // check of tekst niet leeg is
+        this.category = category != null ? category : "algemeen"; // default category
         this.createdAt = Objects.requireNonNull(createdAt); // check op null
         this.lastActivityAt = Objects.requireNonNull(lastActivityAt); // ook checken
         if (lastActivityAt.isBefore(createdAt)) { // kan niet eerder zijn dan gemaakt
@@ -47,13 +50,19 @@ public final class Discussion {
     // maakt nieuwe discussie aan
     public static Discussion create(String title, String author, String body) {
         Instant now = Instant.now(); // tijd van nu
-        return new Discussion(UUID.randomUUID().toString(), title, author, body, now, now, 0);
+        return new Discussion(UUID.randomUUID().toString(), title, author, body, "algemeen", now, now, 0);
     }
 
     // maakt discussie aan vanuit database entity (met bestaande id)
+    public static Discussion fromEntity(String id, String title, String author, String body, String category,
+                                        Instant createdAt, Instant lastActivityAt, int reactionsCount) {
+        return new Discussion(id, title, author, body, category, createdAt, lastActivityAt, reactionsCount);
+    }
+    
+    // Overload without category for backward compatibility
     public static Discussion fromEntity(String id, String title, String author, String body,
                                         Instant createdAt, Instant lastActivityAt, int reactionsCount) {
-        return new Discussion(id, title, author, body, createdAt, lastActivityAt, reactionsCount);
+        return fromEntity(id, title, author, body, "algemeen", createdAt, lastActivityAt, reactionsCount);
     }
 
     // maakt nieuwe versie met nieuwe activiteit en reacties
@@ -63,6 +72,7 @@ public final class Discussion {
                 this.title,
                 this.author,
                 this.body,
+                this.category,
                 this.createdAt,
                 Objects.requireNonNull(lastActivityAt),
                 Math.max(0, reactionsCount)
@@ -74,6 +84,7 @@ public final class Discussion {
     public String getTitle() { return title; }
     public String getAuthor() { return author; }
     public String getBody() { return body; }
+    public String getCategory() { return category; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastActivityAt() { return lastActivityAt; }
     public int getReactionsCount() { return reactionsCount; }
