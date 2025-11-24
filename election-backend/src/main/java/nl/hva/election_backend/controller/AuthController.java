@@ -38,10 +38,13 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        String username = user.getUsername();
-        String token = jwtService.generateToken(user.getId().toString());
+        // Long → Integer
+        Integer userId = Math.toIntExact(user.getId());
 
-        return ResponseEntity.ok(new LoginResponse(token, username));
+        // Token maken met userId + username
+        String token = jwtService.generateToken(userId, user.getUsername());
+
+        return ResponseEntity.ok(new LoginResponse(token, user.getUsername()));
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
@@ -57,6 +60,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
         }
     }
-
 }
-
