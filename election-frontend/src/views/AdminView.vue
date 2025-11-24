@@ -25,8 +25,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { AdminStats } from "../types/AdminStats";
-import { getAdminStats } from "../services/adminService";
+import type {AdminStats} from '@/types/api.ts'
+import { getAdminStats } from "../services/AdminService.ts";
 
 const stats = ref<AdminStats>({
   totalUsers: 0,
