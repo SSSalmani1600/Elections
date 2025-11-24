@@ -66,7 +66,14 @@ public class DutchElectionService {
             // Please note that you can also specify an absolute path to the folder!
             electionParser.parseResults(electionId, PathUtils.getResourcePath("/%s".formatted(folderName)));
             // Do what ever you like to do
-            electionEntity.setDate(LocalDate.parse(election.getDate()));
+            String dateStr = election.getDate();
+
+            if (dateStr == null || dateStr.isBlank()) {
+                // Fallback – pick something that makes sense for your assignment
+                electionEntity.setDate(LocalDate.of(year, 1, 1));
+            } else {
+                electionEntity.setDate(LocalDate.parse(dateStr));  // expects "yyyy-MM-dd"
+            }
             electionRepository.save(electionEntity);
             // Now is also the time to send the election information to a database for example.
 
