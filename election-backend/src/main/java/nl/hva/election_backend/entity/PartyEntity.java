@@ -34,7 +34,7 @@ public class PartyEntity {
 //    }
 
     public String getId() {
-        return party_id;
+        return partyId;
     }
 
     public String getName() {
