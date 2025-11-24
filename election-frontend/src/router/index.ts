@@ -66,7 +66,7 @@ const router = createRouter({
       component: ElectionCalendarView,
     },
     {
-      path: '/admin',
+      path: '/admin/stats',
       name: 'admin',
       component: AdminView,
     },
