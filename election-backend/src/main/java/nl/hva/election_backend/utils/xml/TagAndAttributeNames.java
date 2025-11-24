@@ -91,6 +91,7 @@ public interface TagAndAttributeNames {
     String VALID_VOTES = "ValidVotes";
     String VOTING_METHOD = "VotingMethod";
     // These are the actual keys used for these specific tags
+    String CONTEST_IDENTIFIER_ID = String.format("%s-%s", CONTEST_IDENTIFIER, "Id");
     String AFFILIATION_IDENTIFIER_ID = String.format("%s-%s", AFFILIATION_IDENTIFIER, "Id");
     String CANDIDATE_IDENTIFIER_ID = String.format("%s-%s", CANDIDATE_IDENTIFIER, "Id");
     String CANDIDATE_IDENTIFIER_SHORT_CODE = String.format("%s-%s", CANDIDATE_IDENTIFIER, "ShortCode");

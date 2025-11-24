@@ -11,4 +11,12 @@ public class ConstituencyService {
     public ConstituencyService(ConstituencyRepository constituencyRepository) {
         this.constituencyRepository = constituencyRepository;
     }
+
+    public ConstituencyEntity saveIfNotExists(String id, int year, String name) {
+        if (constituencyRepository.findByNameAndYear(name, year).isPresent()) {
+            return null;
+        }
+
+        return constituencyRepository.save(new ConstituencyEntity(id, year, name));
+    }
 }
