@@ -13,18 +13,29 @@ import java.util.Map;
 
 @Service
 public class JwtService {
-    private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
-            "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
+
+    private final String SECRET_KEY = System.getenv().getOrDefault(
+            "JWT_SECRET_B64",
+            "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A="
+    );
+
     private final String issuer = "ga-stemmen.nl";
 
-
-    public String generateToken(String displayName) {
+    // TOKEN MET userId + displayName
+    public String generateToken(Integer userId, String displayName) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
 
-        return Jwts.builder().claims().add(claims).subject(displayName)
-                .issuer(issuer).issuedAt(new Date(System.currentTimeMillis()))
+        return Jwts.builder()
+                .claims()
+                .add(claims)
+                .subject(displayName)
+                .issuer(issuer)
+                .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
-                .and().signWith(this.getKey()).compact();
+                .and()
+                .signWith(this.getKey())
+                .compact();
     }
 
     private SecretKey getKey() {
@@ -38,22 +49,25 @@ public class JwtService {
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts
-            .parser()
-            .verifyWith(getKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractDisplayName(String token) {
-        Claims claims = extractAllClaims(token);
-        return claims.getSubject();
+        return extractAllClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         Claims claims = extractAllClaims(token);
-        if (!claims.getIssuer().equals("ga-stemmen.nl")) return false;
+        if (!claims.getIssuer().equals(issuer)) return false;
         return !isTokenExpired(token);
+    }
+
+    public Integer extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", Integer.class);
     }
 }
