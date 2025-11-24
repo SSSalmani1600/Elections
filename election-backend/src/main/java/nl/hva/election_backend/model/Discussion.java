@@ -4,12 +4,12 @@ import java.time.Instant;
 
 public class Discussion {
 
-    private String id;          // id als string (wordt long in DB)
+    private String id;
     private String title;
     private String body;
     private String category;
-    private Long userId;        // <-- BELANGRIJK
-    private String author;      // username (alleen voor frontend)
+    private Long userId;
+    private String author;
     private Instant createdAt;
     private Instant lastActivityAt;
     private int reactionsCount;
@@ -52,19 +52,15 @@ public class Discussion {
         return d;
     }
 
-    // --------- GETTERS ----------
-
     public String getId() { return id; }
     public String getTitle() { return title; }
     public String getBody() { return body; }
     public String getCategory() { return category; }
-    public Long getUserId() { return userId; }     // <-- nu bestaat dit
+    public Long getUserId() { return userId; }
     public String getAuthor() { return author; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastActivityAt() { return lastActivityAt; }
     public int getReactionsCount() { return reactionsCount; }
-
-    // --------- SETTERS (nodig voor service) ----------
 
     public void setId(String id) { this.id = id; }
     public void setUserId(Long userId) { this.userId = userId; }

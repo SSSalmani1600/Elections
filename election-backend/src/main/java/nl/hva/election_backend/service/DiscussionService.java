@@ -37,12 +37,14 @@ public class DiscussionService {
 
     // ---------------------- LIST -----------------------
     public List<DiscussionListItemDto> list() {
-        return discussionRepository.findAllByOrderByLastActivityAtDesc()
+
+        // Belangrijk: onze JOIN FETCH versie gebruiken
+        return discussionRepository.findAllWithUserOrdered()
                 .stream()
                 .map(entity -> new DiscussionListItemDto(
                         entity.getId().toString(),
                         entity.getTitle(),
-                        getUserName(entity.getUserId()),
+                        entity.getUser().getUsername(),   // <-- geen Onbekend meer!
                         entity.getLastActivityAt(),
                         entity.getReactionsCount()
                 ))
@@ -58,7 +60,7 @@ public class DiscussionService {
                 reactionRepository.findAllByDiscussionIdOrderByCreatedAtAsc(id);
 
         return new DiscussionDetailDto(
-                d.getId().toString(), // ✅ Fix: toString toegevoegd
+                d.getId().toString(),
                 d.getTitle(),
                 getUserName(d.getUserId()),
                 d.getBody(),
