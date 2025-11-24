@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ConstituencyRepository extends JpaRepository<ConstituencyEntity, ConstituencyId> {
+    Optional<ConstituencyEntity> findByNameAndYear(String name, int year);
 }
