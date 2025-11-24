@@ -2,7 +2,9 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.entity.MunicipalityEntity;
 import nl.hva.election_backend.repository.MunicipalityRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MunicipalityService {
     private final MunicipalityRepository municipalityRepo;
 

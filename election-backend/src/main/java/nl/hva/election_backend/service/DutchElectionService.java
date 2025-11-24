@@ -25,11 +25,13 @@ import java.time.LocalDate;
 public class DutchElectionService {
     private Election election;
     private final PartyService partyService;
+    private final MunicipalityService municipalityService;
     private final ElectionRepository electionRepository;
     private final ConstituencyService constituencyService;
 
-    public DutchElectionService(PartyService partyService, ElectionRepository electionRepository, ConstituencyService constituencyService) {
+    public DutchElectionService(PartyService partyService, MunicipalityService municipalityService, ElectionRepository electionRepository, ConstituencyService constituencyService) {
         this.partyService = partyService;
+        this.municipalityService = municipalityService;
         this.electionRepository = electionRepository;
         this.constituencyService = constituencyService;
     }
@@ -53,7 +55,7 @@ public class DutchElectionService {
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
         DutchElectionParser electionParser = new DutchElectionParser(
-                new DutchDefinitionTransformer(election, partyService),
+                new DutchDefinitionTransformer(election, partyService, municipalityService),
                 new DutchCandidateTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
