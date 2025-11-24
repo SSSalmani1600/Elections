@@ -18,6 +18,7 @@ import static nl.hva.election_backend.utils.xml.TagAndAttributeNames.*;
 public class DutchDefinitionTransformer implements DefinitionTransformer {
     private final Election election;
     private final PartyService partyService;
+    private int currentPartyId = 1;
 
     /**
      * Creates a new transformer for handling the structure of the constituencies, municipalities and the parties.
@@ -42,9 +43,14 @@ public class DutchDefinitionTransformer implements DefinitionTransformer {
     @Override
     public void registerParty(Map<String, String> electionData) {
         String name = electionData.get(REGISTERED_APPELLATION);
+        String electionYear = electionData.get(ELECTION_DATE);
 
-        int year = Integer.parseInt(election.getDate().substring(0, 4));
-        PartyEntity saveParty = partyService.saveIfNotExists(name, year);
+        String partyId = String.valueOf(currentPartyId);
+        int year = Integer.parseInt(electionYear.substring(0, 4));
+        PartyEntity saveParty = partyService.saveIfNotExists(name, year, partyId);
+        currentPartyId++;
+
+
         System.out.println("Party saved: " + saveParty.getYear() + " - " + saveParty.getId());
     }
 

@@ -13,10 +13,9 @@ public class PartyService {
         this.partyRepository = repository;
     }
 
-    public PartyEntity saveIfNotExists(String name, int year) {
+    public PartyEntity saveIfNotExists(String name, int year, String partyId) {
         return partyRepository
                 .findByNameAndYear(name, year)
-                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year)));
+                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year, partyId)));
     }
-
 }
