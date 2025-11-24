@@ -50,6 +50,12 @@ export interface Party {
   candidates: Candidate[];
 }
 
+export interface Party2 {
+  year: number;
+  party_id: string;
+  name: string;
+}
+
 export interface Constituency {
   name: string;
   parties: Party[];
