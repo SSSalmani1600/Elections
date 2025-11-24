@@ -17,15 +17,14 @@ public class PartyService {
         this.partyRepository = repository;
     }
 
-    public PartyEntity saveIfNotExists(String name, int year) {
+    public PartyEntity saveIfNotExists(String name, int year, String partyId) {
         return partyRepository
                 .findByNameAndYear(name, year)
-                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year)));
+                .orElseGet(() -> partyRepository.save(new PartyEntity(name, year, partyId)));
     }
 
     public Set<PartyEntity> getParties() {
         List<PartyEntity> partyList = partyRepository.findAll();
         return new HashSet<>(partyList);
     }
-
 }
