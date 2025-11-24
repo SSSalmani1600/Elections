@@ -5,43 +5,41 @@ import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import IconSpinner from '@/components/icons/IconSpinner.vue'
 import type { Party2 } from '@/types/api.ts'
-import Fuse from 'fuse.js'
+import { getWikipediaPartyData } from '@/services/WikipediaService.ts'
+import { useFuse } from '@vueuse/integrations/useFuse'
 
 const data = ref<Party2[]>([])
+const partyWithInfo = ref<{ name: string; img: string; summary: string }[]>([])
 const loading = ref(false)
 const hasError = ref<boolean>(false)
 const inputText = ref<string>('')
-let fuseInstance: Fuse<Party2> | null = null
-const searchResults = ref<Party2[]>([])
-
-const fuseConfig = {
-  keys: ['name'],
-  threshold: 0.3,
-}
+const { results } = useFuse(inputText, partyWithInfo, {
+  fuseOptions: {
+    keys: ['name'],
+    threshold: 0.3,
+  },
+})
 
 onMounted(async () => {
   loading.value = true
   updatePageSize()
   try {
-    const fetchedData = Array.from(await getParties())
-    data.value = fetchedData
-    console.log(data.value[0])
-    fuseInstance = new Fuse(fetchedData, fuseConfig)
+    data.value = Array.from(await getParties())
+    const promises = data.value.map(async (party) => {
+      const wikiInfo = await getWikipediaPartyData(party.name)
+      return {
+        name: party.name,
+        img: wikiInfo?.img || '',
+        summary: wikiInfo?.summary || '',
+      }
+    })
+    partyWithInfo.value = await Promise.all(promises)
   } catch (err: any) {
     console.error(err.message)
     hasError.value = true
   } finally {
     loading.value = false
     console.log(loading.value)
-  }
-})
-
-watch(inputText, (newQuery) => {
-  if (fuseInstance && newQuery.trim().length > 0) {
-    const results = fuseInstance.search(newQuery.trim())
-    searchResults.value = results.map(r => r.item)
-  } else {
-    searchResults.value = []
   }
 })
 
@@ -88,7 +86,7 @@ const pages = computed(() => {
 
 const filteredList = computed(() => {
   currentPage.value = 1
-  return inputText.value.trim() === '' ? data.value : searchResults.value
+  return inputText.value.trim() === '' ? partyWithInfo.value : results.value.map((r) => r.item)
 })
 
 const visibleParties = computed(() => {
@@ -156,7 +154,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
           <span
             v-show="hasError"
             class="text-lg bg-background py-4 px-8 rounded-lg shadow-lg text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full md:w-fit"
-          >Er konden geen partijen gevonden worden!</span
+            >Er konden geen partijen gevonden worden!</span
           >
           <div
             v-show="!hasError && visibleParties.length > 0"
@@ -168,21 +166,19 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
               :key="party.name"
               class="bg-primary w-full h-fit rounded-lg"
             >
-              <a
-                href="/"
-                class="flex gap-8 bg-background! h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300"
+              <div
+                class="flex gap-8 bg-background  h-[150px] border rounded-lg border-[#455174]! overflow-hidden p-4! ease-out hover:transform hover:-translate-x-2 hover:-translate-y-2 hover:shadow-lg duration-300"
               >
-                <img src="../assets/partij-img.svg" width="120px" alt="" class="mb-auto" />
+                <span class="w-[120px] h-full">
+                  <img :src="party.img" alt="" class="w-full h-full object-contain " />
+                </span>
                 <div class="overflow-hidden">
                   <div class="flex flex-col max-w-[250px]">
-                    <span class="text-lg font-bold truncate">{{ party.name }}</span>
-                    <p class="text-text-muted line-clamp-3">
-                      simply dummy text of the printing and typesetting industry. Lorem Ipsum has
-                      been the industry's standard dummy text ever since the 1500s,
-                    </p>
+                    <span class="text-lg  font-bold truncate">{{ party.name }}</span>
+                    <p class="text-text-muted line-clamp-3">{{ party.summary }}</p>
                   </div>
                 </div>
-              </a>
+              </div>
             </router-link>
           </div>
           <IconSpinner

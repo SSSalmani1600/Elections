@@ -13,15 +13,25 @@ import { Autoplay, Grid, Navigation, Pagination } from "swiper/modules";
 import { getParties } from "@/services/PartyService.ts";
 import type {SwiperEvents} from "swiper/types";
 import type { Party2 } from '@/types/api.ts'
+import { getWikipediaPartyData } from '@/services/WikipediaService.ts'
 
 const data = ref<Party2[]>([]);
+const partyWithImg = ref<{ name: string; img: string;}[]>([])
 const loading = ref(false);
 const error = ref<string>("");
 
 onMounted(async () => {
   loading.value = true;
   try {
-    data.value = await getParties();
+    data.value = Array.from(await getParties());
+    const promises = data.value.map(async (party) => {
+      const wikiInfo = await getWikipediaPartyData(party.name);
+      return {
+        name: party.name,
+        img: wikiInfo?.img || '',
+      }
+    })
+    partyWithImg.value = await Promise.all(promises)
   } catch (err: any) {
     console.error(err.message);
     error.value = "Er konden geen partijen gevonden worden!";
@@ -146,21 +156,14 @@ onMounted(async () => {
           <div class="swiper-wrapper">
             <router-link
               :to="{ path: '/partij/' + party.name }"
-              v-for="(party, index) in data"
+              v-for="(party) in partyWithImg"
               :key="party"
               class="swiper-slide p-4 px-10 h-fit w-full flex items-center justify-between bg-background text-white rounded-xl z-20"
             >
               <div class="flex items-center gap-4 overflow-hidden w-full">
                 <div class="w-[40px] h-[40px] shrink-0">
                   <img
-                    v-if="index % 2 == 0"
-                    src="../assets/fvd-logo.png"
-                    class="w-full h-full object-contain"
-                    alt=""
-                  />
-                  <img
-                    v-if="index % 2 !== 0"
-                    src="../assets/d66-logo.png"
+                    :src="party.img"
                     class="w-full h-full object-contain"
                     alt=""
                   />
