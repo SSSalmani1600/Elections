@@ -46,6 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 ".*/api/auth(/.*)?",
                 ".*/api/parties(/.*)?",
                 ".*/api/elections(/.*)?",
+                ".*/api/users(/.*)?",
                 ".*/api/next-elections(/.*)?"
         };
 

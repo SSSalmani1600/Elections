@@ -63,14 +63,14 @@ for general use.
 ### What extra features does a `LinkedHashMap` add, and how does that affect speed?
 
 With the normal HashMap the data stores in a chaotic, but fast unsorted way. With the LinkedHashMap this data is stored
-and sorted by either `insertion-order` or `acces-order`, depending on what you want.
+and sorted by either `insertion-order` or `access-order`, depending on what you want.
 
 This is done through a doubly linked list. This means that every node knows their "next" and "previous" node. Making the
-iteration order predictable. Fortunatly this does not effect the speed drasticly, it still proceeds at the **same O(1)
+iteration order predictable. Fortunately this does not affect the speed drastically, it still proceeds at the **same O(1)
 speed** as the HashMap for the methods `put()`, `get()` and `remove()` with a slight overhead. This is because it needs
 to add pointer events for "next" and "previous" for each node.
 
-A LinkedHashMap can be useful if you want to implement it for LRU-caches (with acces-order), or when you just want it to
+A LinkedHashMap can be useful if you want to implement it for LRU-caches (with access-order), or when you just want it to
 have a predictable outcome.
 
 ### How does a `TreeMap` keep keys sorted, and what is the cost of that?
@@ -89,7 +89,7 @@ It gets this time complexity by maintaining a balance between tree height and in
 4. Every path from root to end has the same amount of black nodes.
 
 These rules prevent the tree from getting too deep or unbalanced. New nodes always get inserted as red. Whenever a new
-node is inserted and it violates one of the rules (for example 2 red nodes in a row), it will perform one of these
+node is inserted, and it violates one of the rules (for example 2 red nodes in a row), it will perform one of these
 solutions:
 
 #### 1. Recoloring
@@ -98,7 +98,7 @@ Recoloring will appear when the **parent** and the **uncle** of the new node are
 
 - Both the **parent** and **uncle** are colored to black
 - **Grandparent** is colored to red
-- If the **grandparent** is the root, it will immediatly be colored back to black
+- If the **grandparent** is the root, it will immediately be colored back to black
 
 This will fix the red to red violation, without needing to rotate any of the nodes.
 
@@ -115,7 +115,7 @@ of the tree, either one or two rotations are needed.
   Here is a **double rotation** needed, first it needs to be changed to a straight line. After that the same rotation in
   case 1 will be used.
 
-Both recoloring and rotation can be combined with eachother, when both of the conditions are met.
+Both recoloring and rotation can be combined with each-other, when both of the conditions are met.
 
 ### Which implementation is the fastest for adding, finding, and removing data?
 

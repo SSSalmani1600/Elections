@@ -1,5 +1,8 @@
 package nl.hva.election_backend.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Candidate {
     private final String firstName;
     private final String lastName;
@@ -13,6 +16,8 @@ public class Candidate {
     private boolean isElected = false;
     private String candidateId;
     private int votes;
+    private final Map<String, Integer> votesByMunicipality = new HashMap<>();
+    private final Map<String, Integer> votesByStation = new HashMap<>();
 
     public Candidate(String firstName, String namePrefix, String lastName, String initials, String gender, String localityName, String electionName, String affiliationId, String candidateId) {
         this.firstName = firstName;
@@ -114,5 +119,13 @@ public class Candidate {
 
     public void setCandidateId(String candidateId) {
         this.candidateId = candidateId;
+    }
+
+    public Map<String, Integer> getVotesByMunicipality() {
+        return votesByMunicipality;
+    }
+
+    public Map<String, Integer> getVotesByStation() {
+        return votesByStation;
     }
 }
