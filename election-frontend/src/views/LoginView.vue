@@ -33,7 +33,12 @@ async function loginHandler(): Promise<void> {
 
   try {
     const data: LoginResponse = await login(email.value, password.value)
-    localStorage.setItem('JWT', data.token)
+
+    // JWT opslaan
+    localStorage.setItem("JWT", data.token)
+    localStorage.setItem("userId", String(data.id))
+    localStorage.setItem("username", data.displayName)
+
     router.replace('/')
   } catch (err: unknown) {
     console.log(err)

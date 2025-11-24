@@ -1,6 +1,7 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -19,48 +20,33 @@ public class UserEntity {
     @Column(nullable = false)
     private String email;
 
-    @Column(name = "is_admin", nullable = false)
-    private boolean isAdmin;
+    @Column(name = "is_admin")
+    private Boolean isAdmin;
 
-    // GETTERS & SETTERS
+    // ⭐ BELANGRIJK! Hibernate had deze nodig
+    public UserEntity() {}
 
-    public Long getId() {
-        return id;
-    }
+    // -------------- RELATIE FIX -------------------
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<DiscussionEntity> discussions;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<ReactionEntity> reactions;
 
-    public String getUsername() {
-        return username;
-    }
+    // ------------ GETTERS & SETTERS --------------
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public void setIsAdmin(boolean admin) {
-        isAdmin = admin;
-    }
+    public Boolean getIsAdmin() { return isAdmin; }
+    public void setIsAdmin(Boolean admin) { this.isAdmin = admin; }
 }

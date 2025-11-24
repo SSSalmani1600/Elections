@@ -18,14 +18,23 @@ public class ReactionEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    // toegevoegde relatie naar UserEntity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false
+    )
+    private UserEntity user;
+
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
     private Instant createdAt;
 
-    public ReactionEntity() {
-    }
+    public ReactionEntity() {}
 
     public ReactionEntity(DiscussionEntity discussion, Long userId, String message, Instant createdAt) {
         this.discussion = discussion;
@@ -34,7 +43,7 @@ public class ReactionEntity {
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters
+    // getters & setters
     public Long getId() {
         return id;
     }
@@ -59,6 +68,14 @@ public class ReactionEntity {
         this.userId = userId;
     }
 
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
     public String getMessage() {
         return message;
     }
@@ -75,4 +92,3 @@ public class ReactionEntity {
         this.createdAt = createdAt;
     }
 }
-
