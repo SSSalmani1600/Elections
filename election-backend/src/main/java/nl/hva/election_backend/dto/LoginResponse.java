@@ -1,6 +1,7 @@
 package nl.hva.election_backend.dto;
 
 public class LoginResponse {
+    private Long id;
     private String displayName;
     private String token;
 
@@ -9,6 +10,20 @@ public class LoginResponse {
     public LoginResponse(String token, String displayName) {
         this.displayName = displayName;
         this.token = token;
+    }
+
+    public LoginResponse(Long id, String token, String displayName) {
+        this.id = id;
+        this.displayName = displayName;
+        this.token = token;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDisplayName() {
