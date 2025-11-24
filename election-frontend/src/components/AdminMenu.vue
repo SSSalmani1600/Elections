@@ -70,7 +70,7 @@ onMounted(async () => {
         </router-link>
 
         <router-link
-          to="/admin/standpunten"
+          to="/admin/positions"
           class="bg-[#EF3054] text-white text-center py-4 rounded-xl font-semibold shadow-md hover:bg-[#D9294B] transition-all"
         >
           Standpunten beheren
