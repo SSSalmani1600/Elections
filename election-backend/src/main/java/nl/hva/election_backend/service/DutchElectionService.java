@@ -2,6 +2,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.entity.ElectionEntity;
 import nl.hva.election_backend.model.Election;
+import nl.hva.election_backend.repository.ConstituencyRepository;
 import nl.hva.election_backend.repository.ElectionRepository;
 import nl.hva.election_backend.utils.xml.DutchElectionParser;
 import nl.hva.election_backend.utils.xml.transformers.*;
@@ -25,10 +26,12 @@ public class DutchElectionService {
     private Election election;
     private final PartyService partyService;
     private final ElectionRepository electionRepository;
+    private final ConstituencyService constituencyService;
 
-    public DutchElectionService(PartyService partyService, ElectionRepository electionRepository) {
+    public DutchElectionService(PartyService partyService, ElectionRepository electionRepository, ConstituencyService constituencyService) {
         this.partyService = partyService;
         this.electionRepository = electionRepository;
+        this.constituencyService = constituencyService;
     }
 
     public Election readResults(String electionId, String folderName) {
@@ -54,7 +57,7 @@ public class DutchElectionService {
                 new DutchCandidateTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
-                new DutchConstituencyVotesTransformer(election),
+                new DutchConstituencyVotesTransformer(election, constituencyService),
                 new DutchMunicipalityVotesTransformer(election)
         );
 
