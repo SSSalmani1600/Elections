@@ -10,14 +10,12 @@ import java.util.List;
 @Repository
 public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Long> {
 
-    // Originele methode
-    List<DiscussionEntity> findAllByOrderByLastActivityAtDesc();
-
-    // Nieuwe methode: User joinen zodat de username beschikbaar is
     @Query("""
         SELECT d FROM DiscussionEntity d
-        JOIN FETCH d.user u
+        LEFT JOIN FETCH d.user
         ORDER BY d.lastActivityAt DESC
     """)
     List<DiscussionEntity> findAllWithUserOrdered();
+
+    List<DiscussionEntity> findAllByOrderByLastActivityAtDesc();
 }

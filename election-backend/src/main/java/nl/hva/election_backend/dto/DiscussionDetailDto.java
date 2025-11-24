@@ -1,14 +1,13 @@
-
 package nl.hva.election_backend.dto;
 
 import java.time.Instant;
 import java.util.List;
 
-// dit is een data van discussie, wordt naar frontend gestuurd
+// Detailweergave van 1 discussie
 public record DiscussionDetailDto(
         String id,
         String title,
-        String author,
+        String author,              // ✔ username van UserEntity
         String body,
         Instant createdAt,
         Instant lastActivityAt,

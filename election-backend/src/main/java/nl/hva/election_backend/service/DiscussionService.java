@@ -6,7 +6,6 @@ import nl.hva.election_backend.dto.ReactionDto;
 
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
-import nl.hva.election_backend.model.User;
 
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
@@ -38,13 +37,17 @@ public class DiscussionService {
     // ---------------------- LIST -----------------------
     public List<DiscussionListItemDto> list() {
 
-        // Belangrijk: onze JOIN FETCH versie gebruiken
         return discussionRepository.findAllWithUserOrdered()
                 .stream()
                 .map(entity -> new DiscussionListItemDto(
                         entity.getId().toString(),
                         entity.getTitle(),
-                        entity.getUser().getUsername(),   // <-- geen Onbekend meer!
+
+                        // Altijd author ophalen via userId → betrouwbaar en 100% correct
+                        userRepository.findById(entity.getUserId())
+                                .map(u -> u.getUsername())
+                                .orElse("Onbekend"),
+
                         entity.getLastActivityAt(),
                         entity.getReactionsCount()
                 ))
@@ -62,16 +65,27 @@ public class DiscussionService {
         return new DiscussionDetailDto(
                 d.getId().toString(),
                 d.getTitle(),
-                getUserName(d.getUserId()),
+
+                // Author van discussion
+                userRepository.findById(d.getUserId())
+                        .map(u -> u.getUsername())
+                        .orElse("Onbekend"),
+
                 d.getBody(),
                 d.getCreatedAt(),
                 d.getLastActivityAt(),
                 d.getReactionsCount(),
+
                 reactions.stream()
                         .map(r -> new ReactionDto(
                                 r.getId(),
                                 r.getMessage(),
-                                getUserName(r.getUserId()),
+
+                                // Author van reactie
+                                userRepository.findById(r.getUserId())
+                                        .map(u -> u.getUsername())
+                                        .orElse("Onbekend"),
+
                                 r.getCreatedAt()
                         ))
                         .collect(Collectors.toList())
@@ -108,7 +122,6 @@ public class DiscussionService {
 
         ReactionEntity saved = reactionRepository.save(r);
 
-        // Update discussion stats
         discussion.setReactionsCount(discussion.getReactionsCount() + 1);
         discussion.setLastActivityAt(Instant.now());
         discussionRepository.save(discussion);
@@ -116,15 +129,13 @@ public class DiscussionService {
         return new ReactionDto(
                 saved.getId(),
                 saved.getMessage(),
-                getUserName(saved.getUserId()),
+
+                // Altijd via repo ophalen
+                userRepository.findById(saved.getUserId())
+                        .map(u -> u.getUsername())
+                        .orElse("Onbekend"),
+
                 saved.getCreatedAt()
         );
-    }
-
-    // ---------------------- USERNAME HELPER ----------------------
-    private String getUserName(Long userId) {
-        return userRepository.findById(userId)
-                .map(User::getUsername)
-                .orElse("Onbekend");
     }
 }
