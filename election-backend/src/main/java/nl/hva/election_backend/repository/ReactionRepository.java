@@ -14,6 +14,6 @@ public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> 
     List<ReactionEntity> findByModerationStatusIn(List<String> statuses);
 
     // Methods uit main
-    List<ReactionEntity> findAllByDiscussionIdOrderByCreatedAtAsc(int discussionId);
-    long countByDiscussionId(int discussionId);
+    List<ReactionEntity> findAllByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
+    long countByDiscussionId(Long discussionId);
 }
