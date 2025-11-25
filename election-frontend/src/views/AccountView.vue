@@ -31,11 +31,11 @@
       </div>
 
       <!-- Main Content: Two Column Layout -->
-      <div v-else-if="user" class="grid lg:grid-cols-2 gap-8">
-        
-        <!-- Left Column: Account Info -->
-        <div class="bg-[#111830]/80 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
-          
+      <div v-else-if="user" class="grid lg:grid-cols-2 gap-8 items-start">
+
+        <!-- Left Column: Account Info (Sticky) -->
+        <div class="bg-[#111830]/80 border border-white/10 rounded-2xl shadow-xl overflow-hidden lg:sticky lg:top-8">
+
           <!-- View Mode -->
           <div v-if="!editMode">
             <!-- User header -->
@@ -100,9 +100,9 @@
 
               <button
                 @click="startEdit"
-                class="w-full mt-4 px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white 
-                       shadow-lg shadow-[#ef3054]/20 hover:shadow-xl hover:shadow-[#ef3054]/30 
-                       hover:scale-[1.02] transition-all duration-300 
+                class="w-full mt-4 px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white
+                       shadow-lg shadow-[#ef3054]/20 hover:shadow-xl hover:shadow-[#ef3054]/30
+                       hover:scale-[1.02] transition-all duration-300
                        flex items-center justify-center gap-2 text-sm"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,8 +194,8 @@
               <div v-if="activityLoading" class="text-center py-6 text-gray-500 text-sm">Laden...</div>
               <div v-else-if="activity.topics.length === 0" class="text-center py-6 text-gray-500 text-sm italic">Nog geen topics geplaatst</div>
               <div v-else class="space-y-2">
-                <router-link 
-                  v-for="topic in activity.topics" 
+                <router-link
+                  v-for="topic in activity.topics"
                   :key="topic.id"
                   :to="`/discussions/${topic.id}`"
                   class="block p-3 rounded-xl bg-white/5 border border-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all"
@@ -228,8 +228,8 @@
               <div v-if="activityLoading" class="text-center py-6 text-gray-500 text-sm">Laden...</div>
               <div v-else-if="activity.reactions.length === 0" class="text-center py-6 text-gray-500 text-sm italic">Nog geen reacties geplaatst</div>
               <div v-else class="space-y-2">
-                <router-link 
-                  v-for="reaction in activity.reactions" 
+                <router-link
+                  v-for="reaction in activity.reactions"
                   :key="reaction.id"
                   :to="`/discussions/${reaction.discussionId}`"
                   class="block p-3 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all"
@@ -293,8 +293,8 @@ const activity = ref<{ topics: Topic[], reactions: Reaction[] }>({
 })
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('nl-NL', { 
-    day: 'numeric', 
+  return new Date(dateStr).toLocaleDateString('nl-NL', {
+    day: 'numeric',
     month: 'short',
     year: 'numeric'
   })
@@ -331,7 +331,7 @@ onMounted(async () => {
       newPassword: '',
     }
     localStorage.setItem('userId', String(userData.id))
-    
+
     // Fetch activity
     await fetchActivity(userData.id)
   } catch (err: unknown) {
