@@ -43,10 +43,12 @@ onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
+    const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
 
-    if (!localStorage.getItem('voting_guide_answers')) {
-      localStorage.setItem('voting_guide_answers', '{}')
-    }
+    data.value = data.value.map(statement => ({
+      ...statement,
+      answer: storedAnswers[statement.id] ?? null
+    }))
 
     findUnansweredQuestion()
   } catch (err: any) {
@@ -87,7 +89,7 @@ onMounted(async () => {
             <span class="font-bold block w-full text-lg truncate"
               >{{ index + 1 }} - {{ statement.statement }}</span
             >
-            <div>
+            <div class="block truncate w-full text-left">
               <span class="opacity-80">{{ statement.category }}</span>
               <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
             </div>
@@ -126,13 +128,15 @@ onMounted(async () => {
           <div class="flex items-center gap-3 text-lg">
             <button
               @click="saveAnswer(selectedStatement!.id, 'EENS')"
-              class="btn opinion-btn !border-[#48D507] hover:bg-[#48D507]"
+              :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
+              class="btn opinion-btn !border-[#277D00] hover:bg-[#277D00]"
             >
               EENS
             </button>
             <span class="text-2xl">/</span>
             <button
               @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
+              :class="selectedStatement?.answer === 'NEUTRAAL' ? 'bg-white text-black' : ''"
               class="btn opinion-btn hover:bg-white hover:text-black"
             >
               NEUTRAAL
@@ -140,6 +144,7 @@ onMounted(async () => {
             <span class="text-2xl">/</span>
             <button
               @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
+              :class="selectedStatement?.answer === 'ONEENS' ? 'bg-[#FF1E00]' : ''"
               class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
             >
               ONEENS
