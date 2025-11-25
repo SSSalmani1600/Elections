@@ -21,20 +21,6 @@ public class LoginResponse {
         this.id = id;
     }
 
-    public LoginResponse(Long id, String token, String displayName) {
-        this.id = id;
-        this.displayName = displayName;
-        this.token = token;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
