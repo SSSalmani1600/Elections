@@ -181,10 +181,24 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
               </div>
             </router-link>
           </div>
-          <IconSpinner
+
+          <div
             v-if="loading"
-            class="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2"
-          />
+            class="max-h-[482px] overflow-y-hidden grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2 animate-pulse"
+          >
+            <div
+              v-for="n in 9"
+              :key="n"
+              class="bg-background border rounded-lg border-[#455174] h-[150px] p-4 flex gap-8"
+            >
+              <div class="w-[120px] h-full bg-[#2b3246] rounded"></div>
+              <div class="flex flex-col gap-3 w-full overflow-hidden">
+                <div class="h-5 bg-[#2b3246] rounded w-[70%]"></div>
+                <div class="h-4 bg-[#2b3246] rounded w-full"></div>
+                <div class="h-4 bg-[#2b3246] rounded w-[90%]"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div
@@ -217,3 +231,22 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes loadingShimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #2b3246 0%,
+    #3b445c 50%,
+    #2b3246 100%
+  );
+  background-size: 300% 100%;
+  animation: loadingShimmer 1.2s infinite;
+}
+
+</style>
