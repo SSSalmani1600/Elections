@@ -12,14 +12,13 @@ public class AdminService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // ✔️ Totaal aantal gebruikers
+
     public int getTotalUsers() {
         String sql = "SELECT COUNT(*) FROM public.users";
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
-    // ✔️ Gemelde berichten
-    // Voor nu neem ik discussions (kan ook reactions zijn)
+
     public int getReportedPosts() {
         String sql = "SELECT COUNT(*) FROM public.discussions";
         return jdbcTemplate.queryForObject(sql, Integer.class);
