@@ -67,3 +67,10 @@ export interface User {
   email: string;
   isAdmin?: boolean;
 }
+
+export interface Statement {
+  id: number;
+  statement: string;
+  category: string;
+  explanation: string;
+}
