@@ -2,7 +2,11 @@ package nl.hva.election_backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nl.hva.election_backend.dto.UpdateUserRequest;
+import nl.hva.election_backend.entity.DiscussionEntity;
+import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.model.User;
+import nl.hva.election_backend.repository.DiscussionRepository;
+import nl.hva.election_backend.repository.ReactionRepository;
 import nl.hva.election_backend.repository.TestRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import nl.hva.election_backend.service.JwtService;
@@ -10,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,6 +24,12 @@ public class UserController {
 
     @Autowired
     private TestRepository userRepository;
+
+    @Autowired
+    private DiscussionRepository discussionRepository;
+
+    @Autowired
+    private ReactionRepository reactionRepository;
 
     @Autowired
     private BCryptPasswordHasher passwordHasher;
@@ -111,5 +122,46 @@ public class UserController {
 
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
+    }
+
+    // 🔹 Ophalen van gebruikersactiviteit (topics en reacties)
+    @GetMapping("/{id}/activity")
+    public ResponseEntity<?> getUserActivity(@PathVariable Long id) {
+        // Check of user bestaat
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Haal discussies op
+        List<DiscussionEntity> discussions = discussionRepository.findByUserIdOrderByCreatedAtDesc(id);
+        List<Map<String, Object>> topicsList = new ArrayList<>();
+        for (DiscussionEntity d : discussions) {
+            Map<String, Object> topic = new HashMap<>();
+            topic.put("id", d.getId());
+            topic.put("title", d.getTitle());
+            topic.put("createdAt", d.getCreatedAt().toString());
+            topic.put("reactionsCount", d.getReactionsCount());
+            topicsList.add(topic);
+        }
+
+        // Haal reacties op
+        List<ReactionEntity> reactions = reactionRepository.findByUserIdOrderByCreatedAtDesc(id);
+        List<Map<String, Object>> reactionsList = new ArrayList<>();
+        for (ReactionEntity r : reactions) {
+            Map<String, Object> reaction = new HashMap<>();
+            reaction.put("id", r.getId());
+            reaction.put("message", r.getMessage());
+            reaction.put("createdAt", r.getCreatedAt().toString());
+            reaction.put("discussionId", r.getDiscussion().getId());
+            reaction.put("discussionTitle", r.getDiscussion().getTitle());
+            reactionsList.add(reaction);
+        }
+
+        // Combineer in response
+        Map<String, Object> activity = new HashMap<>();
+        activity.put("topics", topicsList);
+        activity.put("reactions", reactionsList);
+
+        return ResponseEntity.ok(activity);
     }
 }

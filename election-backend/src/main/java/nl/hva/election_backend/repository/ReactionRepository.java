@@ -12,4 +12,7 @@ public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> 
     List<ReactionEntity> findAllByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
 
     long countByDiscussionId(Long discussionId);
+
+    // Haal alle reacties op van een specifieke gebruiker
+    List<ReactionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

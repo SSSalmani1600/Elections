@@ -18,4 +18,7 @@ public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Lo
     List<DiscussionEntity> findAllWithUserOrdered();
 
     List<DiscussionEntity> findAllByOrderByLastActivityAtDesc();
+
+    // Haal alle discussies op van een specifieke gebruiker
+    List<DiscussionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
