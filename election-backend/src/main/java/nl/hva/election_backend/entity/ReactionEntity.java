@@ -1,7 +1,8 @@
 package nl.hva.election_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "reactions")
@@ -11,48 +12,83 @@ public class ReactionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int discussionId;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discussion_id", nullable = false)
+    private DiscussionEntity discussion;
 
-    private int userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(name = "message", nullable = false)
-    private String content;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            insertable = false,
+            updatable = false
+    )
+    private UserEntity user;
 
+    @Column(name = "message", nullable = false, columnDefinition = "TEXT")
+    private String message;
+
+    @Column(name = "moderation_status", nullable = false)
     private String moderationStatus = "PENDING";
 
+    @Column(name = "flagged_reason")
     private String flaggedReason;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
+    private Instant createdAt = Instant.now();
 
-    // --- GETTERS & SETTERS ---
+    public ReactionEntity() {}
+
+    public ReactionEntity(DiscussionEntity discussion, Long userId, String message) {
+        this.discussion = discussion;
+        this.userId = userId;
+        this.message = message;
+        this.createdAt = Instant.now();
+    }
 
     public Long getId() {
         return id;
     }
 
-    public int getDiscussionId() {
-        return discussionId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setDiscussionId(int discussionId) {
-        this.discussionId = discussionId;
+    public DiscussionEntity getDiscussion() {
+        return discussion;
     }
 
-    public int getUserId() {
+    public void setDiscussion(DiscussionEntity discussion) {
+        this.discussion = discussion;
+    }
+
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public String getContent() {
-        return content;
+    public UserEntity getUser() {
+        return user;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getModerationStatus() {
@@ -71,11 +107,11 @@ public class ReactionEntity {
         this.flaggedReason = flaggedReason;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 }
