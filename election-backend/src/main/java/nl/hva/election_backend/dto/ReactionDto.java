@@ -3,21 +3,34 @@ package nl.hva.election_backend.dto;
 import java.time.Instant;
 
 public class ReactionDto {
-    private String author;
+    private Long id;        // handig voor debugging / frontend
+    private String author;  // naam van de user
     private String message;
     private Instant createdAt;
 
-    // ✅ Lege constructor nodig voor JSON (Spring)
+    // ✅ Lege constructor (nodig voor JSON)
     public ReactionDto() {}
 
-    // ✅ Handige constructor voor aanmaken
+    // ✅ Constructor die service gebruikt
     public ReactionDto(String author, String message, Instant createdAt) {
         this.author = author;
         this.message = message;
         this.createdAt = createdAt;
     }
 
-    // ✅ Getters
+    // ✅ Optioneel: constructor met id erbij, handig bij return uit DB
+    public ReactionDto(Long id, String author, String message, Instant createdAt) {
+        this.id = id;
+        this.author = author;
+        this.message = message;
+        this.createdAt = createdAt;
+    }
+
+    // Getters
+    public Long getId() {
+        return id;
+    }
+
     public String getAuthor() {
         return author;
     }
@@ -30,7 +43,11 @@ public class ReactionDto {
         return createdAt;
     }
 
-    // ✅ Setters
+    // Setters
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setAuthor(String author) {
         this.author = author;
     }

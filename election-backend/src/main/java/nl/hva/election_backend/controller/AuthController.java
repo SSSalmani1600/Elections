@@ -41,7 +41,7 @@ public class AuthController {
         String username = user.getUsername();
         String token = jwtService.generateToken(user.getId().toString());
 
-        return ResponseEntity.ok(new LoginResponse(token, username));
+        return ResponseEntity.ok(new LoginResponse(user.getId(), token, username));
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
@@ -59,4 +59,3 @@ public class AuthController {
     }
 
 }
-
