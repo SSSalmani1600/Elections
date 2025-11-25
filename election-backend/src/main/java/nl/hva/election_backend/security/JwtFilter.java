@@ -28,6 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/elections/",
             "/api/users",
             "/api/next-elections",
+            "/api/statements",
     };
 
     @Override
@@ -49,7 +50,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 ".*/api/parties(/.*)?",
                 ".*/api/elections(/.*)?",
                 ".*/api/users(/.*)?",
-                ".*/api/next-elections(/.*)?"
+                ".*/api/next-elections(/.*)?",
+                ".*/api/statements(/.*)?"
         };
 
         for (String pattern : whiteListPatterns) {
