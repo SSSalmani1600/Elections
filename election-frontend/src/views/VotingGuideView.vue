@@ -10,21 +10,46 @@ const selectedStatement = ref<Statement | null>(null)
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
 }
+
+const saveAnswer = (statementId: number, answer: string) => {
+  const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+
+  const index = stored.findIndex((item: { id: number, answer: string }) => item.id === statementId)
+
+  if (index !== -1) {
+    stored[index].answer = answer
+  } else {
+    stored.push({ id: statementId, answer })
+  }
+
+  localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
+
+  findUnansweredQuestion()
+}
+
+const findUnansweredQuestion = () => {
+  const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+
+  const firstUnanswered = data.value.find(statement => {
+    return !storedAnswers[statement.id]
+  })
+
+  if (firstUnanswered) {
+    selectedStatement.value = firstUnanswered
+  } else if (data.value.length > 0) {
+    selectedStatement.value = data.value[0]
+  }
+}
 onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
-    console.log(data.value)
 
-    const firstUnanswered = data.value.find((statement) => {
-      return !localStorage.getItem(`answer_${statement.id}`)
-    })
-
-    if (firstUnanswered) {
-      selectedStatement.value = firstUnanswered
-    } else if (data.value.length > 0) {
-      selectedStatement.value = data.value[0]
+    if (!localStorage.getItem('voting_guide_answers')) {
+      localStorage.setItem('voting_guide_answers', '[]')
     }
+
+    findUnansweredQuestion()
   } catch (err: any) {
     console.error(err.message)
   } finally {
@@ -63,7 +88,7 @@ onMounted(async () => {
       <div class="col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
-            <span class="px-2.5 py-2 rounded-[50px] bg-primary">{{
+            <span class="px-2.5 py-2 rounded-[10px] font-bold bg-primary">{{
               selectedStatement?.category
             }}</span>
             <span class="font-bold text-3xl">STELLING - {{ selectedStatement?.id }}</span>
@@ -76,11 +101,11 @@ onMounted(async () => {
         <div class="flex flex-col gap-4">
           <span class="font-bold text-[28px]">Hiermee ben ik het</span>
           <div class="flex items-center gap-3 text-lg">
-            <button class="btn opinion-btn !border-[#48D507] hover:bg-[#48D507]">EENS</button>
+            <button @click="saveAnswer(selectedStatement!.id, 'EENS')" class="btn opinion-btn !border-[#48D507] hover:bg-[#48D507]">EENS</button>
             <span class="text-2xl">/</span>
-            <button class="btn opinion-btn hover:bg-white hover:text-black">NEUTRAAL</button>
+            <button @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')" class="btn opinion-btn hover:bg-white hover:text-black">NEUTRAAL</button>
             <span class="text-2xl">/</span>
-            <button class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]">ONEENS</button>
+            <button @click="saveAnswer(selectedStatement!.id, 'ONEENS')" class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]">ONEENS</button>
           </div>
         </div>
       </div>
