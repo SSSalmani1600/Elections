@@ -34,7 +34,7 @@ public class DiscussionService {
         this.userRepository = userRepository;
     }
 
-    // ---------------------- LIST -----------------------
+
     public List<DiscussionListItemDto> list() {
 
         return discussionRepository.findAllWithUserOrdered()
@@ -53,13 +53,19 @@ public class DiscussionService {
                 .collect(Collectors.toList());
     }
 
-    // ---------------------- DETAIL ----------------------
     public DiscussionDetailDto getDetailById(Long id) {
         DiscussionEntity d = discussionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
 
+
         List<ReactionEntity> reactions =
-                reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(id);
+                reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(id)
+                        .stream()
+                        .filter(r ->
+                                r.getModerationStatus().equals("APPROVED")
+                                        || r.getModerationStatus().equals("PENDING")
+                        )
+                        .collect(Collectors.toList());
 
         return new DiscussionDetailDto(
                 d.getId().toString(),
@@ -87,7 +93,7 @@ public class DiscussionService {
         );
     }
 
-    // ---------------------- CREATE DISCUSSION ----------------------
+
     public Long createDiscussion(String title, String content, String category, Long userId) {
 
         DiscussionEntity entity = new DiscussionEntity();
