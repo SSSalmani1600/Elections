@@ -49,10 +49,6 @@ onMounted(async () => {
       fill: 'row',
     },
     speed: 1000,
-    autoplay: {
-      pauseOnMouseEnter: true,
-      delay: 4000,
-    },
     loop: true,
     spaceBetween: 20,
     slidesPerGroup: 1,
@@ -168,9 +164,9 @@ onMounted(async () => {
               :to="{ path: '/partij/' + party.name }"
               v-for="party in partyWithImg"
               :key="party.name"
-              class="swiper-slide p-4 px-10 bg-background rounded-xl flex items-center gap-4"
+              class="swiper-slide p-4 px-10 bg-background rounded-xl w-full gap-4"
             >
-              <div class="w-[40px] h-[40px]">
+              <div class="w-[50px] h-[50px]">
                 <img :src="party.img" class="w-full h-full object-contain" alt="" />
               </div>
               <span class="font-semibold truncate text-white">{{ party.name }}</span>
@@ -252,12 +248,12 @@ onMounted(async () => {
 .swiper-slide {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
 }
 
 .skeleton-img {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 8px;
   background: linear-gradient(90deg, #3e3e3e 0%, #555 50%, #3e3e3e 100%);
   background-size: 200% 100%;
