@@ -45,14 +45,14 @@ onMounted(async () => {
     data.value = Array.from(await getAllStatements())
     const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
 
-    data.value = data.value.map(statement => ({
+    data.value = data.value.map((statement) => ({
       ...statement,
-      answer: storedAnswers[statement.id] ?? null
+      answer: storedAnswers[statement.id] ?? null,
     }))
 
     findUnansweredQuestion()
   } catch (err: any) {
-    errorMessage.value = "Er ging iets mis bij het ophalen van de statements"
+    errorMessage.value = 'Er ging iets mis bij het ophalen van de statements'
     console.error(err.message)
   } finally {
     loading.value = false
@@ -61,41 +61,47 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="errorMessage" class="bg-background p-10 rounded-[10px] absolute transform translate-[-50%] top-1/2 left-1/2">
+  <div
+    v-if="errorMessage"
+    class="bg-background p-10 rounded-[10px] absolute transform translate-[-50%] top-1/2 left-1/2"
+  >
     <span class="text-red-400 font-bold text-xl">ERROR</span>
     <p class="text-lg">{{ errorMessage }}</p>
   </div>
-  <div v-else class="flex flex-col gap-4 m-[54px]">
-    <span class="font-bold text-[28px]">STELINGEN</span>
-    <div class="grid grid-cols-12 gap-20">
-      <div
-        class="col-span-3 bg-background rounded-[10px] max-h-[575px] overflow-y-scroll overflow-x-hidden"
-      >
-        <template v-if="loading">
-          <button v-for="i in 10" :key="i" class="flex flex-col gap-2.5 p-4 items-start w-full">
-            <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
-            <span class="skeleton-text h-4 w-[40%] rounded-[10px]"></span>
-          </button>
-        </template>
+  <div v-else class="m-6 lg:m-[54px]">
+    <div class="flex flex-col lg:grid lg:grid-cols-12 gap-20">
+      <div class="flex flex-col gap-4 order-2 lg:order-1 lg:col-span-4 2xl:col-span-3">
+        <span class="font-bold text-[28px]">STELINGEN</span>
+        <div
+          class="bg-background rounded-[10px] max-h-[400px] lg:max-h-[575px] overflow-x-scroll lg:overflow-y-scroll lg:overflow-x-hidden"
+        >
+          <template v-if="loading">
+            <button v-for="i in 10" :key="i" class="flex flex-col gap-2.5 p-4 items-start w-full">
+              <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
+              <span class="skeleton-text h-4 w-[40%] rounded-[10px]"></span>
+            </button>
+          </template>
 
-        <template v-else>
-          <button
-            v-for="(statement, index) in data"
-            :key="statement.id"
-            @click="selectStatement(statement)"
-            :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
-            class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
-          >
-            <span class="font-bold block w-full text-lg truncate"
-              >{{ index + 1 }} - {{ statement.statement }}</span
+          <template v-else>
+            <button
+              v-for="(statement, index) in data"
+              :key="statement.id"
+              @click="selectStatement(statement)"
+              :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
+              class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
             >
-            <div class="block truncate w-full text-left">
-              <span class="opacity-80">{{ statement.category }}</span>
-              <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
-            </div>
-          </button>
-        </template>
+              <span class="font-bold block w-full text-lg truncate text-left"
+                >{{ index + 1 }} - {{ statement.statement }}</span
+              >
+              <div class="block truncate w-full text-left">
+                <span class="opacity-80">{{ statement.category }}</span>
+                <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
+              </div>
+            </button>
+          </template>
+        </div>
       </div>
+
       <div v-if="loading" class="col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
@@ -110,22 +116,24 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else class="col-span-7 flex flex-col gap-10">
+      <div v-else class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
-          <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
-            <span class="px-2.5 py-2 rounded-[10px] font-bold bg-primary">{{
+          <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
+            <span class="px-2.5 text-sm py-2 rounded-[10px] font-bold bg-primary">{{
               selectedStatement?.category
             }}</span>
-            <span class="font-bold text-3xl">STELLING - {{ selectedStatement?.id }}</span>
+            <span class="font-bold text-xl lg:text-3xl"
+              >STELLING - {{ selectedStatement?.id }}</span
+            >
           </div>
           <div class="flex flex-col gap-4 bg-background p-4 rounded-lg">
-            <p class="text-[28px] font-bold">{{ selectedStatement?.statement }}</p>
-            <p class="opacity-80 text-lg">{{ selectedStatement?.explanation }}</p>
+            <p class="text-xl lg:text-[28px] font-bold">{{ selectedStatement?.statement }}</p>
+            <p class="text-md opacity-80 lg:text-lg">{{ selectedStatement?.explanation }}</p>
           </div>
         </div>
         <div class="flex flex-col gap-4">
           <span class="font-bold text-[28px]">Hiermee ben ik het</span>
-          <div class="flex items-center gap-3 text-lg">
+          <div class="flex flex-wrap items-center gap-3 text-lg lg:flex-row">
             <button
               @click="saveAnswer(selectedStatement!.id, 'EENS')"
               :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
