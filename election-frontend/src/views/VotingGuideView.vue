@@ -94,7 +94,21 @@ onMounted(async () => {
           </button>
         </template>
       </div>
-      <div class="col-span-7 flex flex-col gap-10">
+      <div v-if="loading" class="col-span-7 flex flex-col gap-10">
+        <div class="flex flex-col gap-6">
+          <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
+            <span class="skeleton-text h-4 w-[10%] rounded-[10px]"></span>
+            <span class="skeleton-text h-4 w-[30%] rounded-[10px]"></span>
+          </div>
+          <div class="flex flex-col gap-4 bg-background p-4 rounded-lg">
+            <span class="skeleton-text h-8 w-full rounded-[10px]"></span>
+            <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
+            <span class="skeleton-text h-4 w-[30%] rounded-[10px]"></span>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
             <span class="px-2.5 py-2 rounded-[10px] font-bold bg-primary">{{
