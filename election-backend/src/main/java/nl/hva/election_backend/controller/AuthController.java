@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     private final AuthService authService;
     private final JwtService jwtService;
 
@@ -29,23 +30,29 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid email or password");
         }
 
         User user = authService.authenticate(req.getEmail(), req.getPassword());
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         }
 
-        // Long → Integer
-        Integer userId = Math.toIntExact(user.getId());
+        // UserId als integer
+        Integer userId = user.getId().intValue();
+        String username = user.getUsername();
 
-        // Token maken met userId + username
-        String token = jwtService.generateToken(userId, user.getUsername());
+        // Token genereren met userId + username
+        String token = jwtService.generateToken(userId, username);
 
-        return ResponseEntity.ok(new LoginResponse(token, user.getUsername()));
+        return ResponseEntity.ok(
+                new LoginResponse(token, username)
+        );
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {

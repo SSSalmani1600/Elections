@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from 'vue';
+import {nextTick, onMounted, ref} from 'vue';
 import Swiper from 'swiper';
 
 // Import Swiper styles
@@ -9,14 +9,14 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import 'swiper/css/autoplay';
 
-import { Autoplay, Grid, Navigation, Pagination } from "swiper/modules";
-import { getParties } from "@/services/PartyService.ts";
+import {Autoplay, Grid, Navigation, Pagination} from "swiper/modules";
+import {getParties} from "@/services/PartyService.ts";
 import type {SwiperEvents} from "swiper/types";
-import type { Party2 } from '@/types/api.ts'
-import { getWikipediaPartyData } from '@/services/WikipediaService.ts'
+import type {Party2} from '@/types/api.ts'
+import {getWikipediaPartyData} from '@/services/WikipediaService.ts'
 
 const data = ref<Party2[]>([]);
-const partyWithImg = ref<{ name: string; img: string;}[]>([])
+const partyWithImg = ref<{ name: string; img: string; }[]>([])
 const loading = ref(false);
 const error = ref<string>("");
 
@@ -49,10 +49,6 @@ onMounted(async () => {
       fill: 'row',
     },
     speed: 1000,
-    autoplay: {
-      pauseOnMouseEnter: true,
-      delay: 4000,
-    },
     loop: true,
     spaceBetween: 20,
     slidesPerGroup: 1,
@@ -134,6 +130,7 @@ onMounted(async () => {
   });
   swiper.init?.();
 });
+
 </script>
 
 <template>
@@ -152,40 +149,43 @@ onMounted(async () => {
       </span>
 
       <div class="relative">
-        <div class="swiper">
+        <!-- Skeleton Section -->
+        <div v-if="loading" class="grid grid-cols-1  gap-4 !max-h-[164px] overflow-y-hidden md:grid-cols-2 min-[1480px]:grid-cols-3">
+          <div v-for="i in 6" :key="i" class="p-4 bg-background rounded-xl flex items-center gap-4">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text"></div>
+          </div>
+        </div>
+
+<!--         Swiper Section-->
+        <div v-else class="swiper">
           <div class="swiper-wrapper">
             <router-link
               :to="{ path: '/partij/' + party.name }"
-              v-for="(party) in partyWithImg"
-              :key="party"
-              class="swiper-slide p-4 px-10 h-fit w-full flex items-center justify-between bg-background text-white rounded-xl z-20"
+              v-for="party in partyWithImg"
+              :key="party.name"
+              class="swiper-slide p-4 px-10 bg-background rounded-xl w-full gap-4"
             >
-              <div class="flex items-center gap-4 overflow-hidden w-full">
-                <div class="w-[40px] h-[40px] shrink-0">
-                  <img
-                    :src="party.img"
-                    class="w-full h-full object-contain"
-                    alt=""
-                  />
-                </div>
-                <span class="font-semibold truncate text-white">{{ party.name }}</span>
+              <div class="w-[50px] h-[50px]">
+                <img :src="party.img" class="w-full h-full object-contain" alt="" />
               </div>
+              <span class="font-semibold truncate text-white">{{ party.name }}</span>
             </router-link>
           </div>
         </div>
 
-        <button class="swiper-button-prev navigation-btn" aria-label="Vorige slide">
-          <i class="pi pi-angle-left"></i>
-        </button>
-        <button class="swiper-button-next navigation-btn" aria-label="Volgende slide">
-          <i class="pi pi-angle-right"></i>
-        </button>
+      <button class="swiper-button-prev navigation-btn" aria-label="Vorige slide">
+        <i class="pi pi-angle-left"></i>
+      </button>
+      <button class="swiper-button-next navigation-btn" aria-label="Volgende slide">
+        <i class="pi pi-angle-right"></i>
+      </button>
 
-        <div class="swiper-pagination"></div>
-      </div>
+      <div class="swiper-pagination"></div>
     </div>
+  </div>
 
-    <img src="../assets/party-slide-img.svg" width="400" alt="">
+  <img src="../assets/party-slide-img.svg" width="400" alt="">
   </div>
 </template>
 
@@ -248,6 +248,34 @@ onMounted(async () => {
 .swiper-slide {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
+}
+
+.skeleton-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #3e3e3e 0%, #555 50%, #3e3e3e 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.2s infinite;
+  flex-shrink: 0;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 60%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #3e3e3e 0%, #555 50%, #3e3e3e 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.2s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

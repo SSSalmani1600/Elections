@@ -2,6 +2,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.entity.ElectionEntity;
 import nl.hva.election_backend.model.Election;
+import nl.hva.election_backend.repository.ConstituencyRepository;
 import nl.hva.election_backend.repository.ElectionRepository;
 import nl.hva.election_backend.utils.xml.DutchElectionParser;
 import nl.hva.election_backend.utils.xml.transformers.*;
@@ -24,11 +25,15 @@ import java.time.LocalDate;
 public class DutchElectionService {
     private Election election;
     private final PartyService partyService;
+    private final MunicipalityService municipalityService;
     private final ElectionRepository electionRepository;
+    private final ConstituencyService constituencyService;
 
-    public DutchElectionService(PartyService partyService, ElectionRepository electionRepository) {
+    public DutchElectionService(PartyService partyService, MunicipalityService municipalityService, ElectionRepository electionRepository, ConstituencyService constituencyService) {
         this.partyService = partyService;
+        this.municipalityService = municipalityService;
         this.electionRepository = electionRepository;
+        this.constituencyService = constituencyService;
     }
 
     public Election readResults(String electionId, String folderName) {
@@ -50,11 +55,11 @@ public class DutchElectionService {
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
         DutchElectionParser electionParser = new DutchElectionParser(
-                new DutchDefinitionTransformer(election, partyService),
+                new DutchDefinitionTransformer(election, partyService, municipalityService),
                 new DutchCandidateTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
-                new DutchConstituencyVotesTransformer(election),
+                new DutchConstituencyVotesTransformer(election, constituencyService),
                 new DutchMunicipalityVotesTransformer(election)
         );
 
@@ -63,7 +68,14 @@ public class DutchElectionService {
             // Please note that you can also specify an absolute path to the folder!
             electionParser.parseResults(electionId, PathUtils.getResourcePath("/%s".formatted(folderName)));
             // Do what ever you like to do
-            electionEntity.setDate(LocalDate.parse(election.getDate()));
+            String dateStr = election.getDate();
+
+            if (dateStr == null || dateStr.isBlank()) {
+                // Fallback – pick something that makes sense for your assignment
+                electionEntity.setDate(LocalDate.of(year, 1, 1));
+            } else {
+                electionEntity.setDate(LocalDate.parse(dateStr));  // expects "yyyy-MM-dd"
+            }
             electionRepository.save(electionEntity);
             // Now is also the time to send the election information to a database for example.
 

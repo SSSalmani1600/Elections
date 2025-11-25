@@ -1,7 +1,10 @@
 export interface LoginResponse {
+  id: number
   displayName: string
+  email: string
   token: string
 }
+
 
 export interface RegisterResponse {
   email: string;

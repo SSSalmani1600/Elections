@@ -1,39 +1,32 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import nl.hva.election_backend.entity.id.PartyId;
 
 @Entity
+@IdClass(PartyId.class)
 @Table(name = "parties")
 public class PartyEntity {
 
     @Id
-    private String party_id;
+    private int year;
+
+    @Id
+    private String partyId;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private int year;
+    public PartyEntity() {}
 
-    public PartyEntity() {
-    }
-
-    public PartyEntity(String name, int year) {
+    public PartyEntity(String name, int year, String partyId) {
         this.name = name;
         this.year = year;
-        this.party_id = generatePartyId(name, year);
-    }
-
-    private String generatePartyId(String name, int year) {
-        return (name.toUpperCase()
-                .replaceAll("[^A-Z0-9]+", "_")
-                .replaceAll("_+", "_")
-                .replaceAll("^_|_$", "")
-                + "_" + year);
+        this.partyId = partyId;
     }
 
     public String getId() {
-        return party_id;
+        return partyId;
     }
 
     public String getName() {
