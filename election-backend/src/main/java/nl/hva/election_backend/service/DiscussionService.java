@@ -9,7 +9,7 @@ import nl.hva.election_backend.entity.ReactionEntity;
 
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
-import nl.hva.election_backend.repository.UserRepository;
+import nl.hva.election_backend.repository.TestRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -22,12 +22,12 @@ public class DiscussionService {
 
     private final DiscussionRepository discussionRepository;
     private final ReactionRepository reactionRepository;
-    private final UserRepository userRepository;
+    private final TestRepository userRepository;
 
     public DiscussionService(
             DiscussionRepository discussionRepository,
             ReactionRepository reactionRepository,
-            UserRepository userRepository
+            TestRepository userRepository
     ) {
         this.discussionRepository = discussionRepository;
         this.reactionRepository = reactionRepository;
@@ -79,13 +79,11 @@ public class DiscussionService {
                 reactions.stream()
                         .map(r -> new ReactionDto(
                                 r.getId(),
-                                r.getMessage(),
-
                                 // Author van reactie
                                 userRepository.findById(r.getUserId())
                                         .map(u -> u.getUsername())
                                         .orElse("Onbekend"),
-
+                                r.getMessage(),
                                 r.getCreatedAt()
                         ))
                         .collect(Collectors.toList())
@@ -128,13 +126,11 @@ public class DiscussionService {
 
         return new ReactionDto(
                 saved.getId(),
-                saved.getMessage(),
-
                 // Altijd via repo ophalen
                 userRepository.findById(saved.getUserId())
                         .map(u -> u.getUsername())
                         .orElse("Onbekend"),
-
+                saved.getMessage(),
                 saved.getCreatedAt()
         );
     }
