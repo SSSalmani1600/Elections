@@ -9,11 +9,13 @@ import java.util.List;
 @Repository
 public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> {
 
-    // Jouw methods
     List<ReactionEntity> findByModerationStatus(String status);
+
     List<ReactionEntity> findByModerationStatusIn(List<String> statuses);
 
-    // Methods uit main
-    List<ReactionEntity> findAllByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
-    long countByDiscussionId(Long discussionId);
+
+    List<ReactionEntity> findAllByDiscussion_IdOrderByCreatedAtAsc(Long discussionId);
+
+
 }
+
