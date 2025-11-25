@@ -32,7 +32,7 @@ public class JwtService {
                 .subject(displayName)
                 .issuer(issuer)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .and()
                 .signWith(this.getKey())
                 .compact();
