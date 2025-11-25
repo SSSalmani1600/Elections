@@ -1,22 +1,27 @@
 <template>
   <AdminLayout>
-    <h1 class="admin-title">Admin Dashboard</h1>
+    <h1 class="text-3xl font-bold text-white mb-8">Admin Dashboard</h1>
 
-    <div class="cards">
-      <div class="card">
-        <h2>Gebruikers</h2>
-        <p>{{ stats.totalUsers }}</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Card: Total Users -->
+      <div class="bg-white/10 border border-white/20 p-6 rounded-xl shadow-lg backdrop-blur-md text-white text-center hover:scale-[1.02] transition">
+        <h2 class="text-xl font-semibold mb-2">Gebruikers</h2>
+        <p class="text-4xl font-bold">{{ stats.totalUsers }}</p>
       </div>
 
-      <div class="card">
-        <h2>Gemelde berichten</h2>
-        <p>{{ stats.reportedPosts }}</p>
+      <!-- Card: Reported Posts -->
+      <div class="bg-white/10 border border-white/20 p-6 rounded-xl shadow-lg backdrop-blur-md text-white text-center hover:scale-[1.02] transition">
+        <h2 class="text-xl font-semibold mb-2">Gemelde berichten</h2>
+        <p class="text-4xl font-bold">{{ stats.reportedPosts }}</p>
       </div>
 
-      <div class="card">
-        <h2>Openstaande reviews</h2>
-        <p>{{ stats.pendingReviews }}</p>
+      <!-- Card: Pending Reviews -->
+      <div class="bg-white/10 border border-white/20 p-6 rounded-xl shadow-lg backdrop-blur-md text-white text-center hover:scale-[1.02] transition">
+        <h2 class="text-xl font-semibold mb-2">Openstaande reviews</h2>
+        <p class="text-4xl font-bold">{{ stats.pendingReviews }}</p>
       </div>
+
     </div>
   </AdminLayout>
 </template>
@@ -37,33 +42,3 @@ onMounted(async () => {
   stats.value = await getAdminStats();
 });
 </script>
-
-<style scoped>
-.admin-title {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 30px;
-}
-
-.cards {
-  display: flex;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 25px;
-  border-radius: 12px;
-  width: 260px;
-  text-align: center;
-  backdrop-filter: blur(4px);
-  color: #141c36;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.2);
-}
-</style>
