@@ -67,3 +67,10 @@ export interface User {
   email: string;
   password: string;
 }
+
+export interface Statement {
+  id: number;
+  statement: string;
+  category: string;
+  explanation: string;
+}
