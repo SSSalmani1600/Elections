@@ -1,11 +1,20 @@
 package nl.hva.election_backend.dto;
 
 public class UpdateUserRequest {
+    private String currentPassword; // Verplicht voor verificatie
     private String username;
     private String email;
-    private String password; // Optioneel - alleen als wachtwoord moet worden gewijzigd
+    private String password; // Nieuw wachtwoord (optioneel)
 
     public UpdateUserRequest() {}
+
+    public String getCurrentPassword() {
+        return currentPassword;
+    }
+
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
+    }
 
     public String getUsername() {
         return username;

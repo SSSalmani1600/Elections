@@ -60,9 +60,10 @@ export async function getUserById(id: number): Promise<User> {
 }
 
 export interface UpdateUserRequest {
+  currentPassword?: string;  // Verplicht voor verificatie
   username?: string;
   email?: string;
-  password?: string;
+  password?: string;         // Nieuw wachtwoord (optioneel)
 }
 
 export async function updateUser(id: number, updates: UpdateUserRequest): Promise<User> {

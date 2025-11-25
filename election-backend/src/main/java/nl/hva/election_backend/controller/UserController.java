@@ -59,7 +59,7 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 🔹 Bewerken van gebruiker
+    // 🔹 Bewerken van gebruiker (met wachtwoordverificatie)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
         Optional<User> optionalUser = userRepository.findById(id);
@@ -69,6 +69,19 @@ public class UserController {
         }
 
         User user = optionalUser.get();
+
+        // ⚠️ Verifieer huidig wachtwoord VOORDAT wijzigingen worden toegestaan
+        if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Huidig wachtwoord is verplicht om wijzigingen door te voeren");
+        }
+
+        if (!passwordHasher.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Huidig wachtwoord is onjuist");
+        }
+
+        // ✅ Wachtwoord geverifieerd - nu mogen wijzigingen worden doorgevoerd
 
         // Update username als opgegeven
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
@@ -81,15 +94,16 @@ public class UserController {
             // Check of email al in gebruik is door andere gebruiker
             Optional<User> existingUser = userRepository.findByEmail(normalizedEmail);
             if (existingUser.isPresent() && !existingUser.get().getId().equals(id)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail is al in gebruik");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail is al in gebruik door een ander account");
             }
             user.setEmail(normalizedEmail);
         }
 
-        // Update wachtwoord als opgegeven
+        // Update wachtwoord als nieuw wachtwoord is opgegeven
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             if (request.getPassword().length() < 8) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Wachtwoord moet minimaal 8 karakters zijn");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Nieuw wachtwoord moet minimaal 8 karakters zijn");
             }
             String passwordHash = passwordHasher.hash(request.getPassword());
             user.setPasswordHash(passwordHash);
