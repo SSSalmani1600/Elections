@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Order(200)
+@Order(200) // 🔥 Draait NA JwtFilter
 public class AdminFilter extends OncePerRequestFilter {
 
     private final JdbcTemplate jdbcTemplate;
@@ -25,14 +25,14 @@ public class AdminFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Alleen admin endpoints beveiligen
+        // Alleen VÓÓR doorgaan als het een admin-route is
         String uri = request.getRequestURI();
         if (!uri.startsWith("/admin")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // JwtFilter MOET dit zetten → request.setAttribute("userId", userId);
+        // JwtFilter MOET userId gezet hebben
         String userIdAttr = (String) request.getAttribute("userId");
 
         if (userIdAttr == null) {
@@ -48,7 +48,6 @@ public class AdminFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Check of gebruiker admin is
         Boolean isAdmin = jdbcTemplate.queryForObject(
                 "SELECT is_admin FROM public.users WHERE id = ?",
                 Boolean.class,
@@ -64,8 +63,12 @@ public class AdminFilter extends OncePerRequestFilter {
     }
 
     private void deny(HttpServletResponse response) throws IOException {
+        if (response.isCommitted()) return;
+
+        response.resetBuffer();
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
+
         response.getWriter().write("""
             {"error": "forbidden", "message": "Admin access required"}
         """);
