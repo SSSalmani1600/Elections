@@ -43,13 +43,15 @@ public class AuthController {
 
         // UserId als integer
         Integer userId = user.getId().intValue();
+        Long id = user.getId();
+
         String username = user.getUsername();
 
         // Token genereren met userId + username
         String token = jwtService.generateToken(userId, username);
 
         return ResponseEntity.ok(
-                new LoginResponse(token, username)
+                new LoginResponse(id, token, username)
         );
     }
 
