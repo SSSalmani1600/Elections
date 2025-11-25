@@ -2,6 +2,7 @@ package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.entity.StatementEntity;
 import nl.hva.election_backend.service.StatementService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +19,12 @@ public class StatementController {
     }
 
     @GetMapping("/all")
-    public LinkedHashSet<StatementEntity> getAllStatements() {
-        return this.statementService.getAllStatements();
+    public ResponseEntity<?> getAllStatements() {
+        try {
+            return ResponseEntity.ok(statementService.getAllStatements());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Something went wrong with fetching all statements");
+        }
     }
+
 }
