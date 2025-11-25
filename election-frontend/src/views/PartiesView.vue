@@ -184,18 +184,19 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
 
           <div
             v-if="loading"
-            class="max-h-[482px] overflow-y-hidden grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2 animate-pulse"
+            class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2"
           >
             <div
               v-for="n in 9"
               :key="n"
               class="bg-background border rounded-lg border-[#455174] h-[150px] p-4 flex gap-8"
             >
-              <div class="w-[120px] h-full bg-[#2b3246] rounded"></div>
-              <div class="flex flex-col gap-3 w-full overflow-hidden">
-                <div class="h-5 bg-[#2b3246] rounded w-[70%]"></div>
-                <div class="h-4 bg-[#2b3246] rounded w-full"></div>
-                <div class="h-4 bg-[#2b3246] rounded w-[90%]"></div>
+              <div class="skeleton-img w-[120px] h-full rounded-lg"></div>
+
+              <div class="flex flex-col gap-3 w-full">
+                <div class="skeleton-text h-5 w-[70%] rounded-lg"></div>
+                <div class="skeleton-text h-4 w-full rounded-lg"></div>
+                <div class="skeleton-text h-4 w-[85%] rounded-lg"></div>
               </div>
             </div>
           </div>
@@ -233,20 +234,20 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
 </template>
 
 <style scoped>
-@keyframes loadingShimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+.skeleton-img,
+.skeleton-text {
+  background: linear-gradient(90deg, #3e3e3e 0%, #555 50%, #3e3e3e 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.2s infinite;
 }
 
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    #2b3246 0%,
-    #3b445c 50%,
-    #2b3246 100%
-  );
-  background-size: 300% 100%;
-  animation: loadingShimmer 1.2s infinite;
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 </style>
