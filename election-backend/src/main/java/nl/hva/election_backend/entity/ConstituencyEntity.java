@@ -9,6 +9,7 @@ import nl.hva.election_backend.entity.id.ConstituencyId;
 public class ConstituencyEntity {
 
     @Id
+    @Column(name = "constituency_id")
     private String constituencyId;
 
     @Id
@@ -30,7 +31,7 @@ public class ConstituencyEntity {
         return constituencyId;
     }
 
-    public void setId(String constituencyId) {
+    public void setConstituencyId(String constituencyId) {
         this.constituencyId = constituencyId;
     }
 
