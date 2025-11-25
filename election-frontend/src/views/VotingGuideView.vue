@@ -13,16 +13,23 @@ const selectStatement = (statement: Statement) => {
 
 const saveAnswer = (statementId: number, answer: string) => {
   const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
-  stored[(statementId)] = answer
+  stored[statementId] = answer
   localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
 
+  const index = data.value.findIndex((item) => item.id === statementId)
+
+  if (index !== -1) {
+    data.value[index].answer = answer
+  }
+
+  console.log(data.value[index])
   findUnansweredQuestion()
 }
 
 const findUnansweredQuestion = () => {
   const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
 
-  const firstUnanswered = data.value.find(statement => !storedAnswers[statement.id])
+  const firstUnanswered = data.value.find((statement) => !storedAnswers[statement.id])
 
   if (firstUnanswered) {
     selectedStatement.value = firstUnanswered
@@ -53,7 +60,9 @@ onMounted(async () => {
   <div class="flex flex-col gap-4 m-[54px]">
     <span class="font-bold text-[28px]">STELINGEN</span>
     <div class="grid grid-cols-12 gap-20">
-      <div class="col-span-3 bg-background rounded-[10px] max-h-[575px] overflow-y-scroll overflow-x-hidden">
+      <div
+        class="col-span-3 bg-background rounded-[10px] max-h-[575px] overflow-y-scroll overflow-x-hidden"
+      >
         <template v-if="loading">
           <button v-for="i in 10" :key="i" class="flex flex-col gap-2.5 p-4 items-start w-full">
             <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
@@ -72,7 +81,10 @@ onMounted(async () => {
             <span class="font-bold block w-full text-lg truncate"
               >{{ index + 1 }} - {{ statement.statement }}</span
             >
-            <span class="opacity-80">{{ statement.category }}</span>
+            <div>
+              <span class="opacity-80">{{ statement.category }}</span>
+              <span v-if="statement.answer" class="font-bold"> - {{statement.answer}}</span>
+            </div>
           </button>
         </template>
       </div>
@@ -92,11 +104,26 @@ onMounted(async () => {
         <div class="flex flex-col gap-4">
           <span class="font-bold text-[28px]">Hiermee ben ik het</span>
           <div class="flex items-center gap-3 text-lg">
-            <button @click="saveAnswer(selectedStatement!.id, 'EENS')" class="btn opinion-btn !border-[#48D507] hover:bg-[#48D507]">EENS</button>
+            <button
+              @click="saveAnswer(selectedStatement!.id, 'EENS')"
+              class="btn opinion-btn !border-[#48D507] hover:bg-[#48D507]"
+            >
+              EENS
+            </button>
             <span class="text-2xl">/</span>
-            <button @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')" class="btn opinion-btn hover:bg-white hover:text-black">NEUTRAAL</button>
+            <button
+              @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
+              class="btn opinion-btn hover:bg-white hover:text-black"
+            >
+              NEUTRAAL
+            </button>
             <span class="text-2xl">/</span>
-            <button @click="saveAnswer(selectedStatement!.id, 'ONEENS')" class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]">ONEENS</button>
+            <button
+              @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
+              class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
+            >
+              ONEENS
+            </button>
           </div>
         </div>
       </div>

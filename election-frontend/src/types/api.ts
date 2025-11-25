@@ -70,4 +70,5 @@ export interface Statement {
   statement: string;
   category: string;
   explanation: string;
+  answer: string | null;
 }
