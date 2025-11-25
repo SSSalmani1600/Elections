@@ -25,14 +25,6 @@ public class PartyEntity {
         this.partyId = partyId;
     }
 
-//    private String generatePartyId(String name, int year) {
-//        return (name.toUpperCase()
-//                .replaceAll("[^A-Z0-9]+", "_")
-//                .replaceAll("_+", "_")
-//                .replaceAll("^_|_$", "")
-//                + "_" + year);
-//    }
-
     public String getId() {
         return partyId;
     }
