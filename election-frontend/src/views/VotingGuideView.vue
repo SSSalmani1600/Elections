@@ -1,35 +1,34 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import type { Statement } from '@/types/api.ts'
+import { getAllStatements } from '@/services/StatementService.ts'
 
-import {onMounted, ref} from "vue";
-import type {Statement} from "@/types/api.ts";
-import {getAllStatements} from "@/services/StatementService.ts";
-
-const data = ref<Statement[]>([]);
-const loading = ref<boolean>(false);
-const selectedStatement = ref<Statement | null>(null);
+const data = ref<Statement[]>([])
+const loading = ref<boolean>(false)
+const selectedStatement = ref<Statement | null>(null)
 
 const selectStatement = (statement: Statement) => {
-  selectedStatement.value = statement;
+  selectedStatement.value = statement
 }
 onMounted(async () => {
   try {
-    loading.value = true;
+    loading.value = true
     data.value = Array.from(await getAllStatements())
     console.log(data.value)
 
-    const firstUnanswered = data.value.find(statement => {
-      return !localStorage.getItem(`answer_${statement.id}`);
-    });
+    const firstUnanswered = data.value.find((statement) => {
+      return !localStorage.getItem(`answer_${statement.id}`)
+    })
 
     if (firstUnanswered) {
-      selectedStatement.value = firstUnanswered;
+      selectedStatement.value = firstUnanswered
     } else if (data.value.length > 0) {
-      selectedStatement.value = data.value[0];
+      selectedStatement.value = data.value[0]
     }
   } catch (err: any) {
-    console.error(err.message);
+    console.error(err.message)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 })
 </script>
@@ -38,29 +37,35 @@ onMounted(async () => {
   <div class="flex flex-col gap-4 m-[54px]">
     <span class="font-bold text-[28px]">STELINGEN</span>
     <div class="grid grid-cols-12 gap-20">
+      <div class="col-span-3 bg-background rounded-[10px] max-h-[575px] overflow-y-scroll overflow-x-hidden">
+        <template v-if="loading">
+          <button v-for="i in 10" :key="i" class="flex flex-col gap-2.5 p-4 items-start w-full">
+            <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
+            <span class="skeleton-text h-4 w-[40%] rounded-[10px]"></span>
+          </button>
+        </template>
 
-      <div class="col-span-3 bg-background rounded-[10px] max-h-[575px] overflow-x-hidden">
-        <button v-if="loading" v-for="i in 10" class="flex flex-col gap-2.5 p-4 items-start w-full">
-          <span class="skeleton-text h-4 w-full rounded-[10px]"></span>
-          <span class="skeleton-text h-4 w-[40%] rounded-[10px]"></span>
-        </button>
-
-        <button v-if="!loading" v-for="(statement, index) in data" :key="statement.id"
-                @click="selectStatement(statement)"
-                :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
-                class="flex flex-col cursor-pointer gap-1 p-4 items-start hover:bg-primary duration-300">
-          <span class="font-bold text-2xl truncate">{{ index + 1 }} - {{
-              statement.statement
-            }}</span>
-          <span class="opacity-80">{{ statement.category }}</span>
-        </button>
+        <template v-else>
+          <button
+            v-for="(statement, index) in data"
+            :key="statement.id"
+            @click="selectStatement(statement)"
+            :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
+            class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
+          >
+            <span class="font-bold block w-full text-lg truncate"
+              >{{ index + 1 }} - {{ statement.statement }}</span
+            >
+            <span class="opacity-80">{{ statement.category }}</span>
+          </button>
+        </template>
       </div>
       <div class="col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
             <span class="px-2.5 py-2 rounded-[50px] bg-primary">{{
-                selectedStatement?.category
-              }}</span>
+              selectedStatement?.category
+            }}</span>
             <span class="font-bold text-3xl">STELLING - {{ selectedStatement?.id }}</span>
           </div>
           <div class="flex flex-col gap-4 bg-background p-4 rounded-lg">
