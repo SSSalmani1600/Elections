@@ -12,27 +12,17 @@ const selectStatement = (statement: Statement) => {
 }
 
 const saveAnswer = (statementId: number, answer: string) => {
-  const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
-
-  const index = stored.findIndex((item: { id: number, answer: string }) => item.id === statementId)
-
-  if (index !== -1) {
-    stored[index].answer = answer
-  } else {
-    stored.push({ id: statementId, answer })
-  }
-
+  const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
+  stored[(statementId)] = answer
   localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
 
   findUnansweredQuestion()
 }
 
 const findUnansweredQuestion = () => {
-  const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
 
-  const firstUnanswered = data.value.find(statement => {
-    return !storedAnswers[statement.id]
-  })
+  const firstUnanswered = data.value.find(statement => !storedAnswers[statement.id])
 
   if (firstUnanswered) {
     selectedStatement.value = firstUnanswered
@@ -40,13 +30,14 @@ const findUnansweredQuestion = () => {
     selectedStatement.value = data.value[0]
   }
 }
+
 onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
 
     if (!localStorage.getItem('voting_guide_answers')) {
-      localStorage.setItem('voting_guide_answers', '[]')
+      localStorage.setItem('voting_guide_answers', '{}')
     }
 
     findUnansweredQuestion()
