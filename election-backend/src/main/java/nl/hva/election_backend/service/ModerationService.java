@@ -24,27 +24,27 @@ public class ModerationService {
     }
 
     public void approveReaction(Long id) {
-        ReactionEntity r = reactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+        ReactionEntity reaction = reactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reaction not found: " + id));
 
-        r.setModerationStatus("APPROVED");
-        reactionRepository.save(r);
+        reaction.setModerationStatus("APPROVED");
+        reactionRepository.save(reaction);
     }
 
     public void rejectReaction(Long id) {
-        ReactionEntity r = reactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+        ReactionEntity reaction = reactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reaction not found: " + id));
 
-        r.setModerationStatus("REJECTED");
-        reactionRepository.save(r);
+        reaction.setModerationStatus("REJECTED");
+        reactionRepository.save(reaction);
     }
 
     public void flagReaction(Long id, String reason) {
-        ReactionEntity r = reactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+        ReactionEntity reaction = reactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Reaction not found: " + id));
 
-        r.setModerationStatus("FLAGGED");
-        r.setFlaggedReason(reason);
-        reactionRepository.save(r);
+        reaction.setModerationStatus("FLAGGED");
+        reaction.setFlaggedReason(reason);
+        reactionRepository.save(reaction);
     }
 }
