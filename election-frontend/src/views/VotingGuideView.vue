@@ -6,6 +6,7 @@ import { getAllStatements } from '@/services/StatementService.ts'
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
 const selectedStatement = ref<Statement | null>(null)
+const errorMessage = ref<string | null>(null)
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
@@ -49,6 +50,7 @@ onMounted(async () => {
 
     findUnansweredQuestion()
   } catch (err: any) {
+    errorMessage.value = "Er ging iets mis bij het ophalen van de statements"
     console.error(err.message)
   } finally {
     loading.value = false
@@ -57,7 +59,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 m-[54px]">
+  <div v-if="errorMessage" class="bg-background p-10 rounded-[10px] absolute transform translate-[-50%] top-1/2 left-1/2">
+    <span class="text-red-400 font-bold text-xl">ERROR</span>
+    <p class="text-lg">{{ errorMessage }}</p>
+  </div>
+  <div v-else class="flex flex-col gap-4 m-[54px]">
     <span class="font-bold text-[28px]">STELINGEN</span>
     <div class="grid grid-cols-12 gap-20">
       <div
@@ -83,7 +89,7 @@ onMounted(async () => {
             >
             <div>
               <span class="opacity-80">{{ statement.category }}</span>
-              <span v-if="statement.answer" class="font-bold"> - {{statement.answer}}</span>
+              <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
             </div>
           </button>
         </template>
