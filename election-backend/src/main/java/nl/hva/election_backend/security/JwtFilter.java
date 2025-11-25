@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.hva.election_backend.service.JwtService;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
+@Order(1) // 🔥 JwtFilter moet ALTIJD vóór AdminFilter draaien
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -22,12 +21,13 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
-    String[] whiteListURLs = {
-            "/api/auth/",
-            "/api/parties",
-            "/api/elections/",
-            "/api/users",
-            "/api/next-elections",
+    // Public endpoints
+    private final String[] whiteListPatterns = {
+            ".*/api/auth(/.*)?",
+            ".*/api/parties(/.*)?",
+            ".*/api/elections(/.*)?",
+            ".*/api/users(/.*)?",
+            ".*/api/next-elections(/.*)?"
     };
 
     @Override
@@ -42,14 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         System.out.println("[JwtFilter] Incoming request URI: " + uri);
 
-        String[] whiteListPatterns = {
-                ".*/api/auth(/.*)?",
-                ".*/api/parties(/.*)?",
-                ".*/api/elections(/.*)?",
-                ".*/api/users(/.*)?",
-                ".*/api/next-elections(/.*)?"
-        };
-
+        // Check whitelist
         for (String pattern : whiteListPatterns) {
             if (uri.matches(pattern)) {
                 filterChain.doFilter(request, response);
@@ -57,16 +50,20 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
+        // Public GET/POST on discussions
         if (uri.startsWith("/api/discussions")
-                && ("GET".equalsIgnoreCase(request.getMethod()) || "POST".equalsIgnoreCase(request.getMethod()))) {
+                && ("GET".equalsIgnoreCase(request.getMethod())
+                || "POST".equalsIgnoreCase(request.getMethod()))) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // JWT check
+        // JWT validation
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring("Bearer ".length());
+
+            String token = authHeader.substring(7);
 
             try {
                 if (token.isEmpty() || !jwtService.validateToken(token)) {
@@ -74,12 +71,10 @@ public class JwtFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                // Display name (jouw oude code)
-                String userName = jwtService.extractDisplayName(token);
-                request.setAttribute("userName", userName);
+                String displayName = jwtService.extractDisplayName(token);
+                Integer userId = jwtService.extractUserId(token);
 
-                // ➕ **NIEUWE TOEVOEGING — userId meegeven aan AdminFilter**
-                Integer userId = jwtService.extractUserId(token); // deze moet in jwtService zitten
+                request.setAttribute("userName", displayName);
                 request.setAttribute("userId", String.valueOf(userId));
 
                 filterChain.doFilter(request, response);
@@ -96,9 +91,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private void unauthorized(HttpServletResponse response, String code, String message) throws IOException {
         if (response.isCommitted()) return;
+
+        response.resetBuffer();
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
+
         response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
-        response.flushBuffer();
     }
 }
