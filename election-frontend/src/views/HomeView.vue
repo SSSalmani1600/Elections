@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {useRouter} from 'vue-router'
 import PartiesSlider from "@/components/PartiesSlider.vue";
+import PollList from '@/components/PollList.vue'
 
 const router = useRouter()
 
@@ -24,7 +25,9 @@ const goToForum = () => router.push('/forum')
     </div>
 
     <PartiesSlider/>
-
+    <section class="w-full max-w-5xl px-4">
+      <PollList/>
+    </section>
     <footer
       class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12 max-lg:flex-col">
       <div>
