@@ -1,5 +1,6 @@
 package nl.hva.election_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -11,6 +12,7 @@ public class ReactionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discussion_id", nullable = false)
     private DiscussionEntity discussion;
@@ -18,7 +20,7 @@ public class ReactionEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // toegevoegde relatie naar UserEntity
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "user_id",
@@ -31,64 +33,48 @@ public class ReactionEntity {
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @Column(name = "moderation_status", nullable = false)
+    private String moderationStatus = "PENDING";
+
+    @Column(name = "flagged_reason")
+    private String flaggedReason;
+
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     public ReactionEntity() {}
 
-    public ReactionEntity(DiscussionEntity discussion, Long userId, String message, Instant createdAt) {
+    public ReactionEntity(DiscussionEntity discussion, Long userId, String message) {
         this.discussion = discussion;
         this.userId = userId;
         this.message = message;
-        this.createdAt = createdAt;
+        this.createdAt = Instant.now();
     }
 
-    // getters & setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public DiscussionEntity getDiscussion() { return discussion; }
+    public void setDiscussion(DiscussionEntity discussion) { this.discussion = discussion; }
 
-    public DiscussionEntity getDiscussion() {
-        return discussion;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public void setDiscussion(DiscussionEntity discussion) {
-        this.discussion = discussion;
-    }
+    public UserEntity getUser() { return user; }
+    public void setUser(UserEntity user) { this.user = user; }
 
-    public Long getUserId() {
-        return userId;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public String getModerationStatus() { return moderationStatus; }
+    public void setModerationStatus(String moderationStatus) { this.moderationStatus = moderationStatus; }
 
-    public UserEntity getUser() {
-        return user;
-    }
+    public String getFlaggedReason() { return flaggedReason; }
+    public void setFlaggedReason(String flaggedReason) { this.flaggedReason = flaggedReason; }
 
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public void setDiscussionId(int i) {
     }
 }

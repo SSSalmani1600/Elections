@@ -10,6 +10,7 @@ import DiscussionDetailView from '@/views/DiscussionDetailView.vue'
 import ElectionCalendarView from '@/views/ElectionCalenderView.vue'
 import VotingGuideView from '@/views/VotingGuideView.vue'
 import AccountView from '@/views/AccountView.vue'
+import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,7 +46,7 @@ const router = createRouter({
       component: PartyDetailView,
     },
     {
-      path: '/forum',
+      path: '/discussions',
       name: 'forum',
       component: DiscussionsView,
     },
@@ -54,10 +55,53 @@ const router = createRouter({
       name: 'discussion-detail',
       component: DiscussionDetailView,
     },
+      {
+          path: '/forum',
+          name: 'forum',
+          component: DiscussionsView,
+      },
     {
       path: '/calendar',
       name: 'calendar',
       component: ElectionCalendarView,
+    },
+    {
+      path: '/stemwijzer',
+      name: 'voting-guide',
+      component: VotingGuideView,
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: AccountView,
+    },
+    {
+      path: '/admin/stats',
+      name: 'admin',
+      component: AdminDashboardView,
+    },
+    {
+      path: '/admin',
+      name: 'admin-dashboard',
+      component: () => import('@/views/admin/AdminDashboardView.vue'),
+    },
+
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('@/views/admin/AdminUsersView.vue'),
+    },
+
+    {
+      path: '/admin/moderation',
+      name: 'admin-moderation',
+      component: () => import('@/views/admin/AdminModerationView.vue'),
+    },
+
+    {
+      path: '/admin/positions',
+      name: 'admin-positions',
+      component: () => import('@/views/admin/AdminPositionsView.vue'),
     },
     {
       path: '/stemwijzer',

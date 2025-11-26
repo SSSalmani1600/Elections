@@ -1,6 +1,5 @@
 package nl.hva.election_backend.security;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -14,19 +13,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
+
     private final JwtService jwtService;
 
     public JwtFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
+    // ⭐ GEZAMENLIJKE WHITELIST
     private static final Pattern[] whiteListPatterns = {
             Pattern.compile("^/api/auth/.*$"),
             Pattern.compile("^/api/parties/.*$"),
@@ -38,7 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
     };
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         // Allow preflight
@@ -47,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Allow whitelisted endpoints
+        // ⭐ CHECK WHITELIST
         String uri = request.getRequestURI();
         for (Pattern pattern : whiteListPatterns) {
             if (pattern.matcher(uri).matches()) {
@@ -56,49 +56,80 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
+        // ⭐ 1. COOKIE BASED JWT (main backend)
+        String cookieToken = null;
         Cookie[] cookies = request.getCookies();
-        String jwtToken = null;
 
         if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("jwt".equals(cookie.getName())) {
-                    jwtToken = cookie.getValue();
-                    break;
+            for (Cookie c : cookies) {
+                if ("jwt".equals(c.getName())) {
+                    cookieToken = c.getValue();
                 }
             }
         }
 
-        if (jwtToken == null) {
-            unauthorized(response, "missing_token", "Request to secured endpoint requires token");
+        // ⭐ 2. BEARER TOKEN (jouw versie)
+        String authHeader = request.getHeader("Authorization");
+        String bearerToken = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            bearerToken = authHeader.substring(7);
+        }
+
+        // ⭐ PRIORITEIT: Bearer → anders Cookie
+        String token = bearerToken != null ? bearerToken : cookieToken;
+
+        if (token == null || token.isEmpty()) {
+            unauthorized(response, "missing_token", "This endpoint requires a valid JWT (cookie or Bearer).");
             return;
         }
 
+        // ⭐ TOKEN VALIDATIE
         try {
-            TokenValidationResponse tokenResponse = jwtService.validateToken(jwtToken);
+            TokenValidationResponse validation = jwtService.validateToken(token);
 
-            if (!tokenResponse.isValid()) {
+            if (!validation.isValid()) {
                 unauthorized(response, "invalid_token", "Invalid or expired JWT token");
                 return;
             }
 
-//            if (tokenResponse.shouldRefresh()) {
-//                return;
-//            }
+            // ⭐ Extract displayName + userId (jouw claim)
+            Integer userId = null;
+            String displayName = null;
+            String username = null;
 
-            String username = jwtService.extractUsername(jwtToken);
-            request.setAttribute("username", username);
+            try {
+                userId = jwtService.extractUserId(token);
+            } catch (Exception ignored) {}
+
+            try {
+                displayName = jwtService.extractDisplayName(token);
+            } catch (Exception ignored) {}
+
+            try {
+                username = jwtService.extractUsername(token);
+            } catch (Exception ignored) {}
+
+            // ⭐ Request attributes beschikbaar voor controllers
+            if (username != null) request.setAttribute("username", username);
+            if (displayName != null) request.setAttribute("userName", displayName);
+            if (userId != null) request.setAttribute("userId", userId);
+
             filterChain.doFilter(request, response);
-        } catch (JwtException e) {
-            unauthorized(response, "internal_error", String.valueOf(e));
+
+        } catch (RuntimeException e) {  // 💡 FIX: alleen RuntimeException
+            unauthorized(response, "internal_error", e.getMessage());
         }
     }
 
     private void unauthorized(HttpServletResponse response, String code, String message) throws IOException {
         if (response.isCommitted()) return;
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
+        response.getWriter().write(
+                "{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}"
+        );
         response.flushBuffer();
     }
 }
-

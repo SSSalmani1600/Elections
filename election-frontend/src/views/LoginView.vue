@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
 const auth = useAuthStore()
+
 const agree = ref(false)
 const email = ref('')
 const password = ref('')
@@ -16,10 +17,9 @@ const error = reactive({
   password: '',
 })
 
-// Check of gebruiker al ingelogd is
+// ⭐ MAIN BRANCH: redirect als user al ingelogd is
 onMounted(() => {
   if (auth.isLoggedIn) {
-    // Al ingelogd, redirect naar home
     router.replace('/')
   }
 })
@@ -44,13 +44,14 @@ async function loginHandler(): Promise<void> {
   try {
     const data: LoginResponse = await login(email.value, password.value)
 
-    // JWT opslaan
-    localStorage.setItem("JWT", data.token)
-    localStorage.setItem("userId", String(data.id))
-    localStorage.setItem("username", data.displayName)
+    // ⭐ JOUW EXTRA ADMIN INFO OPSLAAN
+    localStorage.setItem("JWT", data.token)                    // JWT (indien backend meestuurt)
+    localStorage.setItem("userId", String(data.id))            // id
+    localStorage.setItem("username", data.displayName)         // displayName
+    localStorage.setItem("isAdmin", String(data.isAdmin))      // ADMIN FLAG
 
-    // Update auth store
-    auth.login(data.displayName, data.token)
+    // ⭐ Auth store updaten (nu met isAdmin)
+    auth.login(data.displayName, data.token, data.isAdmin)
 
     router.replace('/')
   } catch (err: unknown) {
@@ -98,9 +99,11 @@ async function loginHandler(): Promise<void> {
             placeholder="Wachtwoord"
           />
           <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
-            {{ error.password }}</span
-          >
+            {{ error.password }}
+          </span>
         </div>
+
+        <!-- Agree -->
         <div class="flex items-center gap-2 text-sm">
           <input id="agree" type="checkbox" v-model="agree" class="w-4 h-4 accent-[#EF3054]" />
           <label for="agree">
@@ -110,6 +113,7 @@ async function loginHandler(): Promise<void> {
             <span class="text-[#EF3054] cursor-pointer">privacyverklaring</span>.
           </label>
         </div>
+
         <!-- Submit -->
         <button
           type="submit"
