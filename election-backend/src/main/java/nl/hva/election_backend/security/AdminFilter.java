@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Order(200) // 🔥 Draait NA JwtFilter
+@Order(200)
 public class AdminFilter extends OncePerRequestFilter {
 
     private final JdbcTemplate jdbcTemplate;
@@ -22,28 +22,29 @@ public class AdminFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Alleen VÓÓR doorgaan als het een admin-route is
         String uri = request.getRequestURI();
         if (!uri.startsWith("/admin")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // JwtFilter MOET userId gezet hebben
-        String userIdAttr = (String) request.getAttribute("userId");
+        // JwtFilter zet userId als Integer, GEEN String
+        Object userIdObj = request.getAttribute("userId");
 
-        if (userIdAttr == null) {
+        if (userIdObj == null) {
             deny(response);
             return;
         }
 
-        int userId;
+        Integer userId;
         try {
-            userId = Integer.parseInt(userIdAttr);
-        } catch (NumberFormatException e) {
+            userId = (Integer) userIdObj; // correcte cast
+        } catch (ClassCastException e) {
             deny(response);
             return;
         }
