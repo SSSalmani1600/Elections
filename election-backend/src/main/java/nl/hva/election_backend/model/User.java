@@ -1,7 +1,6 @@
 package nl.hva.election_backend.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -21,23 +20,19 @@ public class User {
     private String passwordHash;
 
     @Column(name = "is_admin")
-    private Boolean isAdmin;
+    private Boolean isAdmin = false; // ⭐ Default waarde
 
-    public Boolean getIsAdmin() {
-        return isAdmin;
+    public User() {
     }
-
-    public void setIsAdmin(Boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
-
-    public User() {}
 
     public User(String email, String passwordHash, String username) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.username = username;
+        this.isAdmin = false; // ⭐ default blijft consistent
     }
+
+    // ⭐ GETTERS & SETTERS
 
     public Long getId() {
         return id;
@@ -70,5 +65,12 @@ public class User {
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
-}
 
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+}

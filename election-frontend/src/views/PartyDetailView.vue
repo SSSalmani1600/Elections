@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getParties } from '@/services/ElectionService.ts'
+import { getParties } from '@/services/PartyService.ts'
 import type { Candidate } from '@/types/api.ts'
 import { getWikipediaSummary, getWikipediaPerson } from '@/services/WikipediaService.ts'
 
@@ -19,16 +19,13 @@ const leaderImage = ref<string>('')
 
 onMounted(async () => {
   try {
-    const data = await getParties()
-    console.log(data)
+    const data = Array.from(await getParties())
 
-    const partiesArray = data.parties ?? data
-    const foundParty = partiesArray.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
-    console.log(foundParty)
+    const foundParty = data.find((p) => p.name.toLowerCase() === routeName.toLowerCase())
 
     if (foundParty) {
       partyName.value = foundParty.name
-      candidates.value = foundParty.candidates ?? []
+      // candidates.value = foundParty.candidates ?? []
       const partyleader = candidates.value.find((c) => c.candidateId === '1')
       if (partyleader) {
         partyLeader.value = partyleader
@@ -44,11 +41,9 @@ onMounted(async () => {
           console.warn('Geen Wikipedia-profiel voor lijsttrekker:', err)
         }
       }
-      console.log('Kandidaten gevonden:', candidates.value)
 
       try {
         const summary = await getWikipediaSummary(foundParty.name)
-        console.log('Wikipedia parsed summary:', summary)
         wikiSummary.value = (summary.summary || '').replace(/\n/g, '<br><br>')
         wikiUrl.value = summary.url || ''
         wikiImage.value = summary.image || ''

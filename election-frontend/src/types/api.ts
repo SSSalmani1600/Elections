@@ -71,3 +71,17 @@ export interface Statement {
   explanation: string;
   answer: string | null;
 }
+export interface AdminStats {
+  totalUsers: number;
+  reportedPosts: number;
+  pendingReviews: number;
+}
+export interface LoginResponse {
+  id: number
+  displayName: string
+  token: string
+  isAdmin: boolean
+}
+
+
+
