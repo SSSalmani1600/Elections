@@ -59,7 +59,7 @@ public class JwtService {
             .getPayload();
     }
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         Claims claims = extractAllClaims(token);
         return claims.getSubject();
     }

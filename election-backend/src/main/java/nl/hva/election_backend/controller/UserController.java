@@ -41,7 +41,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@CookieValue(value = "jwt", required = false) String accessToken) {
         try {
-            String userIdStr = jwtService.extractUsername(accessToken); // Subject bevat user ID
+            String userIdStr = jwtService.extractUserId(accessToken); // Subject bevat user ID
             Long userId = Long.parseLong(userIdStr);
 
             Optional<User> user = userRepository.findById(userId);

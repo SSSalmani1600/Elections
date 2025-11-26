@@ -82,8 +82,8 @@ public class JwtFilter extends OncePerRequestFilter {
 //                return;
 //            }
 
-            String username = jwtService.extractUsername(jwtToken);
-            request.setAttribute("username", username);
+            String userId = jwtService.extractUserId(jwtToken);
+            request.setAttribute("userId", userId);
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
             unauthorized(response, "internal_error", String.valueOf(e));
