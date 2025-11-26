@@ -39,14 +39,15 @@ public class UserController {
 
     // 🔹 Ophalen van huidige gebruiker via JWT token
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request, @CookieValue("jwt") String accessToken) {
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization token required");
         }
 
         try {
-            String userIdStr = jwtService.extractUsername(accessToken); // Subject bevat user ID
+            String token = authHeader.substring(7); // Verwijder "Bearer " prefix
+            String userIdStr = jwtService.extractUsername(token); // Subject bevat user ID
             Long userId = Long.parseLong(userIdStr);
 
             Optional<User> user = userRepository.findById(userId);

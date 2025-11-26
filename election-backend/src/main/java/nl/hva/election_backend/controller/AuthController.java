@@ -60,7 +60,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
-                .body(new LoginResponse(user.getUsername()));
+                .body(new LoginResponse(user.getId(), user.getUsername(), authResponse.getAccessToken()));
     }
 
     @PostMapping("/register")
