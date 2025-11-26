@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 
@@ -7,6 +7,8 @@ const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
 const selectedStatement = ref<Statement | null>(null)
 const errorMessage = ref<string | null>(null)
+const statementRefs = ref<Record<number, HTMLButtonElement | null>>({})
+
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
@@ -38,6 +40,28 @@ const findUnansweredQuestion = () => {
     selectedStatement.value = data.value[0]
   }
 }
+
+const setStatementRef = (el: HTMLButtonElement | null, index: number) => {
+  if (el) {
+    statementRefs.value[index] = el
+  }
+}
+
+watch(selectedStatement, async (newVal) => {
+  if (!newVal) return
+
+  await nextTick()
+
+  const index = data.value.findIndex(s => s.id === newVal.id)
+  const el = statementRefs.value[index]
+
+  if (el) {
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    })
+  }
+})
 
 onMounted(async () => {
   try {
@@ -87,6 +111,7 @@ onMounted(async () => {
               v-for="(statement, index) in data"
               :key="statement.id"
               @click="selectStatement(statement)"
+              :ref="el => setStatementRef(el as HTMLButtonElement | null, index)"
               :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
               class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
             >
@@ -95,14 +120,23 @@ onMounted(async () => {
               >
               <div class="block truncate w-full text-left">
                 <span class="opacity-80">{{ statement.category }}</span>
-                <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }} <i class="pi pi-check text-[#277D00] font-bold ml-2" style="font-size: 1rem; font-weight: 700"></i></span>
+                <span v-if="statement.answer" class="font-bold">
+                  - {{ statement.answer }}
+                  <i
+                    class="pi pi-check text-[#277D00] font-bold ml-2"
+                    style="font-size: 1rem; font-weight: 700"
+                  ></i
+                ></span>
               </div>
             </button>
           </template>
         </div>
       </div>
 
-      <div v-if="loading" class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10">
+      <div
+        v-if="loading"
+        class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10"
+      >
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
             <span class="skeleton-text h-4 w-[10%] rounded-[10px]"></span>
