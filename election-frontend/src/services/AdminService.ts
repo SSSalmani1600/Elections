@@ -1,5 +1,5 @@
 export async function getAdminStats() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch("http://localhost:8080/api/admin/stats", {
     method: "GET",
@@ -8,8 +8,6 @@ export async function getAdminStats() {
       "Content-Type": "application/json",
     }
   });
-
-
 
   if (!res.ok) {
     console.error("Admin error:", await res.text());
