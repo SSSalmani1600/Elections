@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
               class="block px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700"
               @click="userMenuOpen = false"
             >
-               Admin Paneel
+               Beheerderspaneel
             </router-link>
 
             <router-link
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
               class="btn btn-secondary"
               @click="toggleMenu"
             >
-               Admin Paneel
+              Beheerderspaneel
             </router-link>
 
             <router-link to="/account" class="btn btn-primary" @click="toggleMenu">Mijn account</router-link>
