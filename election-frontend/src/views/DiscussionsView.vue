@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 type DiscussionListItem = {
@@ -15,6 +15,20 @@ const router = useRouter()
 const discussions = ref<DiscussionListItem[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+
+// Filter state
+type FilterType = 'recent' | 'popular'
+const activeFilter = ref<FilterType>('recent')
+
+// Sorted discussions based on filter
+const sortedDiscussions = computed(() => {
+  const copy = [...discussions.value]
+  if (activeFilter.value === 'popular') {
+    return copy.sort((a, b) => b.reactionsCount - a.reactionsCount)
+  } else {
+    return copy.sort((a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime())
+  }
+})
 
 // Modal state
 const showModal = ref(false)
@@ -132,20 +146,54 @@ async function createDiscussion() {
         </p>
       </div>
 
-      <!-- New Topic Button -->
-      <div class="flex justify-center mb-10">
+      <!-- Actions Bar: Filters + New Topic -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+        <!-- Filter Buttons -->
+        <div class="flex items-center gap-2 p-1.5 bg-[#111830]/80 border border-white/10 rounded-xl">
+          <button
+            @click="activeFilter = 'recent'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all',
+              activeFilter === 'recent' 
+                ? 'bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white shadow-lg' 
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            ]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Recent
+          </button>
+          <button
+            @click="activeFilter = 'popular'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all',
+              activeFilter === 'popular' 
+                ? 'bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white shadow-lg' 
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            ]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            </svg>
+            Populair
+          </button>
+        </div>
+
+        <!-- New Topic Button -->
         <button
           @click="openModal"
-          class="px-8 py-4 rounded-xl font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
+          class="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
                  text-white shadow-lg shadow-[#ef3054]/20
                  hover:shadow-xl hover:shadow-[#ef3054]/30
                  hover:scale-[1.02] transition-all duration-300
-                 flex items-center gap-3"
+                 flex items-center gap-2 text-sm"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Nieuw topic starten
+          Nieuw topic
         </button>
       </div>
 
@@ -168,7 +216,7 @@ async function createDiscussion() {
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="discussions.length === 0" class="flex justify-center">
+      <div v-else-if="sortedDiscussions.length === 0" class="flex justify-center">
         <div class="bg-[#111830]/80 border border-white/10 rounded-2xl p-12 text-center max-w-md">
           <svg class="w-20 h-20 text-gray-600 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -184,7 +232,7 @@ async function createDiscussion() {
       <!-- Topics List -->
       <div v-else class="space-y-4">
         <div
-          v-for="topic in discussions"
+          v-for="topic in sortedDiscussions"
           :key="topic.id"
           @click="goToDetail(topic.id)"
           class="group cursor-pointer bg-[#111830]/80 border border-white/10 rounded-2xl p-6
