@@ -9,15 +9,16 @@ export interface Election {
 }
 
 export async function getUpcomingElections(): Promise<Election[]> {
-  const token = localStorage.getItem('token')
-
-  const res = await fetch('http://localhost:8080/api/next-elections', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`, // ✅ belangrijk
+  const res = await apiFetch(
+    'http://localhost:8080/api/electionresults/next-elections',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  })
+    false,
+  )
 
   if (!res.ok) {
     throw new Error(`Failed to fetch upcoming elections: ${res.statusText}`)
