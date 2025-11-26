@@ -69,9 +69,9 @@ public interface TagAndAttributeNames {
     String REGISTERED_PARTIES = "RegisteredParties";
     String REGISTERED_PARTY = "RegisteredParty";
     String REGION = "Region";
-    String REGION_CATEGORY = "RegionCategory";
     String REGION_NAME = "RegionName";
     String REGION_NUMBER = "RegionNumber";
+    String REGION_CATEGORY = "RegionCategory";
     String REJECTED_VOTES = "RejectedVotes";
     String REPORTING_UNIT_IDENTIFIER = "ReportingUnitIdentifier";
     String REPORTING_UNIT_VOTES = "ReportingUnitVotes";
@@ -91,7 +91,12 @@ public interface TagAndAttributeNames {
     String VALID_VOTES = "ValidVotes";
     String VOTING_METHOD = "VotingMethod";
     // These are the actual keys used for these specific tags
+    String REGION_NUMBER_ATTRIBUTE = String.format("%s-%s", REGION, "RegionNumber");
+    String REGION_CATEGORY_ATTRIBUTE  = String.format("%s-%s", REGION, "RegionCategory");
+    String SUPERIOR_REGION_NUMBER_ATTRIBUTE = String.format("%s-%s", REGION, "SuperiorRegionNumber");
+    String CONTEST_IDENTIFIER_ID = String.format("%s-%s", CONTEST_IDENTIFIER, "Id");
     String AFFILIATION_IDENTIFIER_ID = String.format("%s-%s", AFFILIATION_IDENTIFIER, "Id");
+    String AUTHORITY_IDENTIFIER_ID = String.format("%s-%s", AUTHORITY_IDENTIFIER, "Id");
     String CANDIDATE_IDENTIFIER_ID = String.format("%s-%s", CANDIDATE_IDENTIFIER, "Id");
     String CANDIDATE_IDENTIFIER_SHORT_CODE = String.format("%s-%s", CANDIDATE_IDENTIFIER, "ShortCode");
 }

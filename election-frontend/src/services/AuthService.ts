@@ -7,8 +7,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      email: email,
-      password: password,
+      email,
+      password,
     }),
 
     credentials: 'include',
@@ -18,7 +18,9 @@ export async function login(email: string, password: string): Promise<LoginRespo
     throw new Error(`Login failed (${res.status})`)
   }
 
-  return (await res.json()) as LoginResponse
+  const data = (await res.json()) as LoginResponse
+
+  return data
 }
 
 export async function register(

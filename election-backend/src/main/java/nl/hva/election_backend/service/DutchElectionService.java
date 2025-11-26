@@ -1,15 +1,20 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.entity.ElectionEntity;
 import nl.hva.election_backend.model.Election;
+import nl.hva.election_backend.repository.ConstituencyRepository;
+import nl.hva.election_backend.repository.ElectionRepository;
 import nl.hva.election_backend.utils.xml.DutchElectionParser;
 import nl.hva.election_backend.utils.xml.transformers.*;
 import nl.hva.election_backend.utils.PathUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * A demo service for demonstrating how an EML-XML parser can be used inside a backend application.<br/>
@@ -19,23 +24,42 @@ import java.io.IOException;
 @Service
 public class DutchElectionService {
     private Election election;
+    private final PartyService partyService;
+    private final MunicipalityService municipalityService;
+    private final ElectionRepository electionRepository;
+    private final ConstituencyService constituencyService;
+
+    public DutchElectionService(PartyService partyService, MunicipalityService municipalityService, ElectionRepository electionRepository, ConstituencyService constituencyService) {
+        this.partyService = partyService;
+        this.municipalityService = municipalityService;
+        this.electionRepository = electionRepository;
+        this.constituencyService = constituencyService;
+    }
 
     public Election readResults(String electionId, String folderName) {
         System.out.println("Processing files...");
 
-        if (election == null) {
-            election = new Election(electionId);
-        }
+        this.election = new Election(electionId);
+        System.out.println(this.election);
 
-        Election election = new Election(electionId);
+        int year = Integer.parseInt(electionId.replaceAll("\\D", ""));
+
+
+        System.out.println("Election year - " + year);
+        ElectionEntity electionEntity = electionRepository.findById(year)
+                .orElseGet(() -> electionRepository.save(
+                        new ElectionEntity(year, electionId, "Tweede Kamerverkiezing", null)
+                ));
+        System.out.println("Dutch Election results: " + election);
+
         // TODO This lengthy construction of the parser should be replaced with a fitting design pattern!
         //  And refactoring the constructor while your at it is also a good idea.
         DutchElectionParser electionParser = new DutchElectionParser(
-                new DutchDefinitionTransformer(election),
+                new DutchDefinitionTransformer(election, partyService, municipalityService),
                 new DutchCandidateTransformer(election),
                 new DutchResultTransformer(election),
                 new DutchNationalVotesTransformer(election),
-                new DutchConstituencyVotesTransformer(election),
+                new DutchConstituencyVotesTransformer(election, constituencyService),
                 new DutchMunicipalityVotesTransformer(election)
         );
 
@@ -44,12 +68,21 @@ public class DutchElectionService {
             // Please note that you can also specify an absolute path to the folder!
             electionParser.parseResults(electionId, PathUtils.getResourcePath("/%s".formatted(folderName)));
             // Do what ever you like to do
-            System.out.println("Dutch Election results: " + election);
+            String dateStr = election.getDate();
+
+            if (dateStr == null || dateStr.isBlank()) {
+                // Fallback – pick something that makes sense for your assignment
+                electionEntity.setDate(LocalDate.of(year, 1, 1));
+            } else {
+                electionEntity.setDate(LocalDate.parse(dateStr));  // expects "yyyy-MM-dd"
+            }
+            electionRepository.save(electionEntity);
             // Now is also the time to send the election information to a database for example.
 
             this.election = election;
             return this.election;
-        } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException | SAXException e) {
+        } catch (IOException | XMLStreamException | NullPointerException | ParserConfigurationException |
+                 SAXException e) {
             // FIXME You should do here some proper error handling! The code below is NOT how you handle errors properly!
             System.err.println("Failed to process the election results!");
             e.printStackTrace();

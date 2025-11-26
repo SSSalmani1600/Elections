@@ -1,5 +1,7 @@
 package nl.hva.election_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,17 +13,43 @@ import java.util.Set;
  *
  */
 public class Election {
-    private final String id;
+    private String id;
     private final List<Party> parties = new ArrayList<>();
     private Set<Constituency> constituencies = new HashSet<>();
+    private String type;
+    private String date;
+    @JsonIgnore
+    private String status;
 
-    public Election(String id) {
+    public Election(String id, String type, String date, String status) {
+
         this.id = id;
+        this.type = type;
+        this.date = date;
+        this.status = status;
+
+    }
+
+    public Election(String electionId) {
+        this.id = electionId;
+    }
+
+    public String getType() { return type; }
+    public String getDate() { return date; }
+    public String getStatus() { return status; }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     @Override
     public String toString() {
-        return "You have to create a proper election model yourself!";
+        return "Election{id='%s', type='%s', date='%s', parties=%d}"
+                .formatted(id, type, date, parties.size());
     }
 
     public String getId() {

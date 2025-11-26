@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login, register } from '@/services/AuthService'
 import type { LoginResponse, RegisterResponse } from '@/types/api'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const displayName = ref('')
 const email = ref('')
@@ -24,15 +26,25 @@ async function onSubmit() {
     }
 
     const res: RegisterResponse = await register(email.value, password.value, displayName.value)
-
     const data: LoginResponse = await login(res.email, res.password)
 
-    localStorage.setItem('JWT', data.token)
-    localStorage.setItem('username', res.username)
-    success.value = `Account aangemaakt en automatisch ingelogd als ${data.displayName}!`
-    setTimeout(() => router.replace('/'), 1500)
-  } catch (err: unknown) {
-    console.log(err)
+    // ✅ Sla alle benodigde data op in localStorage
+    localStorage.setItem("JWT", data.token)
+    localStorage.setItem("userId", String(data.id))
+    localStorage.setItem("username", data.displayName)
+
+    // ✅ log direct in via de store
+    auth.login(res.username, data.token)
+    
+    // ✅ Sla userId op voor account pagina
+    if (data.id) {
+      localStorage.setItem('userId', String(data.id))
+    }
+
+    success.value = `Account aangemaakt en automatisch ingelogd als ${res.username}!`
+    await router.replace('/') // geen timeout
+  } catch (err) {
+    console.error(err)
     error.value = 'Registratie mislukt. Controleer je gegevens.'
   } finally {
     loading.value = false
@@ -51,7 +63,7 @@ async function onSubmit() {
         <!-- Display Name -->
         <div class="flex flex-col gap-2">
           <label for="displayName" class="text-sm font-medium text-gray-300"
-            >Naam/gebruikersnaam</label
+          >Naam/gebruikersnaam</label
           >
           <input
             v-model="displayName"
@@ -130,3 +142,4 @@ input::placeholder {
   color: #777;
 }
 </style>
+

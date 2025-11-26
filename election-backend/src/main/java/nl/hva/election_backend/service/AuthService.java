@@ -3,14 +3,15 @@ package nl.hva.election_backend.service;
 import nl.hva.election_backend.dto.AuthenticationResponse;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
-import nl.hva.election_backend.repo.RefreshTokenRepository;
-import nl.hva.election_backend.repo.UserRepository;
+import nl.hva.election_backend.repository.RefreshTokenRepository;
+import nl.hva.election_backend.repository.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -35,6 +36,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.refreshRepo = refreshRepo;
     }
+
 
     @Transactional
     public AuthenticationResponse authenticate(String email, String password) {
@@ -69,7 +71,7 @@ public class AuthService {
 
         String normalizedEmail = normalizeEmail(email);
 
-        // simpele checks (pas aan naar jouw wensen)
+
         if (!normalizedEmail.contains("@")) {
             throw new IllegalArgumentException("Ongeldig e-mailadres");
         }
@@ -81,18 +83,20 @@ public class AuthService {
             throw new IllegalStateException("E-mail is al in gebruik");
         }
 
-        // Hash via DI hasher; fallback naar expliciete BCrypt als hasher om wat voor reden dan ook null is.
+
         String passwordHash = hasher.hash(rawPassword);
+
 
         User user = new User();
         user.setEmail(normalizedEmail);
-        user.setUsername(username);
+        user.setUsername(username.trim());
         user.setPasswordHash(passwordHash);
+
 
         return userRepo.save(user);
     }
 
-    // Handige helper om e-mails consistent op te slaan/te zoeken
+
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase();
     }

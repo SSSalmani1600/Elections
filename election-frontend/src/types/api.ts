@@ -7,7 +7,12 @@ export interface RegisterResponse {
   password: string
   username: string
 }
-export type ParserResponse = { parties: { name: string }[] }
+export type ParserResponse = {
+  parties: {
+    name: string
+    candidates: Candidate[]
+  }[]
+}
 
 export interface Candidate {
   firstName: string
@@ -23,6 +28,7 @@ export interface Candidate {
 
 export interface Candidate {
   firstName: string
+  namePrefix?: string
   lastName: string
   initials: string
   gender: string
@@ -40,6 +46,12 @@ export interface Party {
   candidates: Candidate[]
 }
 
+export interface Party2 {
+  year: number
+  party_id: string
+  name: string
+}
+
 export interface Constituency {
   name: string
   parties: Party[]
@@ -47,7 +59,14 @@ export interface Constituency {
 
 export interface User {
   id: number
-  displayName: string
+  username: string
   email: string
-  password: string
+  isAdmin?: boolean
+}
+
+export interface Statement {
+  id: number
+  statement: string
+  category: string
+  explanation: string
 }
