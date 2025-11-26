@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 import PartiesSlider from "@/components/PartiesSlider.vue";
 
 const router = useRouter()
@@ -8,8 +8,7 @@ const goToForum = () => router.push('/forum')
 </script>
 
 <template>
-  <main
-    class="flex flex-col items-center min-h-screen gap-16">
+  <main class="flex flex-col items-center min-h-screen gap-16">
     <div class="flex flex-col items-center w-fit mt-[75px] gap-8 px-4">
       <div class="flex flex-col items-center gap-3">
         <h1 class="text-4xl font-bold max-md:text-3xl text-center">Maak kennis met de Nederlandse politiek</h1>
@@ -23,7 +22,7 @@ const goToForum = () => router.push('/forum')
       </div>
     </div>
 
-    <PartiesSlider/>
+    <!-- <PartiesSlider/> -->
 
     <footer
       class="w-full bg-background text-center py-16 flex items-center justify-center mt-auto gap-12 max-lg:flex-col">

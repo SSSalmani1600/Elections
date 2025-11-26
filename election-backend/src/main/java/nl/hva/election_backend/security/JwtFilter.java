@@ -1,11 +1,11 @@
 package nl.hva.election_backend.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.service.JwtService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -57,67 +57,31 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // 1. Cookie based JWT
-        String cookieToken = null;
         Cookie[] cookies = request.getCookies();
+        String jwtToken = null;
 
         if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("jwt".equals(c.getName())) {
-                    cookieToken = c.getValue();
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    jwtToken = cookie.getValue();
                     break;
                 }
             }
         }
 
-        // 2. Bearer token (Authorization header)
-        String authHeader = request.getHeader("Authorization");
-        String bearerToken = null;
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            bearerToken = authHeader.substring(7);
-        }
-
-        // Prioriteit: Bearer token > Cookie
-        String token = bearerToken != null ? bearerToken : cookieToken;
-
-        if (token == null || token.isEmpty()) {
-            unauthorized(response, "missing_token", "This endpoint requires a valid JWT (cookie or Bearer).");
-            return;
-        }
-
         // Token validatie
         try {
-            TokenValidationResponse validation = jwtService.validateToken(token);
+            boolean tokenResponse = jwtService.validateToken(jwtToken);
 
-            if (!validation.isValid()) {
+            if (!tokenResponse) {
                 unauthorized(response, "invalid_token", "Invalid or expired JWT token");
                 return;
             }
 
-            // Extract user info from token
-            String username = null;
-            try {
-                username = jwtService.extractUsername(token);
-            } catch (Exception ignored) {}
-
-            if (username != null) {
-                request.setAttribute("username", username);
-            }
-
-            // Extract userId for AdminFilter
-            Integer userId = null;
-            try {
-                userId = jwtService.extractUserId(token);
-            } catch (Exception ignored) {}
-
-            if (userId != null) {
-                request.setAttribute("userId", userId);
-            }
-
+            String userId = jwtService.extractUserId(jwtToken);
+            request.setAttribute("userId", userId);
             filterChain.doFilter(request, response);
-
-        } catch (RuntimeException e) {
+        } catch (JwtException e) {
             unauthorized(response, "internal_error", e.getMessage());
         }
     }

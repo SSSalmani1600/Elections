@@ -20,7 +20,15 @@ public class User {
     private String passwordHash;
 
     @Column(name = "is_admin")
-    private Boolean isAdmin = false; // ⭐ Default waarde
+    private boolean isAdmin;
+
+    public boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public User() {
     }
@@ -64,10 +72,6 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
-    }
-
-    public Boolean getIsAdmin() {
-        return isAdmin;
     }
 
     public void setIsAdmin(Boolean isAdmin) {

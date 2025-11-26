@@ -1,13 +1,16 @@
+import { apiFetch } from '@/apiClient'
 import type { LoginResponse, RegisterResponse } from '@/types/api'
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch('http://localhost:8080/api/auth/login', {
+export async function loginRequest(email: string, password: string): Promise<LoginResponse> {
+  const res = await apiFetch('http://localhost:8080/api/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
-    credentials: 'include', // ⭐ nodig voor cookies (main)
+    body: JSON.stringify({
+      email,
+      password,
+    }),
   })
 
   if (!res.ok) {
@@ -16,17 +19,17 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
   const data = (await res.json()) as LoginResponse
 
-  // ⭐ Token opslaan als de backend hem meestuurt
-  if (data.token) {
-    localStorage.setItem('JWT', data.token)
-  }
-
-  // ⭐ Jouw extra informatie opslaan
-  localStorage.setItem('userId', String(data.id))
-  localStorage.setItem('username', data.displayName)
-  localStorage.setItem('isAdmin', String(data.isAdmin))
-
   return data
+}
+
+export async function logoutRequest(): Promise<void> {
+  await apiFetch(
+    'http://localhost:8080/api/auth/login/logout',
+    {
+      method: 'POST',
+    },
+    false,
+  )
 }
 
 export async function register(

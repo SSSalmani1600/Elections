@@ -1,14 +1,15 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ElectionsView from '@/views/ElectionsView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import PartyDetailView from '@/views/PartyDetailView.vue'
-import PartiesView from "@/views/PartiesView.vue";
+import PartiesView from '@/views/PartiesView.vue'
 import DiscussionsView from '@/views/DiscussionsView.vue'
 import DiscussionDetailView from '@/views/DiscussionDetailView.vue'
 import ElectionCalendarView from '@/views/ElectionCalenderView.vue'
 import VotingGuideView from '@/views/VotingGuideView.vue'
+import { authStore } from '@/store/authStore'
 import AccountView from '@/views/AccountView.vue'
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 
@@ -42,7 +43,7 @@ const router = createRouter({
     },
     {
       path: '/partij/:name',
-      name: "partyDetail",
+      name: 'partyDetail',
       component: PartyDetailView,
     },
     {
@@ -55,11 +56,11 @@ const router = createRouter({
       name: 'discussion-detail',
       component: DiscussionDetailView,
     },
-      {
-          path: '/forum',
-          name: 'forum',
-          component: DiscussionsView,
-      },
+    {
+      path: '/forum',
+      name: 'forum',
+      component: DiscussionsView,
+    },
     {
       path: '/calendar',
       name: 'calendar',
@@ -116,5 +117,20 @@ const router = createRouter({
   ],
 })
 
-export default router
+router.beforeEach(async (to, from, next) => {
+  if (!authStore.state.initialized && !authStore.state.loading) {
+    await authStore.initAuth()
+  }
 
+  if (to.meta.requiresAuth && !authStore.state.user) {
+    return next({ name: 'login' })
+  }
+
+  if (to.name === 'login' && authStore.state.user) {
+    return next({ name: 'home' })
+  }
+
+  next()
+})
+
+export default router
