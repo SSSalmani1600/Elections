@@ -150,7 +150,7 @@ onMounted(async () => {
 
       <div class="relative">
         <!-- Skeleton Section -->
-        <div v-if="loading" class="grid grid-cols-1  gap-4 !max-h-[164px] overflow-y-hidden md:grid-cols-2 min-[1480px]:grid-cols-3">
+        <div v-if="loading" class="grid grid-cols-1 gap-4 !max-h-[184px] overflow-y-hidden md:grid-cols-2 min-[1480px]:grid-cols-3">
           <div v-for="i in 6" :key="i" class="p-4 bg-background rounded-xl flex items-center gap-4">
             <div class="skeleton-img"></div>
             <div class="skeleton-text"></div>
