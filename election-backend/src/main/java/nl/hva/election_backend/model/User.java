@@ -1,6 +1,7 @@
 package nl.hva.election_backend.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -38,6 +39,10 @@ public class User {
         this.username = username;
     }
 
+    public User() {
+
+    }
+
     public Long getId() {
         return id;
     }
@@ -69,4 +74,13 @@ public class User {
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
+
