@@ -22,7 +22,8 @@ public class User {
     @Column(name = "is_admin")
     private Boolean isAdmin = false; // ⭐ Default waarde behouden
 
-    public User() {}
+    public User() {
+    }
 
     public User(String email, String passwordHash, String username) {
         this.email = email;
@@ -70,4 +71,5 @@ public class User {
 
     public void setIsAdmin(Boolean isAdmin) {
         this.isAdmin = isAdmin;
+    }
 }
