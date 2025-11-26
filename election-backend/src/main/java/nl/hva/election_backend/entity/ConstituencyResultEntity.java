@@ -11,11 +11,48 @@ public class ConstituencyResultEntity {
     private int year;
 
     @Id
+    @Column(name = "constituency_id")
     private String constituencyId;
 
     @Id
+    @Column(name = "party_id")
     private String partyId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(
+                    name = "year",
+                    referencedColumnName = "year",
+                    insertable = false,
+                    updatable = false
+            ),
+            @JoinColumn(
+                    name = "constituency_id",
+                    referencedColumnName = "constituency_id",
+                    insertable = false,
+                    updatable = false
+            )
+    })
+    private ConstituencyEntity constituency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(
+                    name = "year",
+                    referencedColumnName = "year",
+                    insertable = false,
+                    updatable = false
+            ),
+            @JoinColumn(
+                    name = "party_id",
+                    referencedColumnName = "party_id",
+                    insertable = false,
+                    updatable = false
+            )
+    })
+    private PartyEntity party;
+
+    @Column(name = "valid_votes")
     private int validVotes;
 
     public ConstituencyResultEntity(int year, String constituencyId, String partyId, int validVotes) {
@@ -59,5 +96,21 @@ public class ConstituencyResultEntity {
 
     public void setValidVotes(int validVotes) {
         this.validVotes = validVotes;
+    }
+
+    public ConstituencyEntity getConstituency() {
+        return constituency;
+    }
+
+    public void setConstituency(ConstituencyEntity constituency) {
+        this.constituency = constituency;
+    }
+
+    public PartyEntity getParty() {
+        return party;
+    }
+
+    public void setParty(PartyEntity party) {
+        this.party = party;
     }
 }
