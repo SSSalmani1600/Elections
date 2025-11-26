@@ -26,10 +26,10 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private static final Pattern[] whiteListPatterns = {
-            Pattern.compile("^/api/auth/.*$"),
-            Pattern.compile("^/api/parties/.*$"),
-            Pattern.compile("^/api/elections/.*$"),
-            Pattern.compile("^/api/discussions/.*$")
+            Pattern.compile("^/api/auth(/.*)?$"),
+            Pattern.compile("^/api/parties(/.*)?$"),
+            Pattern.compile("^/api/elections(/.*)?$"),
+            Pattern.compile("^/api/discussions(/.*)?$")
     };
 
     @Override
