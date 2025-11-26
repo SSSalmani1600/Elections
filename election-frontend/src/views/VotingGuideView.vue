@@ -55,7 +55,7 @@ onMounted(async () => {
     errorMessage.value = 'Er ging iets mis bij het ophalen van de statements'
     console.error(err.message)
   } finally {
-    loading.value = false
+    loading.value = true
   }
 })
 </script>
@@ -102,7 +102,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-if="loading" class="col-span-7 flex flex-col gap-10">
+      <div v-if="loading" class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10">
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
             <span class="skeleton-text h-4 w-[10%] rounded-[10px]"></span>
