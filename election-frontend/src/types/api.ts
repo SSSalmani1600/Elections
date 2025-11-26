@@ -72,4 +72,12 @@ export interface AdminStats {
   reportedPosts: number;
   pendingReviews: number;
 }
+export interface LoginResponse {
+  id: number
+  displayName: string
+  token: string
+  isAdmin: boolean
+}
+
+
 
