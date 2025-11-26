@@ -4,7 +4,6 @@ package nl.hva.election_backend.utils.xml.transformers;
 import io.micrometer.common.util.StringUtils;
 import nl.hva.election_backend.entity.MunicipalityEntity;
 import nl.hva.election_backend.entity.PartyEntity;
-import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.model.Election;
 import nl.hva.election_backend.service.MunicipalityService;
 import nl.hva.election_backend.service.PartyService;
@@ -13,8 +12,6 @@ import nl.hva.election_backend.utils.xml.TagAndAttributeNames;
 
 import java.util.Map;
 import java.util.Objects;
-
-import static nl.hva.election_backend.utils.xml.TagAndAttributeNames.*;
 
 /**
  * Just prints to content of electionData to the standard output.>br/>
@@ -82,7 +79,7 @@ public class DutchDefinitionTransformer implements DefinitionTransformer, TagAnd
         currentPartyId++;
 
 
-        System.out.println("Party saved: " + saveParty.getYear() + " - " + saveParty.getId());
+        System.out.println("Party saved: " + saveParty.getYear() + " - " + saveParty.getPartyId());
     }
 
 }
