@@ -51,7 +51,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
             }
 
-            String userIdStr = jwtService.extractDisplayName(token); // Subject bevat user ID
+            String userIdStr = jwtService.extractUsername(token); // Subject bevat user ID
             Long userId = Long.parseLong(userIdStr);
             
             Optional<User> user = userRepository.findById(userId);
