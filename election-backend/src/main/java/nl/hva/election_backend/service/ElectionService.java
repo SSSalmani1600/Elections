@@ -1,6 +1,8 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.entity.ElectionEntity;
 import nl.hva.election_backend.model.Election;
+import nl.hva.election_backend.repository.ElectionRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,9 +16,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ElectionService {
+    private final ElectionRepository electionRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ElectionService.class);
 
@@ -24,6 +28,10 @@ public class ElectionService {
     private String electionSourceUrl;
 
     private static final String STATUS_CONFIRMED = "confirmed";
+
+    public ElectionService(ElectionRepository electionRepository) {
+        this.electionRepository = electionRepository;
+    }
 
     public List<Election> fetchUpcomingElections() throws IOException {
         logger.info("[ElectionService] Ophalen van: {}", electionSourceUrl);
@@ -122,5 +130,9 @@ public class ElectionService {
     private String capitalize(String text) {
         if (text == null || text.isEmpty()) return text;
         return text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
+
+    public Set<Integer> getElectionYears() {
+        return electionRepository.findAll().stream().map(ElectionEntity::getYear).collect(Collectors.toSet());
     }
 }
