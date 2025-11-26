@@ -27,12 +27,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // ⭐ GEZAMENLIJKE WHITELIST
     private static final Pattern[] whiteListPatterns = {
-            Pattern.compile("^/api/auth(/.*)?$"),
-            Pattern.compile("^/api/parties(/.*)?$"),
-            Pattern.compile("^/api/elections(/.*)?$"),
-            Pattern.compile("^/api/users(/.*)?$"),
-            Pattern.compile("^/api/next-elections(/.*)?$"),
-            Pattern.compile("^/api/discussions(/.*)?$") // Public GET/POST
+            Pattern.compile("^/api/auth/.*$"),
+            Pattern.compile("^/api/parties/.*$"),
+            Pattern.compile("^/api/elections/.*$"),
+            Pattern.compile("^/api/discussions/.*$"),
+            Pattern.compile("^/api/statements/.*$"),
+            Pattern.compile("^/api/next-elections/.*$"),
+            Pattern.compile("^/api/users/.*$")
     };
 
     @Override
