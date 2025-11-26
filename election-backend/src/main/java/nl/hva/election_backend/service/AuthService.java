@@ -2,7 +2,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.AuthenticationResponse;
 import nl.hva.election_backend.dto.TokenRefreshResponse;
-import nl.hva.election_backend.exception.InvalidRefreshTokenException;
+import nl.hva.election_backend.exception.UnauthorizedException;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
@@ -54,6 +54,17 @@ public class AuthService {
         refreshRepo.saveAndFlush(refreshToken);
 
         return new AuthenticationResponse(accessToken, refreshTokenHash, user);
+    }
+
+    public User getUser(String accessToken) {
+        if (accessToken == null) {
+            throw new UnauthorizedException("Missing access token");
+        }
+
+        String userId = jwtService.extractUserId(accessToken);
+
+        return userRepo.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
     }
 
     public TokenRefreshResponse refreshTokens(String refreshTokenHash) {
