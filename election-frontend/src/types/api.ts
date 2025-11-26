@@ -57,6 +57,7 @@ export interface Party2 {
 
 export interface Constituency {
   name: string
+  constituencyId: string
   parties: Party[]
 }
 

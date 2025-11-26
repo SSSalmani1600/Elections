@@ -1,14 +1,30 @@
 <script setup lang="ts">
-import { getConstituencies } from '@/services/ElectionService'
+import { getConstituencies, getElectionYears } from '@/services/ElectionService'
 import type { Constituency, Party } from '@/types/api'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import Select from 'primevue/select'
 import Chart from 'primevue/chart'
 import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 
 const constituencies = ref<Constituency[]>([])
+const years = ref<number[]>([])
+const selectedYear = ref<number>(2025)
+const yearOptions = computed(() =>
+  [...years.value]
+    .map((y) => ({
+      label: y,
+      value: y,
+    }))
+)
 
-const constituencyNames: string[] = []
+const constituencyOptions = computed(() =>
+  [...constituencies.value]
+    .map((c) => ({
+      label: c.name,
+      value: c.name,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+)
 
 const chartData = ref()
 const chartOptions = ref()
@@ -121,32 +137,32 @@ function getConstituencyByName(name: string): Constituency | null {
 // fetch constituencies
 const fetchConstituencies = async () => {
   try {
-    constituencies.value = await getConstituencies()
+    constituencies.value = await getConstituencies(selectedYear.value)
   } catch (e) {
     console.error('Failed to fetch constituencies', e)
   }
 }
 
 onMounted(async () => {
+  years.value = await getElectionYears();
   await fetchConstituencies()
 
-  constituencies.value.map((c) => constituencyNames.push(c.name))
-
   if (!selectedConstituency.value && constituencies.value.length) {
-    selectedConstituency.value = constituencies.value[0].name
+    selectedConstituency.value = constituencies.value.find(c => c.name === "Amsterdam")?.name
+      || constituencies.value[0].name;
   }
 
   chartOptions.value = setChartOptions()
   chartData.value = setChartData()
 })
 
-function sortConstituenciesByName(constituencies: string[]): string[] {
-  return constituencies.sort((a, b) => a.localeCompare(b))
-}
-
 // Update chart when user changes selection
 watch(selectedConstituency, () => {
   if (!constituencies.value.length) return
+  chartData.value = setChartData()
+})
+watch(selectedYear, async () => {
+  await fetchConstituencies()
   chartData.value = setChartData()
 })
 </script>
@@ -155,9 +171,7 @@ watch(selectedConstituency, () => {
   <section class="text-white px-6 py-16 md:py-24">
     <div class="max-w-[100rem] mx-auto grid md:grid-cols-2 items-center gap-12 lg:gap-20">
       <div>
-        <h1
-          class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight"
-        >
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-tight tracking-tight">
           Ontdek de verkiezingen<br />
           in Nederland
         </h1>
@@ -168,28 +182,20 @@ watch(selectedConstituency, () => {
         </p>
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <button
-            type="button"
-            @click="scrollToSection('komende-verkiezingen')"
-            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition"
-          >
+          <button type="button" @click="scrollToSection('komende-verkiezingen')"
+            class="bg-[#EF3054] cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow-md hover:shadow-lg hover:bg-[#d11f45] transition">
             Komende verkiezingen
           </button>
-          <button
-            type="button"
-            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition"
-          >
+          <button type="button"
+            class="bg-white text-black cursor-pointer font-semibold px-6 py-4 rounded-2xl text-base sm:text-lg shadow hover:bg-gray-100 transition">
             Uitslagen voorgaande jaren
           </button>
         </div>
       </div>
 
       <div class="flex justify-center md:justify-end">
-        <img
-          src="/src/assets/img/elections-image.png"
-          alt="Illustratie van verkiezingen"
-          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
-        />
+        <img src="/src/assets/img/elections-image.png" alt="Illustratie van verkiezingen"
+          class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl" />
       </div>
     </div>
   </section>
@@ -234,13 +240,10 @@ watch(selectedConstituency, () => {
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Filter row -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <Select
-          v-model="selectedConstituency"
-          name="Kieskringen"
-          :options="sortConstituenciesByName(constituencyNames)"
-          placeholder="Selecteer een kieskring"
-          class="w-full sm:max-w-md"
-        />
+        <Select v-model="selectedYear" name="Jaren" placeholder="Selecteer een jaar" :options="yearOptions"
+          optionLabel="label" optionValue="value" />
+        <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
+          optionValue="value" placeholder="Selecteer een kieskring" class="sm:max-w-md" />
       </div>
 
       <!-- Content grid -->
@@ -252,9 +255,7 @@ watch(selectedConstituency, () => {
 
         <!-- Chart card -->
         <div class="order-1 lg:order-2 h-full">
-          <div
-            class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg"
-          >
+          <div class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
             <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-white/90">
                 Uitslag per partij: {{ selectedConstituency || '—' }}
@@ -262,13 +263,7 @@ watch(selectedConstituency, () => {
               <span class="text-xs text-white/60">stemmen</span>
             </div>
             <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
-              <Chart
-                v-if="chartData"
-                type="bar"
-                :data="chartData"
-                :options="chartOptions"
-                class="w-full h-full"
-              />
+              <Chart v-if="chartData" type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
               <div v-else class="flex items-center justify-center w-full h-full">
                 <p class="text-center text-white/80">Couldn't load data</p>
               </div>
@@ -278,86 +273,4 @@ watch(selectedConstituency, () => {
       </div>
     </div>
   </section>
-
-  <!-- Parties with year selector -->
-  <!-- <section class="px-6 py-16 text-white">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-        <div class="flex items-end gap-3">
-          <h2 class="text-2xl sm:text-3xl font-semibold">Deelnemende partijen</h2>
-          <span v-if="parties" class="text-white/60 text-sm hidden sm:inline">
-            {{ parties.affiliations.length }} partijen
-          </span>
-        </div>
-
-         Year selector
-        <div class="flex items-center gap-2">
-          <label for="year" class="text-sm text-white/70">Jaar</label>
-          <select
-            id="year"
-            v-model.number="selectedYear"
-            class="bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/30"
-          >
-            <option class="text-black" v-for="y in years" :key="y" :value="y">{{ y }}</option>
-          </select>
-        </div>
-      </div>
-
-      Loading skeleton
-      <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <div
-          v-for="i in 8"
-          :key="i"
-          class="bg-white/5 border border-white/10 rounded-xl p-5 animate-pulse"
-        >
-          <div class="flex items-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-white/10"></div>
-            <div class="flex-1 space-y-2">
-              <div class="h-3 w-2/3 bg-white/10 rounded"></div>
-              <div class="h-3 w-1/3 bg-white/10 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      List
-      <div v-else-if="parties" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <article
-          v-for="aff in parties.affiliations"
-          :key="aff.name"
-          class="group bg-white/5 border border-white/10 rounded-xl p-5 transition hover:bg-white/10 hover:border-white/20"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              class="shrink-0 h-10 w-10 rounded-full bg-white/10 grid place-items-center font-semibold"
-              aria-hidden="true"
-              :title="aff.name"
-            >
-              {{ aff.name?.charAt(0)?.toUpperCase() }}
-            </div>
-
-            <div class="min-w-0">
-              <h3 class="font-semibold leading-tight truncate">{{ aff.name }}</h3>
-              <p class="text-xs text-white/60">Politieke partij</p>
-            </div>
-
-            <svg
-              class="ml-auto opacity-0 group-hover:opacity-100 transition h-5 w-5 text-white/60"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </div>
-        </article>
-      </div>
-
-      <p v-else class="text-white/70">Geen partijen gevonden.</p>
-    </div>
-  </section> -->
 </template>

@@ -12,9 +12,10 @@ public class PartyEntity {
     private int year;
 
     @Id
+    @Column(name = "party_id")
     private String partyId;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     public PartyEntity() {}
@@ -25,7 +26,7 @@ public class PartyEntity {
         this.partyId = partyId;
     }
 
-    public String getId() {
+    public String getPartyId() {
         return partyId;
     }
 
