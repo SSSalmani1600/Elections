@@ -9,16 +9,15 @@ import java.util.List;
 @Repository
 public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> {
 
-
     List<ReactionEntity> findByModerationStatus(String status);
 
     List<ReactionEntity> findByModerationStatusIn(List<String> statuses);
 
 
-    List<ReactionEntity> findAllByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
+    List<ReactionEntity> findAllByDiscussion_IdOrderByCreatedAtAsc(Long discussionId);
 
 
-    long countByDiscussionId(Long discussionId);
+    long countByDiscussion_Id(Long discussionId);
 
     List<ReactionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
