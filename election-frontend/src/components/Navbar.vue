@@ -46,6 +46,7 @@ onBeforeUnmount(() => {
       <router-link to="/partijen" class="nav-link">Partijen</router-link>
       <router-link to="/forum" class="nav-link">Forum</router-link>
       <router-link to="/calendar" class="nav-link">Verkiezingskalender</router-link>
+      <router-link to="/stemwijzer" class="nav-link">Stemwijzer</router-link>
     </div>
 
     <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">

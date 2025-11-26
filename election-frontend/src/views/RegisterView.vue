@@ -35,6 +35,11 @@ async function onSubmit() {
 
     // ✅ log direct in via de store
     auth.login(res.username, data.token)
+    
+    // ✅ Sla userId op voor account pagina
+    if (data.id) {
+      localStorage.setItem('userId', String(data.id))
+    }
 
     success.value = `Account aangemaakt en automatisch ingelogd als ${res.username}!`
     await router.replace('/') // geen timeout
