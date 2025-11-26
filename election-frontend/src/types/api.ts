@@ -1,5 +1,8 @@
 export interface LoginResponse {
+  id: number
+  email: string
   username: string
+  isAdmin: boolean
 }
 
 export interface RegisterResponse {
@@ -59,15 +62,15 @@ export interface Constituency {
 
 export interface User {
   id: number
-  username: string
   email: string
+  username: string
   isAdmin?: boolean
 }
 
 export interface Statement {
-  id: number;
-  statement: string;
-  category: string;
-  explanation: string;
-  answer: string | null;
+  id: number
+  statement: string
+  category: string
+  explanation: string
+  answer: string | null
 }
