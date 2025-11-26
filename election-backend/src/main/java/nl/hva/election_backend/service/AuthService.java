@@ -2,6 +2,7 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.AuthenticationResponse;
 import nl.hva.election_backend.dto.TokenRefreshResponse;
+import nl.hva.election_backend.exception.InvalidRefreshTokenException;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
@@ -54,6 +55,7 @@ public class AuthService {
 
         return new AuthenticationResponse(accessToken, refreshTokenHash, user);
     }
+
     public TokenRefreshResponse refreshTokens(String refreshTokenHash) {
         RefreshToken newRefreshToken = jwtService.rotateRefreshToken(refreshTokenHash);
 

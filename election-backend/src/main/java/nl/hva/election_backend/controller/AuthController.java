@@ -1,6 +1,7 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.*;
+import nl.hva.election_backend.exception.InvalidRefreshTokenException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -41,20 +42,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
 
-        ResponseCookie accessCookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(86400)
-                .build();
-
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(86400)
+                .maxAge(60 * 15)
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(60 * 5)
                 .build();
 
         return ResponseEntity.ok()
@@ -77,19 +78,24 @@ public class AuthController {
         }
     }
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshTokenHash) {
-        if (refreshTokenHash == null) return ResponseEntity.status(401).body("Empty refresh token");
+    public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token", required = false) String refreshTokenHash) {
+        if (refreshTokenHash == null || refreshTokenHash.isEmpty()) return ResponseEntity
+                .status(401).body("Empty refresh token");
 
-        TokenRefreshResponse tokenPair = authService.refreshTokens(refreshTokenHash);
+        TokenRefreshResponse tokenPair;
 
-        if (tokenPair.getRefreshTokenHash() == null) return ResponseEntity.status(401).body("Invalid refresh token");
+        try {
+            tokenPair = authService.refreshTokens(refreshTokenHash);
+        } catch(InvalidRefreshTokenException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenPair.getRefreshTokenHash())
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(86400)
+                .maxAge(60 * 15)
                 .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("jwt", tokenPair.getAccessToken())
@@ -97,7 +103,7 @@ public class AuthController {
                 .secure(false)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(60 * 15)
+                .maxAge(60 * 5)
                 .build();
 
         return ResponseEntity.ok()
