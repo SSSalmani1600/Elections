@@ -65,8 +65,9 @@ export interface User {
 }
 
 export interface Statement {
-  id: number
-  statement: string
-  category: string
-  explanation: string
+  id: number;
+  statement: string;
+  category: string;
+  explanation: string;
+  answer: string | null;
 }
