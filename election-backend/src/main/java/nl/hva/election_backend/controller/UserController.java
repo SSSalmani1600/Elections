@@ -39,21 +39,16 @@ public class UserController {
 
     // 🔹 Ophalen van huidige gebruiker via JWT token
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request, @CookieValue("jwt") String accessToken) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization token required");
         }
 
         try {
-            String token = authHeader.substring("Bearer ".length());
-            if (!jwtService.validateToken(token)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-            }
-
-            String userIdStr = jwtService.extractUsername(token); // Subject bevat user ID
+            String userIdStr = jwtService.extractUsername(accessToken); // Subject bevat user ID
             Long userId = Long.parseLong(userIdStr);
-            
+
             Optional<User> user = userRepository.findById(userId);
             return user.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
