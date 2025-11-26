@@ -65,8 +65,8 @@ async function postReaction() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        author: localStorage.getItem('username') || 'Onbekend',
-        message: newReaction.value.trim(),
+        message: newReaction.value, // ✅ juiste variabele
+        userId: Number(localStorage.getItem('userId') ?? 1), // ✅ userId wordt meegestuurd
       }),
     })
 
@@ -79,9 +79,7 @@ async function postReaction() {
       discussion.value.reactionsCount++
     }
 
-    // als lijstpagina open is (bijv. in background), update via localStorage trigger
     localStorage.setItem('forumRefresh', Date.now().toString())
-
     newReaction.value = ''
   } catch (e) {
     errorReaction.value = 'Er ging iets mis bij het plaatsen van je reactie.'
@@ -190,8 +188,6 @@ async function postReaction() {
 textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
-
-/* Scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
 }
