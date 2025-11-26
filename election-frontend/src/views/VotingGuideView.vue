@@ -102,7 +102,7 @@ onMounted(async () => {
     <p class="text-lg">{{ errorMessage }}</p>
   </div>
   <div v-else class="m-6 lg:m-[54px]">
-    <div class="flex flex-col lg:grid lg:grid-cols-12 gap-20">
+    <div class="flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-20">
       <div class="flex flex-col gap-4 order-2 lg:order-1 lg:col-span-4 2xl:col-span-3">
         <span class="font-bold text-[28px]">STELLINGEN</span>
         <div
@@ -165,7 +165,7 @@ onMounted(async () => {
             <span>Jouw progressie</span>
             <span>{{ completedStatements }} / {{ totalStatements }} stellingen</span>
           </div>
-          <ProgressBar></ProgressBar>
+          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements" class="mt-1"></ProgressBar>
         </div>
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
