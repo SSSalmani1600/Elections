@@ -16,6 +16,13 @@ const discussions = ref<DiscussionListItem[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+// Check of gebruiker is ingelogd
+function isLoggedIn(): boolean {
+  const token = localStorage.getItem('JWT')
+  const userId = localStorage.getItem('userId')
+  return !!(token && userId)
+}
+
 // Filter state
 type FilterType = 'recent' | 'popular'
 const activeFilter = ref<FilterType>('recent')
@@ -52,6 +59,11 @@ onMounted(async () => {
 })
 
 function openModal() {
+  // Check of gebruiker is ingelogd
+  if (!isLoggedIn()) {
+    router.push('/inloggen')
+    return
+  }
   formTitle.value = ''
   formBody.value = ''
   formError.value = null
