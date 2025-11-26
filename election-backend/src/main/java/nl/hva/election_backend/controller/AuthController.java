@@ -56,7 +56,6 @@ public class AuthController {
                     .body("Invalid email or password");
         }
 
-        // MAIN authenticatie flow (access + refresh token)
         AuthenticationResponse authResponse = authService.authenticate(req.getEmail(), req.getPassword());
         User user = authResponse.getUser();
 
