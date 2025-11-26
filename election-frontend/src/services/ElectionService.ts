@@ -1,3 +1,4 @@
+import { apiFetch } from '@/apiClient'
 import type { Constituency } from '@/types/api'
 
 export interface Election {
@@ -26,7 +27,7 @@ export async function getUpcomingElections(): Promise<Election[]> {
 }
 
 export async function getConstituencies(electionId: number): Promise<Constituency[]> {
-  const res = await fetch(
+  const res = await apiFetch(
     `http://localhost:8080/api/electionresults/${electionId}/constituencies`,
     {
       method: 'GET',
@@ -34,6 +35,7 @@ export async function getConstituencies(electionId: number): Promise<Constituenc
         'Content-Type': 'application/json',
       },
     },
+    false,
   )
 
   if (!res.ok) {
@@ -44,12 +46,16 @@ export async function getConstituencies(electionId: number): Promise<Constituenc
 }
 
 export async function getElectionYears(): Promise<number[]> {
-  const res = await fetch('http://localhost:8080/electionresults', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const res = await apiFetch(
+    'http://localhost:8080/api/electionresults',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  })
+    false,
+  )
 
   const years: number[] = await res.json()
 

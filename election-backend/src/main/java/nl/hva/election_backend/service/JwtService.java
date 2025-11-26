@@ -84,10 +84,19 @@ public class JwtService {
     }
 
     public boolean validateToken(String token) {
-        Claims claims = extractAllClaims(token);
+        if (token == null || token.isBlank()) {
+            return false;
+        }
 
-        if (!claims.getIssuer().equals("ga-stemmen.nl")) return false;
-        return !isTokenExpired(token);
+        try {
+            Claims claims = extractAllClaims(token);
+
+            if (!issuer.equals(claims.getIssuer())) return false;
+            return !isTokenExpired(token);
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isRefreshTokenValid(String tokenHash) {
