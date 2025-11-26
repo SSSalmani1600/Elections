@@ -28,6 +28,14 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    @GetMapping("/session")
+    public ResponseEntity<LoginResponse> fetchUser(@CookieValue(value = "jwt", required = false) String accessToken) {
+        User user = authService.getUser(accessToken);
+
+        return ResponseEntity
+                .ok(new LoginResponse(user.getId(), user.getEmail(), user.getUsername(), user.getIsAdmin()));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
@@ -60,7 +68,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
-                .body(new LoginResponse(new User(user.getId(), user.getEmail(), user.getUsername(), user.getIsAdmin())));
+                .body(new LoginResponse(user.getId(), user.getEmail(), user.getUsername(), user.getIsAdmin()));
     }
 
     @PostMapping("/register")
