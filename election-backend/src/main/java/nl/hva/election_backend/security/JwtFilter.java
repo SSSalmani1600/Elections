@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.service.JwtService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -14,8 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 @Component
@@ -71,22 +68,18 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
-            TokenValidationResponse tokenResponse = jwtService.validateToken(jwtToken);
+            boolean tokenResponse = jwtService.validateToken(jwtToken);
 
-            if (!tokenResponse.isValid()) {
+            if (!tokenResponse) {
                 unauthorized(response, "invalid_token", "Invalid or expired JWT token");
                 return;
             }
-
-//            if (tokenResponse.shouldRefresh()) {
-//                return;
-//            }
 
             String userId = jwtService.extractUserId(jwtToken);
             request.setAttribute("userId", userId);
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
-            unauthorized(response, "internal_error", String.valueOf(e));
+            unauthorized(response, "internal_error", e.getMessage());
         }
     }
 

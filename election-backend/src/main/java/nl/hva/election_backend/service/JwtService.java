@@ -4,12 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import nl.hva.election_backend.dto.TokenValidationResponse;
+import nl.hva.election_backend.exception.InvalidRefreshTokenException;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -84,24 +83,11 @@ public class JwtService {
         return sb.toString();
     }
 
-    public TokenValidationResponse validateToken(String token) {
+    public boolean validateToken(String token) {
         Claims claims = extractAllClaims(token);
-        if (!claims.getIssuer().equals("ga-stemmen.nl")) {
-            return new TokenValidationResponse(false, false);
-        }
-        if (isTokenExpired(token)) {
-            return new TokenValidationResponse(false, false);
-        };
 
-        Date expirationDate = claims.getExpiration();
-        long remainingTime = expirationDate.getTime() - (new Date().getTime());
-        long totalTime =  expirationDate.getTime() - claims.getIssuedAt().getTime();
-
-        if ((remainingTime / totalTime) * 100 <= 25) {
-            return new TokenValidationResponse(true, true);
-        }
-
-        return new TokenValidationResponse(true, false);
+        if (!claims.getIssuer().equals("ga-stemmen.nl")) return false;
+        return !isTokenExpired(token);
     }
 
     private boolean isRefreshTokenValid(String tokenHash) {
@@ -112,16 +98,16 @@ public class JwtService {
     public RefreshToken rotateRefreshToken(String refreshToken) {
         Optional<RefreshToken> oldRefreshToken = refreshRepo.findByTokenHash(refreshToken);
         if (oldRefreshToken.isEmpty()) {
-            return null;
+            throw new InvalidRefreshTokenException("Empty refresh token");
         };
 
         if (!isRefreshTokenValid(refreshToken)) {
-            return null;
+            throw new InvalidRefreshTokenException("Invalid or expired refresh token");
         }
 
         try {
             String newTokenHash = this.generateRefreshToken();
-            Instant newExpiryDate = Instant.now().plusSeconds(15 * 60 * 1000);
+            Instant newExpiryDate = Instant.now().plus(Duration.ofMinutes(15));
             RefreshToken newRefreshToken =
                     new RefreshToken(oldRefreshToken.get().getUserId(), newTokenHash, newExpiryDate);
             oldRefreshToken.get().setRevokedAt(Instant.now());
@@ -131,8 +117,7 @@ public class JwtService {
             return newRefreshToken;
         } catch(Exception e) {
             log.error("e: ", e);
+            throw new RuntimeException("Server error while rotating refresh token");
         }
-
-        return null;
     }
 }
