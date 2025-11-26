@@ -57,7 +57,6 @@ public class DiscussionService {
         DiscussionEntity d = discussionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
 
-
         List<ReactionEntity> reactions =
                 reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(id)
                         .stream()
@@ -92,6 +91,7 @@ public class DiscussionService {
                         .collect(Collectors.toList())
         );
     }
+
 
 
     public Long createDiscussion(String title, String content, String category, Long userId) {
