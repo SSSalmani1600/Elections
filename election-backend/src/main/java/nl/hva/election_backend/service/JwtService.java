@@ -31,10 +31,10 @@ public class JwtService {
         this.refreshRepo = refreshRepo;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
 
-        return Jwts.builder().claims().add(claims).subject(username)
+        return Jwts.builder().claims().add(claims).subject(String.valueOf(userId))
                 .issuer(issuer).issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 24 uur
                 .and().signWith(this.getKey()).compact();
