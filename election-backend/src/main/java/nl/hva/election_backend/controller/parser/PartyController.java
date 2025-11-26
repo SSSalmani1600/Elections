@@ -23,11 +23,7 @@ public class PartyController {
         this.partyService = partyService;
     }
 
-    @GetMapping
-    public Set<Party> getParties() {
-        return new HashSet<>(electionService.getElection().getParties());
-    }
-    @GetMapping("/short-info")
+    @GetMapping()
     public Set<PartyEntity> readAffiliations() {
         return partyService.getParties();
     }
