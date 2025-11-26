@@ -55,7 +55,7 @@ onMounted(async () => {
     errorMessage.value = 'Er ging iets mis bij het ophalen van de statements'
     console.error(err.message)
   } finally {
-    loading.value = true
+    loading.value = false
   }
 })
 </script>
@@ -95,7 +95,7 @@ onMounted(async () => {
               >
               <div class="block truncate w-full text-left">
                 <span class="opacity-80">{{ statement.category }}</span>
-                <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
+                <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }} <i class="pi pi-check text-[#277D00] font-bold ml-2" style="font-size: 1rem; font-weight: 700"></i></span>
               </div>
             </button>
           </template>
