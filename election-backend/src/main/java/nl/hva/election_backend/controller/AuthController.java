@@ -1,5 +1,6 @@
 package nl.hva.election_backend.controller;
 
+import jakarta.persistence.Column;
 import nl.hva.election_backend.dto.LoginRequest;
 import nl.hva.election_backend.dto.LoginResponse;
 import nl.hva.election_backend.dto.RegisterRequest;
@@ -51,7 +52,8 @@ public class AuthController {
         String token = jwtService.generateToken(userId, username);
 
         return ResponseEntity.ok(
-                new LoginResponse(id, token, username)
+                new LoginResponse(id, token, username, user.getIsAdmin())
+
         );
     }
 
