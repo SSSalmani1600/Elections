@@ -1,6 +1,5 @@
 package nl.hva.election_backend.security;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -26,18 +25,19 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
-    // ⭐ COMBINATIE VAN JOUW EN MAIN WHITELIST
+    // ⭐ GEZAMENLIJKE WHITELIST
     private static final Pattern[] whiteListPatterns = {
             Pattern.compile("^/api/auth(/.*)?$"),
             Pattern.compile("^/api/parties(/.*)?$"),
             Pattern.compile("^/api/elections(/.*)?$"),
             Pattern.compile("^/api/users(/.*)?$"),
             Pattern.compile("^/api/next-elections(/.*)?$"),
-            Pattern.compile("^/api/discussions(/.*)?$"), // GET/POST public
+            Pattern.compile("^/api/discussions(/.*)?$") // Public GET/POST
     };
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         // Allow preflight
@@ -46,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ⭐ WHITELISTING
+        // ⭐ CHECK WHITELIST
         String uri = request.getRequestURI();
         for (Pattern pattern : whiteListPatterns) {
             if (pattern.matcher(uri).matches()) {
@@ -55,9 +55,9 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // ⭐ SUPPORT VOOR COOKIE-GEBASEERDE JWT (from main)
-        Cookie[] cookies = request.getCookies();
+        // ⭐ 1. COOKIE BASED JWT (main backend)
         String cookieToken = null;
+        Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
             for (Cookie c : cookies) {
@@ -67,7 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // ⭐ SUPPORT VOOR BEARER TOKEN (from your version)
+        // ⭐ 2. BEARER TOKEN (jouw versie)
         String authHeader = request.getHeader("Authorization");
         String bearerToken = null;
 
@@ -83,7 +83,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ⭐ VALIDATIE — combinatie van beide versies
+        // ⭐ TOKEN VALIDATIE
         try {
             TokenValidationResponse validation = jwtService.validateToken(token);
 
@@ -92,18 +92,31 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Extract data (support jouw extractions)
-            String username = jwtService.extractUsername(token);
-            Integer userId = jwtService.extractUserId(token);
-            String displayName = jwtService.extractDisplayName(token);
+            // ⭐ Extract displayName + userId (jouw claim)
+            Integer userId = null;
+            String displayName = null;
+            String username = null;
 
+            try {
+                userId = jwtService.extractUserId(token);
+            } catch (Exception ignored) {}
+
+            try {
+                displayName = jwtService.extractDisplayName(token);
+            } catch (Exception ignored) {}
+
+            try {
+                username = jwtService.extractUsername(token);
+            } catch (Exception ignored) {}
+
+            // ⭐ Request attributes beschikbaar voor controllers
             if (username != null) request.setAttribute("username", username);
             if (displayName != null) request.setAttribute("userName", displayName);
             if (userId != null) request.setAttribute("userId", userId);
 
             filterChain.doFilter(request, response);
 
-        } catch (JwtException | RuntimeException e) {
+        } catch (RuntimeException e) {  // 💡 FIX: alleen RuntimeException
             unauthorized(response, "internal_error", e.getMessage());
         }
     }
@@ -113,7 +126,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
+        response.getWriter().write(
+                "{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}"
+        );
         response.flushBuffer();
     }
 }
