@@ -1,14 +1,14 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.entity.ReactionEntity;
-import nl.hva.election_backend.security.AdminOnly;
 import nl.hva.election_backend.service.ModerationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/moderation")
+@RequestMapping("/api/admin/moderation")
 public class AdminModerationController {
 
     private final ModerationService moderationService;
@@ -17,34 +17,32 @@ public class AdminModerationController {
         this.moderationService = moderationService;
     }
 
-    @AdminOnly
     @GetMapping("/pending")
-    public List<ReactionEntity> getPending() {
-        return moderationService.getPendingReactions();
+    public ResponseEntity<List<ReactionEntity>> getPending() {
+        return ResponseEntity.ok(moderationService.getPendingReactions());
     }
 
-    @AdminOnly
     @GetMapping("/flagged")
-    public List<ReactionEntity> getFlagged() {
-        return moderationService.getFlaggedReactions();
+    public ResponseEntity<List<ReactionEntity>> getFlagged() {
+        return ResponseEntity.ok(moderationService.getFlaggedReactions());
     }
 
-    @AdminOnly
     @PostMapping("/{id}/approve")
-    public void approve(@PathVariable Long id) {
+    public ResponseEntity<?> approve(@PathVariable Long id) {
         moderationService.approveReaction(id);
+        return ResponseEntity.ok().build();
     }
 
-    @AdminOnly
     @PostMapping("/{id}/reject")
-    public void reject(@PathVariable Long id) {
+    public ResponseEntity<?> reject(@PathVariable Long id) {
         moderationService.rejectReaction(id);
+        return ResponseEntity.ok().build();
     }
 
-    @AdminOnly
     @PostMapping("/{id}/flag")
-    public void flag(@PathVariable Long id, @RequestBody FlagRequest request) {
-        moderationService.flagReaction(id, request.reason());
+    public ResponseEntity<?> flag(@PathVariable Long id, @RequestBody FlagRequest req) {
+        moderationService.flagReaction(id, req.reason());
+        return ResponseEntity.ok().build();
     }
 
     public record FlagRequest(String reason) {}
