@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { getParties } from '@/services/PartyService.ts'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
-import IconSpinner from '@/components/icons/IconSpinner.vue'
 import type { Party2 } from '@/types/api.ts'
 import { getWikipediaPartyData } from '@/services/WikipediaService.ts'
 import { useFuse } from '@vueuse/integrations/useFuse'
@@ -149,7 +148,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
           />
         </div>
       </div>
-      <div class="flex flex-col items-center gap-6 min-h-[542px] w-full">
+      <div class="flex flex-col items-center gap-6 max-h-[542px] w-full">
         <div class="relative w-full min-h-[482px]">
           <span
             v-show="hasError"
@@ -157,7 +156,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
             >Er konden geen partijen gevonden worden!</span
           >
           <div
-            v-show="!hasError && visibleParties.length > 0"
+            v-show="!hasError && visibleParties.length > 0 && !loading"
             class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2"
           >
             <router-link
@@ -187,7 +186,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
             class="grid grid-cols-3 gap-x-6 gap-y-4 max-md:grid-cols-1 max-xl:grid-cols-2"
           >
             <div
-              v-for="n in 9"
+              v-for="n in pageSize"
               :key="n"
               class="bg-background border rounded-lg border-[#455174] h-[150px] p-4 flex gap-8"
             >
@@ -207,6 +206,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
           class="flex items-center justify-between w-[252px] gap-2 mt-auto md:w-[400px]"
         >
           <button class="pagination-btn" @click="currentPage--" :disabled="currentPage === 1">
+            <i class="pi pi-arrow-left"></i>
             <span class="hidden md:block">Vorige</span>
           </button>
           <div class="flex items-center gap-1">
@@ -226,6 +226,7 @@ watch([inputText, filteredList, loading], ([newInput, newList]) => {
             :disabled="currentPage === totalPages"
           >
             <span class="hidden md:block">Volgende</span>
+            <i class="pi pi-arrow-right"></i>
           </button>
         </div>
       </div>
