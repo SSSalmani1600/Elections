@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
+import ProgressBar from '@/components/ProgressBar.vue'
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
 const selectedStatement = ref<Statement | null>(null)
 const errorMessage = ref<string | null>(null)
+const statementRefs = ref<Record<number, HTMLButtonElement | null>>({})
+const totalStatements = ref<number>(0)
+const completedStatements = ref<number>(0)
+const focusTarget = ref<HTMLDivElement | null>(null)
+
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
@@ -23,8 +29,13 @@ const saveAnswer = (statementId: number, answer: string) => {
     data.value[index].answer = answer
   }
 
-  console.log(data.value[index])
+  updateAnsweredStatements(stored)
+
   findUnansweredQuestion()
+}
+
+const updateAnsweredStatements = (storedAnswers: object) => {
+  completedStatements.value = Object.entries(storedAnswers).length
 }
 
 const findUnansweredQuestion = () => {
@@ -39,23 +50,49 @@ const findUnansweredQuestion = () => {
   }
 }
 
+const setStatementRef = (el: HTMLButtonElement | null, index: number) => {
+  if (el) {
+    statementRefs.value[index] = el
+  }
+}
+
+watch(selectedStatement, async (newVal) => {
+  if (!newVal) return
+
+  await nextTick()
+
+  const index = data.value.findIndex((s) => s.id === newVal.id)
+  const el = statementRefs.value[index]
+
+  if (el) {
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+  }
+
+  focusTarget.value?.focus()
+})
+
 onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
     const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
-
+    updateAnsweredStatements(storedAnswers)
     data.value = data.value.map((statement) => ({
       ...statement,
       answer: storedAnswers[statement.id] ?? null,
     }))
+
+    totalStatements.value = data.value.length
 
     findUnansweredQuestion()
   } catch (err: any) {
     errorMessage.value = 'Er ging iets mis bij het ophalen van de statements'
     console.error(err.message)
   } finally {
-    loading.value = true
+    loading.value = false
   }
 })
 </script>
@@ -69,9 +106,9 @@ onMounted(async () => {
     <p class="text-lg">{{ errorMessage }}</p>
   </div>
   <div v-else class="m-6 lg:m-[54px]">
-    <div class="flex flex-col lg:grid lg:grid-cols-12 gap-20">
+    <div class="flex flex-col lg:grid lg:grid-cols-12 lg:items-center gap-20">
       <div class="flex flex-col gap-4 order-2 lg:order-1 lg:col-span-4 2xl:col-span-3">
-        <span class="font-bold text-[28px]">STELINGEN</span>
+        <span class="font-bold text-[28px]">STELLINGEN</span>
         <div
           class="bg-background rounded-[10px] max-h-[400px] lg:max-h-[575px] overflow-x-scroll lg:overflow-y-scroll lg:overflow-x-hidden"
         >
@@ -87,6 +124,7 @@ onMounted(async () => {
               v-for="(statement, index) in data"
               :key="statement.id"
               @click="selectStatement(statement)"
+              :ref="(el) => setStatementRef(el as HTMLButtonElement | null, index)"
               :class="selectedStatement?.id === statement.id ? 'bg-primary' : ''"
               class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
             >
@@ -95,14 +133,23 @@ onMounted(async () => {
               >
               <div class="block truncate w-full text-left">
                 <span class="opacity-80">{{ statement.category }}</span>
-                <span v-if="statement.answer" class="font-bold"> - {{ statement.answer }}</span>
+                <span v-if="statement.answer" class="font-bold">
+                  - {{ statement.answer }}
+                  <i
+                    class="pi pi-check text-[#277D00] font-bold ml-2"
+                    style="font-size: 1rem; font-weight: 700"
+                  ></i
+                ></span>
               </div>
             </button>
           </template>
         </div>
       </div>
 
-      <div v-if="loading" class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10">
+      <div
+        v-if="loading"
+        class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10"
+      >
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center pb-6 border-b-2 border-white">
             <span class="skeleton-text h-4 w-[10%] rounded-[10px]"></span>
@@ -117,6 +164,13 @@ onMounted(async () => {
       </div>
 
       <div v-else class="order-1 lg:order-2 lg:col-span-8 2xl:col-span-7 flex flex-col gap-10">
+        <div>
+          <div class="w-full flex justify-between">
+            <span>Jouw progressie</span>
+            <span>{{ completedStatements }} / {{ totalStatements }} stellingen</span>
+          </div>
+          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements" class="mt-1"></ProgressBar>
+        </div>
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
             <span class="px-2.5 text-sm py-2 rounded-[10px] font-bold bg-primary">{{
@@ -126,6 +180,7 @@ onMounted(async () => {
               >STELLING - {{ selectedStatement?.id }}</span
             >
           </div>
+          <div tabindex="-1" ref="focusTarget" class="sr-only"></div>
           <div class="flex flex-col gap-4 bg-background p-4 rounded-lg">
             <p class="text-xl lg:text-[28px] font-bold">{{ selectedStatement?.statement }}</p>
             <p class="text-md opacity-80 lg:text-lg">{{ selectedStatement?.explanation }}</p>
@@ -186,5 +241,17 @@ onMounted(async () => {
   100% {
     background-position: -200% 0;
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

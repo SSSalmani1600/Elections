@@ -38,7 +38,7 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-    // 🔹 GET /api/users/me — huidig user ophalen via token
+    // 🔹 GET /api/users/me — huidig user ophalen via Bearer token
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
 
@@ -52,7 +52,7 @@ public class UserController {
         try {
             String token = authHeader.substring("Bearer ".length());
 
-            // ⭐ Correcte validatie
+            // ⭐ JWT validatie
             TokenValidationResponse tokenResponse = jwtService.validateToken(token);
 
             if (!tokenResponse.isValid()) {
@@ -60,7 +60,7 @@ public class UserController {
                         .body("Invalid or expired token");
             }
 
-            // ⭐ Juiste methode: userId uit claims halen
+            // ⭐ userId uit jouw custom claim
             Long userId = Long.valueOf(jwtService.extractUserId(token));
 
             Optional<User> user = userRepository.findById(userId);

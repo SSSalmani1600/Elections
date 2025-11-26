@@ -20,7 +20,7 @@ public class User {
     private String passwordHash;
 
     @Column(name = "is_admin")
-    private Boolean isAdmin = false; // ⭐ Default waarde behouden
+    private Boolean isAdmin = false; // ⭐ Default waarde
 
     public User() {
     }
@@ -29,10 +29,11 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.username = username;
-        this.isAdmin = false; // ⭐ consistent gedrag
+        this.isAdmin = false; // ⭐ default blijft consistent
     }
 
     // ⭐ GETTERS & SETTERS
+
     public Long getId() {
         return id;
     }
