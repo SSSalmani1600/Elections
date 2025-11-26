@@ -41,7 +41,6 @@ public class UserController {
     // 🔹 GET /api/users/me — huidig user ophalen via Bearer token
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
-
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

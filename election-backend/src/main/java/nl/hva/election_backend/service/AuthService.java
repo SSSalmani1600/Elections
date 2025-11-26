@@ -50,7 +50,8 @@ public class AuthService {
         String refreshTokenHash = "";
         try {
             refreshTokenHash = jwtService.generateRefreshToken();
-            accessToken = jwtService.generateToken(user.getId().toString());
+            // Gebruik generateToken met userId EN displayName zodat de userId claim in de token zit
+            accessToken = jwtService.generateToken(user.getId().intValue(), user.getUsername());
         } catch (Exception e) {
             log.error("e: ", e);
         }

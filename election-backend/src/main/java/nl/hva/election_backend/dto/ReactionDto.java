@@ -8,19 +8,13 @@ public class ReactionDto {
     private String message;
     private Instant createdAt;
 
+    public ReactionDto() {}
+
     public ReactionDto(Long id, String username, String message, Instant createdAt) {
         this.id = id;
         this.username = username;
         this.message = message;
         this.createdAt = createdAt;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public Long getId() {
@@ -37,6 +31,19 @@ public class ReactionDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    // For backwards compatibility with frontend expecting "author"
+    public String getAuthor() {
+        return username;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Instant getCreatedAt() {

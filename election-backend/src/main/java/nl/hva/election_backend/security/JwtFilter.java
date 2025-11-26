@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
-    // ⭐ GEZAMENLIJKE WHITELIST
+    // Whitelist - deze endpoints zijn publiek toegankelijk
     private static final Pattern[] whiteListPatterns = {
             Pattern.compile("^/api/auth.*$"),
             Pattern.compile("^/api/parties.*$"),
@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ⭐ CHECK WHITELIST
+        // Check whitelist
         String uri = request.getRequestURI();
         for (Pattern pattern : whiteListPatterns) {
             if (pattern.matcher(uri).matches()) {
@@ -57,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // ⭐ 1. COOKIE BASED JWT (main backend)
+        // 1. Cookie based JWT
         String cookieToken = null;
         Cookie[] cookies = request.getCookies();
 
@@ -65,11 +65,12 @@ public class JwtFilter extends OncePerRequestFilter {
             for (Cookie c : cookies) {
                 if ("jwt".equals(c.getName())) {
                     cookieToken = c.getValue();
+                    break;
                 }
             }
         }
 
-        // ⭐ 2. BEARER TOKEN (jouw versie)
+        // 2. Bearer token (Authorization header)
         String authHeader = request.getHeader("Authorization");
         String bearerToken = null;
 
@@ -77,7 +78,7 @@ public class JwtFilter extends OncePerRequestFilter {
             bearerToken = authHeader.substring(7);
         }
 
-        // ⭐ PRIORITEIT: Bearer → anders Cookie
+        // Prioriteit: Bearer token > Cookie
         String token = bearerToken != null ? bearerToken : cookieToken;
 
         if (token == null || token.isEmpty()) {
@@ -85,7 +86,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ⭐ TOKEN VALIDATIE
+        // Token validatie
         try {
             TokenValidationResponse validation = jwtService.validateToken(token);
 
@@ -94,31 +95,29 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // ⭐ Extract displayName + userId (jouw claim)
-            Integer userId = null;
-            String displayName = null;
+            // Extract user info from token
             String username = null;
-
-            try {
-                userId = jwtService.extractUserId(token);
-            } catch (Exception ignored) {}
-
-            try {
-                displayName = jwtService.extractDisplayName(token);
-            } catch (Exception ignored) {}
-
             try {
                 username = jwtService.extractUsername(token);
             } catch (Exception ignored) {}
 
-            // ⭐ Request attributes beschikbaar voor controllers
-            if (username != null) request.setAttribute("username", username);
-            if (displayName != null) request.setAttribute("userName", displayName);
-            if (userId != null) request.setAttribute("userId", userId);
+            if (username != null) {
+                request.setAttribute("username", username);
+            }
+
+            // Extract userId for AdminFilter
+            Integer userId = null;
+            try {
+                userId = jwtService.extractUserId(token);
+            } catch (Exception ignored) {}
+
+            if (userId != null) {
+                request.setAttribute("userId", userId);
+            }
 
             filterChain.doFilter(request, response);
 
-        } catch (RuntimeException e) {  // 💡 FIX: alleen RuntimeException
+        } catch (RuntimeException e) {
             unauthorized(response, "internal_error", e.getMessage());
         }
     }
