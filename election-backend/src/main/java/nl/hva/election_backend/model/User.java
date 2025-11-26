@@ -21,13 +21,13 @@ public class User {
     private String passwordHash;
 
     @Column(name = "is_admin")
-    private Boolean isAdmin;
+    private boolean isAdmin;
 
-    public Boolean getIsAdmin() {
+    public boolean getIsAdmin() {
         return isAdmin;
     }
 
-    public void setIsAdmin(Boolean isAdmin) {
+    public void setIsAdmin(boolean isAdmin) {
         this.isAdmin = isAdmin;
     }
 
@@ -37,13 +37,6 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.username = username;
-    }
-
-    public User(Long id, String email, String username, boolean isAdmin) {
-        this.id = id;
-        this.email = email;
-        this.username = username;
-        this.isAdmin = isAdmin;
     }
 
     public Long getId() {
