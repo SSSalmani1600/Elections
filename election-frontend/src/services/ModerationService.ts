@@ -1,7 +1,7 @@
-const API_URL = "http://localhost:8080/admin/moderation";
+const API_URL = "http://localhost:8080/api/admin/moderation";
 
 export async function getPendingReactions() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch(`${API_URL}/pending`, {
     method: "GET",
@@ -14,7 +14,7 @@ export async function getPendingReactions() {
 }
 
 export async function getFlaggedReactions() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch(`${API_URL}/flagged`, {
     method: "GET",
@@ -27,7 +27,7 @@ export async function getFlaggedReactions() {
 }
 
 export async function approveReaction(id: number) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch(`${API_URL}/${id}/approve`, {
     method: "POST",
@@ -38,7 +38,7 @@ export async function approveReaction(id: number) {
 }
 
 export async function rejectReaction(id: number) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch(`${API_URL}/${id}/reject`, {
     method: "POST",
@@ -49,7 +49,7 @@ export async function rejectReaction(id: number) {
 }
 
 export async function flagReaction(id: number, reason: string) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("JWT");
 
   const res = await fetch(`${API_URL}/${id}/flag`, {
     method: "POST",
