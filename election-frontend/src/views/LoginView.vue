@@ -14,7 +14,7 @@ const error = reactive({
   password: '',
 })
 
-// Check of gebruiker al ingelogd is
+// ⭐ MAIN BRANCH: redirect als user al ingelogd is
 onMounted(() => {
   if (initialized.value && user.value) {
     router.replace('/')
@@ -72,8 +72,11 @@ async function loginHandler(): Promise<void> {
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
             placeholder="Wachtwoord" />
           <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
-            {{ error.password }}</span>
+            {{ error.password }}
+          </span>
         </div>
+
+        <!-- Agree -->
         <div class="flex items-center gap-2 text-sm">
           <input id="agree" type="checkbox" v-model="agree" class="w-4 h-4 accent-[#EF3054]" />
           <label for="agree">
@@ -83,6 +86,7 @@ async function loginHandler(): Promise<void> {
             <span class="text-[#EF3054] cursor-pointer">privacyverklaring</span>.
           </label>
         </div>
+
         <!-- Submit -->
         <button type="submit"
           class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300">

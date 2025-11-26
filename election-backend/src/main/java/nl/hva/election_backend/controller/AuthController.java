@@ -22,6 +22,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:3000"})
 public class AuthController {
+
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -38,12 +39,12 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(
-                Map.of("user", new LoginResponse(
+                new LoginResponse(
                         user.getId(),
                         user.getEmail(),
                         user.getUsername(),
                         user.getIsAdmin()
-                ))
+                )
         );
     }
 
@@ -51,14 +52,17 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid email or password");
         }
 
+        // MAIN authenticatie flow (access + refresh token)
         AuthenticationResponse authResponse = authService.authenticate(req.getEmail(), req.getPassword());
         User user = authResponse.getUser();
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         }
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.getRefreshToken())
@@ -93,7 +97,7 @@ public class AuthController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
         }
     }
     @PostMapping("/refresh")

@@ -51,6 +51,7 @@ onBeforeUnmount(() => {
         <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
       </template>
 
+
       <template v-else>
 
         <button @click.stop="toggleUserMenu"
@@ -67,10 +68,18 @@ onBeforeUnmount(() => {
             <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
               👋 Hallo, <strong>{{ user.username }}</strong>
             </p>
+
+
+            <router-link v-if="user.isAdmin" to="/admin"
+              class="block px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700" @click="userMenuOpen = false">
+              Beheerderspaneel
+            </router-link>
+
             <router-link to="/account" class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
               @click="userMenuOpen = false">
               Mijn account
             </router-link>
+
             <button @click="logout"
               class="block w-full cursor-pointer text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700">
               Uitloggen
@@ -80,7 +89,7 @@ onBeforeUnmount(() => {
       </template>
     </div>
 
-    <!-- MOBIEL MENU -->
+
     <button type="button" @click="toggleMenu" class="text-white cursor-pointer lg:hidden">
       <i class="pi pi-bars text-2xl"></i>
     </button>
@@ -99,13 +108,14 @@ onBeforeUnmount(() => {
           <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
           <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
           <router-link to="/calendar" class="nav-link" @click="toggleMenu">Verkiezingskalender</router-link>
-
           <template v-if="!user">
             <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu">Inloggen</router-link>
             <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu">Registreren</router-link>
           </template>
+
+
           <template v-else>
-            <p class="text-gray-200">👋 Hallo, {{ user?.username }}</p>
+            <p class="text-gray-200">👋 Hallo, {{ user.username }}</p>
             <router-link to="/account" class="btn btn-primary" @click="toggleMenu">Mijn account</router-link>
             <button @click="logout" class="btn btn-secondary cursor-pointer">Uitloggen</button>
           </template>

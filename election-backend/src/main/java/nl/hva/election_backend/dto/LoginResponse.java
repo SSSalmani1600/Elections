@@ -34,19 +34,13 @@ public class LoginResponse {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
-    }
+    public boolean getIsAdmin() { return isAdmin; }
+
+    public void setIsAdmin(boolean isAdmin) { this.isAdmin = isAdmin; }
+
+    public String getUsername() { return username; }
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public boolean isAdmin() {
-        return isAdmin;
-    }
-
-    public void setAdmin(boolean admin) {
-        isAdmin = admin;
     }
 }

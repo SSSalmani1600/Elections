@@ -18,21 +18,28 @@ import java.util.regex.Pattern;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtFilter extends OncePerRequestFilter {
+
     private final JwtService jwtService;
 
     public JwtFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
+    // Whitelist - deze endpoints zijn publiek toegankelijk
     private static final Pattern[] whiteListPatterns = {
-            Pattern.compile("^/api/auth/.*$"),
-            Pattern.compile("^/api/parties/.*$"),
-            Pattern.compile("^/api/elections/.*$"),
-            Pattern.compile("^/api/discussions/.*$")
+            Pattern.compile("^/api/auth.*$"),
+            Pattern.compile("^/api/parties.*$"),
+            Pattern.compile("^/api/elections.*$"),
+            Pattern.compile("^/api/discussions.*$"),
+            Pattern.compile("^/api/statements.*$"),
+            Pattern.compile("^/api/next-elections.*$"),
+            Pattern.compile("^/api/admin.*$"),
+            Pattern.compile("^/api/users.*$")
     };
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         // Allow preflight
@@ -41,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Allow whitelisted endpoints
+        // Check whitelist
         String uri = request.getRequestURI();
         for (Pattern pattern : whiteListPatterns) {
             if (pattern.matcher(uri).matches()) {
@@ -62,11 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        if (jwtToken == null) {
-            unauthorized(response, "missing_token", "Request to secured endpoint requires token");
-            return;
-        }
-
+        // Token validatie
         try {
             boolean tokenResponse = jwtService.validateToken(jwtToken);
 
@@ -85,10 +88,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private void unauthorized(HttpServletResponse response, String code, String message) throws IOException {
         if (response.isCommitted()) return;
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
+        response.getWriter().write(
+                "{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}"
+        );
         response.flushBuffer();
     }
 }
-

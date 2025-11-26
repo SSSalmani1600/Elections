@@ -41,9 +41,9 @@ export async function register(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: email,
-      password: password,
-      username: username,
+      email,
+      password,
+      username, // ⭐ main gebruikt "username" — correct
     }),
   })
 
