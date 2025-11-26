@@ -11,6 +11,8 @@ const errorMessage = ref<string | null>(null)
 const statementRefs = ref<Record<number, HTMLButtonElement | null>>({})
 const totalStatements = ref<number>(0)
 const completedStatements = ref<number>(0)
+const focusTarget = ref<HTMLDivElement | null>(null)
+
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
@@ -68,6 +70,8 @@ watch(selectedStatement, async (newVal) => {
       block: 'center',
     })
   }
+
+  focusTarget.value?.focus()
 })
 
 onMounted(async () => {
@@ -176,6 +180,7 @@ onMounted(async () => {
               >STELLING - {{ selectedStatement?.id }}</span
             >
           </div>
+          <div tabindex="-1" ref="focusTarget" class="sr-only"></div>
           <div class="flex flex-col gap-4 bg-background p-4 rounded-lg">
             <p class="text-xl lg:text-[28px] font-bold">{{ selectedStatement?.statement }}</p>
             <p class="text-md opacity-80 lg:text-lg">{{ selectedStatement?.explanation }}</p>
@@ -236,5 +241,17 @@ onMounted(async () => {
   100% {
     background-position: -200% 0;
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>
