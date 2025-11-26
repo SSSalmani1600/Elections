@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 type Reaction = {
   id: number
-  userId: number
   author: string
   message: string
   createdAt: string
@@ -27,27 +26,6 @@ const router = useRouter()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const discussion = ref<DiscussionDetail | null>(null)
-
-// Current user
-const currentUserId = computed(() => {
-  const id = localStorage.getItem('userId')
-  console.log('Current userId from localStorage:', id)
-  return id ? Number(id) : null
-})
-
-// Helper function to check if reaction belongs to current user
-function isOwnReaction(reaction: Reaction): boolean {
-  const result = currentUserId.value !== null && reaction.userId === currentUserId.value
-  console.log(`Reaction ${reaction.id} - userId: ${reaction.userId}, currentUserId: ${currentUserId.value}, isOwn: ${result}`)
-  return result
-}
-
-// Edit state
-const editingReactionId = ref<number | null>(null)
-const editingMessage = ref('')
-
-// Delete confirmation state
-const deletingReactionId = ref<number | null>(null)
 
 onMounted(async () => {
   const id = route.params.id as string
@@ -107,87 +85,6 @@ async function postReaction() {
     errorReaction.value = 'Er ging iets mis bij het plaatsen van je reactie.'
   } finally {
     submitting.value = false
-  }
-}
-
-// ---------------------- EDIT REACTION ----------------------
-function startEdit(reaction: Reaction) {
-  editingReactionId.value = reaction.id
-  editingMessage.value = reaction.message
-}
-
-function cancelEdit() {
-  editingReactionId.value = null
-  editingMessage.value = ''
-}
-
-async function saveEdit(reactionId: number) {
-  if (!editingMessage.value.trim()) return
-
-  try {
-    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: editingMessage.value,
-        userId: currentUserId.value,
-      }),
-    })
-
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(errorText || 'Fout bij bewerken')
-    }
-
-    const updated = await res.json()
-
-    // Update in local state
-    if (discussion.value) {
-      const index = discussion.value.reactions.findIndex(r => r.id === reactionId)
-      if (index !== -1) {
-        discussion.value.reactions[index] = updated
-      }
-    }
-
-    cancelEdit()
-  } catch (e: any) {
-    errorReaction.value = e.message || 'Er ging iets mis bij het bewerken.'
-  }
-}
-
-// ---------------------- DELETE REACTION ----------------------
-function confirmDelete(reactionId: number) {
-  deletingReactionId.value = reactionId
-}
-
-function cancelDelete() {
-  deletingReactionId.value = null
-}
-
-async function deleteReaction(reactionId: number) {
-  try {
-    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUserId.value,
-      }),
-    })
-
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(errorText || 'Fout bij verwijderen')
-    }
-
-    // Remove from local state
-    if (discussion.value) {
-      discussion.value.reactions = discussion.value.reactions.filter(r => r.id !== reactionId)
-      discussion.value.reactionsCount = Math.max(0, discussion.value.reactionsCount - 1)
-    }
-
-    cancelDelete()
-  } catch (e: any) {
-    errorReaction.value = e.message || 'Er ging iets mis bij het verwijderen.'
   }
 }
 </script>
@@ -273,86 +170,12 @@ async function deleteReaction(reactionId: number) {
               v-for="r in discussion.reactions"
               :key="r.id"
               class="bg-[#0B132B]/80 border border-gray-700 rounded-xl p-5
-                     text-white transition hover:border-[#ef3054] relative"
+                     text-white transition hover:border-[#ef3054]"
             >
-              <!-- Delete Confirmation Modal -->
-              <div v-if="deletingReactionId === r.id" 
-                   class="absolute inset-0 bg-black/80 rounded-xl flex items-center justify-center z-10">
-                <div class="text-center p-4">
-                  <p class="text-white mb-4">Weet je zeker dat je deze reactie wilt verwijderen?</p>
-                  <div class="flex gap-3 justify-center">
-                    <button 
-                      @click="cancelDelete"
-                      class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800"
-                    >
-                      Annuleren
-                    </button>
-                    <button 
-                      @click="deleteReaction(r.id)"
-                      class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
-                    >
-                      Verwijderen
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Header with author and actions -->
-              <div class="flex justify-between items-start mb-2">
-                <p class="text-sm text-gray-400">
-                  {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
-                </p>
-                
-                <!-- Edit/Delete buttons (only for own reactions) -->
-                <div v-if="isOwnReaction(r) && editingReactionId !== r.id" class="flex gap-2">
-                  <button 
-                    @click="startEdit(r)"
-                    class="p-1.5 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 transition"
-                    title="Bewerken"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button 
-                    @click="confirmDelete(r.id)"
-                    class="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition"
-                    title="Verwijderen"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Edit mode -->
-              <div v-if="editingReactionId === r.id" class="mt-2">
-                <textarea
-                  v-model="editingMessage"
-                  class="w-full p-3 rounded-lg bg-[#0B132B] text-white border border-gray-600 
-                         resize-none min-h-[80px] focus:outline-none focus:border-[#ef3054]"
-                ></textarea>
-                <div class="flex gap-2 mt-2">
-                  <button 
-                    @click="cancelEdit"
-                    class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 text-sm"
-                  >
-                    Annuleren
-                  </button>
-                  <button 
-                    @click="saveEdit(r.id)"
-                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#d82f4c] to-[#ef3054] text-white text-sm"
-                  >
-                    Opslaan
-                  </button>
-                </div>
-              </div>
-
-              <!-- Normal view -->
-              <p v-else class="text-base leading-relaxed">{{ r.message }}</p>
+              <p class="text-sm text-gray-400 mb-1">
+                {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
+              </p>
+              <p class="text-base leading-relaxed">{{ r.message }}</p>
             </div>
           </div>
         </div>

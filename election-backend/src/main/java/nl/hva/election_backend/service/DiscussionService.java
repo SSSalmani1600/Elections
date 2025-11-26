@@ -79,7 +79,6 @@ public class DiscussionService {
                 reactions.stream()
                         .map(r -> new ReactionDto(
                                 r.getId(),
-                                r.getUserId(),
                                 userRepository.findById(r.getUserId())
                                         .map(u -> u.getUsername())
                                         .orElse("Onbekend"),
@@ -126,54 +125,11 @@ public class DiscussionService {
 
         return new ReactionDto(
                 saved.getId(),
-                saved.getUserId(),
                 userRepository.findById(saved.getUserId())
                         .map(u -> u.getUsername())
                         .orElse("Onbekend"),
                 saved.getMessage(),
                 saved.getCreatedAt()
         );
-    }
-
-    // ---------------------- UPDATE REACTION ----------------------
-    public ReactionDto updateReaction(Long reactionId, Long userId, String newMessage) {
-        ReactionEntity r = reactionRepository.findById(reactionId)
-                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
-
-        // Check of de gebruiker eigenaar is van de reactie
-        if (!r.getUserId().equals(userId)) {
-            throw new SecurityException("Je kunt alleen je eigen reacties bewerken");
-        }
-
-        r.setMessage(newMessage);
-        ReactionEntity saved = reactionRepository.save(r);
-
-        return new ReactionDto(
-                saved.getId(),
-                saved.getUserId(),
-                userRepository.findById(saved.getUserId())
-                        .map(u -> u.getUsername())
-                        .orElse("Onbekend"),
-                saved.getMessage(),
-                saved.getCreatedAt()
-        );
-    }
-
-    // ---------------------- DELETE REACTION ----------------------
-    public void deleteReaction(Long reactionId, Long userId) {
-        ReactionEntity r = reactionRepository.findById(reactionId)
-                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
-
-        // Check of de gebruiker eigenaar is van de reactie
-        if (!r.getUserId().equals(userId)) {
-            throw new SecurityException("Je kunt alleen je eigen reacties verwijderen");
-        }
-
-        // Update de discussion reactionsCount
-        DiscussionEntity discussion = r.getDiscussion();
-        discussion.setReactionsCount(Math.max(0, discussion.getReactionsCount() - 1));
-        discussionRepository.save(discussion);
-
-        reactionRepository.delete(r);
     }
 }

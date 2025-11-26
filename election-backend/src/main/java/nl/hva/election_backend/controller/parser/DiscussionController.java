@@ -1,9 +1,7 @@
 package nl.hva.election_backend.controller.parser;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import nl.hva.election_backend.service.DiscussionService;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
@@ -84,63 +82,6 @@ public class DiscussionController {
             e.printStackTrace();
             return ResponseEntity.status(500)
                     .body("Error adding reaction: " + e.getMessage());
-        }
-    }
-
-    // ---------------------- UPDATE REACTION ----------------------
-    @PutMapping("/reactions/{reactionId}")
-    public ResponseEntity<?> updateReaction(
-            @PathVariable Long reactionId,
-            @RequestBody Map<String, Object> body
-    ) {
-        try {
-            String message = (String) body.get("message");
-            Object userIdObj = body.get("userId");
-
-            if (message == null || userIdObj == null)
-                return ResponseEntity.badRequest().body("Missing fields");
-
-            Long userId = Long.parseLong(userIdObj.toString());
-
-            ReactionDto updated = service.updateReaction(reactionId, userId, message);
-            return ResponseEntity.ok(updated);
-
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body("Error updating reaction: " + e.getMessage());
-        }
-    }
-
-    // ---------------------- DELETE REACTION ----------------------
-    @DeleteMapping("/reactions/{reactionId}")
-    public ResponseEntity<?> deleteReaction(
-            @PathVariable Long reactionId,
-            @RequestBody Map<String, Object> body
-    ) {
-        try {
-            Object userIdObj = body.get("userId");
-
-            if (userIdObj == null)
-                return ResponseEntity.badRequest().body("userId required");
-
-            Long userId = Long.parseLong(userIdObj.toString());
-
-            service.deleteReaction(reactionId, userId);
-            return ResponseEntity.ok().body("Reactie verwijderd");
-
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body("Error deleting reaction: " + e.getMessage());
         }
     }
 }
