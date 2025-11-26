@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getConstituencies } from '@/services/ElectionService'
+import { getConstituencies, getElectionYears } from '@/services/ElectionService'
 import type { Constituency, Party } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
 import Select from 'primevue/select'
@@ -7,6 +7,15 @@ import Chart from 'primevue/chart'
 import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 
 const constituencies = ref<Constituency[]>([])
+const years = ref<number[]>([])
+const selectedYear = ref<number>(2025)
+const yearOptions = computed(() =>
+  [...years.value]
+    .map((y) => ({
+      label: y,
+      value: y,
+    }))
+)
 
 const constituencyOptions = computed(() =>
   [...constituencies.value]
@@ -128,13 +137,14 @@ function getConstituencyByName(name: string): Constituency | null {
 // fetch constituencies
 const fetchConstituencies = async () => {
   try {
-    constituencies.value = await getConstituencies(2025)
+    constituencies.value = await getConstituencies(selectedYear.value)
   } catch (e) {
     console.error('Failed to fetch constituencies', e)
   }
 }
 
 onMounted(async () => {
+  years.value = await getElectionYears();
   await fetchConstituencies()
 
   if (!selectedConstituency.value && constituencies.value.length) {
@@ -149,6 +159,10 @@ onMounted(async () => {
 // Update chart when user changes selection
 watch(selectedConstituency, () => {
   if (!constituencies.value.length) return
+  chartData.value = setChartData()
+})
+watch(selectedYear, async () => {
+  await fetchConstituencies()
   chartData.value = setChartData()
 })
 </script>
@@ -226,8 +240,10 @@ watch(selectedConstituency, () => {
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Filter row -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <Select v-model="selectedYear" name="Jaren" placeholder="Selecteer een jaar" :options="yearOptions"
+          optionLabel="label" optionValue="value" />
         <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
-          optionValue="value" placeholder="Selecteer een kieskring" class="w-full sm:max-w-md" />
+          optionValue="value" placeholder="Selecteer een kieskring" class="sm:max-w-md" />
       </div>
 
       <!-- Content grid -->

@@ -40,16 +40,34 @@ export async function getUpcomingElections(): Promise<Election[]> {
 }
 
 export async function getConstituencies(electionId: number): Promise<Constituency[]> {
-  const res = await fetch(`/api/electionresults/${electionId}/constituencies`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const res = await fetch(
+    `http://localhost:8080/api/electionresults/${electionId}/constituencies`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  })
+  )
 
   if (!res.ok) {
     throw new Error('Failed to fetch constituencies')
   }
 
   return (await res.json()) as Constituency[]
+}
+
+export async function getElectionYears(): Promise<number[]> {
+  const res = await fetch('http://localhost:8080/electionresults', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  const years: number[] = await res.json()
+
+  if (years) return years
+
+  return []
 }
