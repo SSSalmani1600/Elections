@@ -1,12 +1,25 @@
 package nl.hva.election_backend.repository;
 
 import nl.hva.election_backend.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 
 import java.util.Optional;
 
-public interface UserRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+import java.util.List;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    // Find by username
+//    Optional<User> findByUsername(String username);
+
+    // Find by email
     Optional<User> findByEmail(String email);
-    Optional<User> findById(Long id);
-    User save(User user);
+
+    // Check if a user exists by email
     boolean existsByEmail(String email);
 }

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { login } from '@/services/AuthService'
 import type { LoginResponse } from '@/types/api'
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
+const auth = useAuthStore()
 const agree = ref(false)
 const email = ref('')
 const password = ref('')
@@ -12,6 +14,14 @@ const password = ref('')
 const error = reactive({
   email: '',
   password: '',
+})
+
+// Check of gebruiker al ingelogd is
+onMounted(() => {
+  if (auth.isLoggedIn) {
+    // Al ingelogd, redirect naar home
+    router.replace('/')
+  }
 })
 
 function isValidEmail(): void {
@@ -33,7 +43,15 @@ async function loginHandler(): Promise<void> {
 
   try {
     const data: LoginResponse = await login(email.value, password.value)
-    localStorage.setItem('JWT', data.token)
+
+    // JWT opslaan
+    localStorage.setItem("JWT", data.token)
+    localStorage.setItem("userId", String(data.id))
+    localStorage.setItem("username", data.displayName)
+
+    // Update auth store
+    auth.login(data.displayName, data.token)
+
     router.replace('/')
   } catch (err: unknown) {
     console.log(err)
@@ -104,7 +122,7 @@ async function loginHandler(): Promise<void> {
       <!-- Footer -->
       <p class="text-sm text-gray-300 text-center">
         Nog geen account?
-        <router-link to="/register" class="text-[#EF3054] hover:underline">Registreren</router-link>
+        <router-link to="/registreren" class="text-[#EF3054] hover:underline">Registreren</router-link>
       </p>
     </div>
   </div>

@@ -28,8 +28,18 @@ async function onSubmit() {
     const res: RegisterResponse = await register(email.value, password.value, displayName.value)
     const data: LoginResponse = await login(res.email, res.password)
 
+    // ✅ Sla alle benodigde data op in localStorage
+    localStorage.setItem("JWT", data.token)
+    localStorage.setItem("userId", String(data.id))
+    localStorage.setItem("username", data.displayName)
+
     // ✅ log direct in via de store
     auth.login(res.username, data.token)
+    
+    // ✅ Sla userId op voor account pagina
+    if (data.id) {
+      localStorage.setItem('userId', String(data.id))
+    }
 
     success.value = `Account aangemaakt en automatisch ingelogd als ${res.username}!`
     await router.replace('/') // geen timeout
