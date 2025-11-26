@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useRouter} from 'vue-router'
-import PartiesSlider from "@/components/PartiesSlider.vue";
+// import PartiesSlider from "@/components/PartiesSlider.vue";
 import PollList from '@/components/PollList.vue'
 
 const router = useRouter()
@@ -24,7 +24,7 @@ const goToForum = () => router.push('/forum')
       </div>
     </div>
 
-    <PartiesSlider/>
+<!--    <PartiesSlider/>-->
     <section class="w-full max-w-5xl px-4">
       <PollList/>
     </section>

@@ -1,5 +1,8 @@
 export interface LoginResponse {
+  id: number
+  email: string
   username: string
+  isAdmin: boolean
 }
 
 export interface RegisterResponse {
@@ -54,22 +57,23 @@ export interface Party2 {
 
 export interface Constituency {
   name: string
+  constituencyId: string
   parties: Party[]
 }
 
 export interface User {
   id: number
-  username: string
   email: string
+  username: string
   isAdmin?: boolean
 }
 
 export interface Statement {
-  id: number;
-  statement: string;
-  category: string;
-  explanation: string;
-  answer: string | null;
+  id: number
+  statement: string
+  category: string
+  explanation: string
+  answer: string | null
 }
 export interface AdminStats {
   totalUsers: number;

@@ -18,6 +18,12 @@ public class Party {
         this.name = name;
     }
 
+    public Party(String partyId, String name, int votes) {
+        this.id = partyId;
+        this.name = name;
+        this.votes = votes;
+    }
+
     public String getName() {
         return name;
     }

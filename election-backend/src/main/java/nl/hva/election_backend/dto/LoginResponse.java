@@ -1,58 +1,46 @@
 package nl.hva.election_backend.dto;
 
+import nl.hva.election_backend.model.User;
+
 public class LoginResponse {
-
-    // ⭐ Jouw velden (nodig voor frontend admin + token opslag)
     private Long id;
-    private String displayName;
-    private String token;
-    private Boolean isAdmin;
-
-    // ⭐ Main veld (voor backwards compatibility en andere endpoints)
+    private String email;
     private String username;
+    private boolean isAdmin;
 
-    public LoginResponse() {}
+    public LoginResponse() {
+    }
 
-    // ⭐ Jouw constructor
-    public LoginResponse(Long id, String token, String displayName, Boolean isAdmin) {
+    public LoginResponse(Long id, String email, String username, boolean isAdmin) {
         this.id = id;
-        this.token = token;
-        this.displayName = displayName;
-        this.username = displayName; // ← compatibel met main
+        this.email = email;
+        this.username = username;
         this.isAdmin = isAdmin;
     }
 
-    // ⭐ Main constructor
-    public LoginResponse(String username) {
-        this.username = username;
-        this.displayName = username; // ← voorkomt null issues
+    public Long getId() {
+        return id;
     }
 
-    // ---- GETTERS & SETTERS ----
-
-    public Long getId() { return id; }
-
-    public void setId(Long id) { this.id = id; }
-
-    public String getDisplayName() { return displayName; }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-        this.username = displayName; // sync voor compatibiliteit
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getToken() { return token; }
+    public String getEmail() {
+        return email;
+    }
 
-    public void setToken(String token) { this.token = token; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public Boolean getIsAdmin() { return isAdmin; }
+    public boolean getIsAdmin() { return isAdmin; }
 
-    public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
+    public void setIsAdmin(boolean isAdmin) { this.isAdmin = isAdmin; }
 
     public String getUsername() { return username; }
 
     public void setUsername(String username) {
         this.username = username;
-        this.displayName = username; // sync
     }
 }

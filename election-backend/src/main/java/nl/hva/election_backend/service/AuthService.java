@@ -1,6 +1,8 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.AuthenticationResponse;
+import nl.hva.election_backend.dto.TokenRefreshResponse;
+import nl.hva.election_backend.exception.UnauthorizedException;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
@@ -11,13 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
 
 @Transactional
 @Service
@@ -27,8 +23,6 @@ public class AuthService {
     private final BCryptPasswordHasher hasher;
     private final JwtService jwtService;
     private final RefreshTokenRepository refreshRepo;
-    private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
-            "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
 
     public AuthService(UserRepository userRepo, BCryptPasswordHasher hasher, JwtService jwtService, RefreshTokenRepository refreshRepo) {
         this.userRepo = userRepo;
@@ -36,7 +30,6 @@ public class AuthService {
         this.jwtService = jwtService;
         this.refreshRepo = refreshRepo;
     }
-
 
     @Transactional
     public AuthenticationResponse authenticate(String email, String password) {
@@ -48,10 +41,10 @@ public class AuthService {
 
         String accessToken = "";
         String refreshTokenHash = "";
+
         try {
             refreshTokenHash = jwtService.generateRefreshToken();
-            // Gebruik generateToken met userId EN displayName zodat de userId claim in de token zit
-            accessToken = jwtService.generateToken(user.getId().intValue(), user.getUsername());
+            accessToken = jwtService.generateToken(user.getId());
         } catch (Exception e) {
             log.error("e: ", e);
         }
@@ -61,6 +54,25 @@ public class AuthService {
         refreshRepo.saveAndFlush(refreshToken);
 
         return new AuthenticationResponse(accessToken, refreshTokenHash, user);
+    }
+
+    public User getUser(String accessToken) {
+        if (accessToken == null) {
+            throw new UnauthorizedException("Missing access token");
+        }
+
+        String userId = jwtService.extractUserId(accessToken);
+
+        return userRepo.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+    }
+
+    public TokenRefreshResponse refreshTokens(String refreshTokenHash) {
+        RefreshToken newRefreshToken = jwtService.rotateRefreshToken(refreshTokenHash);
+
+        String newAccessToken = jwtService.generateToken(newRefreshToken.getUserId());
+
+        return new TokenRefreshResponse(newRefreshToken.getTokenHash(), newAccessToken);
     }
 
     public User register(String email, String rawPassword, String username) {

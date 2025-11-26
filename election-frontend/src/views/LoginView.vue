@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { login } from '@/services/AuthService'
-import type { LoginResponse } from '@/types/api'
+import { useAuth } from '@/store/authStore'
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/store/useAuthStore'
 
 const router = useRouter()
-const auth = useAuthStore()
-
 const agree = ref(false)
 const email = ref('')
 const password = ref('')
+const { user, login, initialized } = useAuth();
 
 const error = reactive({
   email: '',
@@ -19,7 +16,7 @@ const error = reactive({
 
 // ⭐ MAIN BRANCH: redirect als user al ingelogd is
 onMounted(() => {
-  if (auth.isLoggedIn) {
+  if (initialized.value && user.value) {
     router.replace('/')
   }
 })
@@ -42,16 +39,7 @@ async function loginHandler(): Promise<void> {
   if ((error.email || error.password) !== '') return
 
   try {
-    const data: LoginResponse = await login(email.value, password.value)
-
-    // ⭐ JOUW EXTRA ADMIN INFO OPSLAAN
-    localStorage.setItem("JWT", data.token)                    // JWT (indien backend meestuurt)
-    localStorage.setItem("userId", String(data.id))            // id
-    localStorage.setItem("username", data.displayName)         // displayName
-    localStorage.setItem("isAdmin", String(data.isAdmin))      // ADMIN FLAG
-
-    // ⭐ Auth store updaten (nu met isAdmin)
-    auth.login(data.displayName, data.token, data.isAdmin)
+    await login(email.value, password.value)
 
     router.replace('/')
   } catch (err: unknown) {
@@ -63,41 +51,26 @@ async function loginHandler(): Promise<void> {
 
 <template>
   <div class="h-[calc(100vh-100px)] bg-[#1C2541] flex flex-col items-center justify-center px-4">
-    <div
-      class="bg-[#0B132B] p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-6 text-white"
-    >
+    <div class="bg-[#0B132B] p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-6 text-white">
       <h1 class="text-3xl font-bold text-center">Inloggen</h1>
 
       <form @submit.prevent="loginHandler" class="flex flex-col gap-5">
         <!-- Email -->
         <div class="flex flex-col gap-2">
           <label for="email" class="text-sm font-medium text-gray-300">E-mail</label>
-          <input
-            v-model="email"
-            @input="error.email = ''"
-            type="email"
-            id="email"
-            name="email"
-            autocomplete="email"
+          <input v-model="email" @input="error.email = ''" type="email" id="email" name="email" autocomplete="email"
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
-            placeholder="E-mail"
-          />
+            placeholder="E-mail" />
           <span v-if="error.email" class="text-[#EF3054] text-sm mt-1">{{ error.email }}</span>
         </div>
 
         <!-- Password -->
         <div class="flex flex-col gap-2">
           <label for="password" class="text-sm font-medium text-gray-300">Wachtwoord</label>
-          <input
-            v-model="password"
-            @input="error.password = ''"
-            type="password"
-            id="password"
-            name="password"
+          <input v-model="password" @input="error.password = ''" type="password" id="password" name="password"
             autocomplete="current-password"
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
-            placeholder="Wachtwoord"
-          />
+            placeholder="Wachtwoord" />
           <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
             {{ error.password }}
           </span>
@@ -115,10 +88,8 @@ async function loginHandler(): Promise<void> {
         </div>
 
         <!-- Submit -->
-        <button
-          type="submit"
-          class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300"
-        >
+        <button type="submit"
+          class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300">
           Log in
         </button>
       </form>

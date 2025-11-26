@@ -1,8 +1,6 @@
 package nl.hva.election_backend.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nl.hva.election_backend.dto.UpdateUserRequest;
-import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.model.User;
@@ -40,27 +38,10 @@ public class UserController {
 
     // 🔹 GET /api/users/me — huidig user ophalen via Bearer token
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Authorization token required");
-        }
-
+    public ResponseEntity<?> getCurrentUser(@CookieValue(value = "jwt", required = false) String accessToken) {
         try {
-            String token = authHeader.substring("Bearer ".length());
-
-            // ⭐ JWT validatie
-            TokenValidationResponse tokenResponse = jwtService.validateToken(token);
-
-            if (!tokenResponse.isValid()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Invalid or expired token");
-            }
-
-            // ⭐ userId uit jouw custom claim
-            Long userId = Long.valueOf(jwtService.extractUserId(token));
+            String userIdStr = jwtService.extractUserId(accessToken); // Subject bevat user ID
+            Long userId = Long.parseLong(userIdStr);
 
             Optional<User> user = userRepository.findById(userId);
 

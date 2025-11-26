@@ -2,9 +2,15 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.entity.ConstituencyEntity;
 import nl.hva.election_backend.entity.ConstituencyResultEntity;
+import nl.hva.election_backend.entity.PartyEntity;
+import nl.hva.election_backend.model.Constituency;
+import nl.hva.election_backend.model.Party;
 import nl.hva.election_backend.repository.ConstituencyRepository;
 import nl.hva.election_backend.repository.ConstituencyResultRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ConstituencyService {
@@ -30,5 +36,32 @@ public class ConstituencyService {
         }
 
         return resultRepository.save(new ConstituencyResultEntity(year, constituencyId, partyId, validVotes));
+    }
+
+    private Constituency toConstituency(ConstituencyEntity entity) {
+
+        Constituency dto = new Constituency(
+                entity.getName(),
+                entity.getConstituencyId()
+        );
+
+        entity.getResults().forEach(result -> {
+            PartyEntity partyEntity = result.getParty();
+
+            Party partyModel = new Party(
+                    partyEntity.getPartyId(),
+                    partyEntity.getName(),
+                    result.getValidVotes()
+            );
+
+            dto.getParties().add(partyModel);
+        });
+
+        return dto;
+    }
+
+    public Set<Constituency> getConstituencies(int electionId) {
+        return constituencyRepository.findAllByYear(electionId)
+                .stream().map(this::toConstituency).collect(Collectors.toSet());
     }
 }
