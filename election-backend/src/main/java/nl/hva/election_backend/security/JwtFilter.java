@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
             Pattern.compile("^/api/elections.*$"),
             Pattern.compile("^/api/discussions.*$"),
             Pattern.compile("^/api/statements.*$"),
-            Pattern.compile("^/api/next-elections.*$"),
+            Pattern.compile("^/api/electionsresult/next-elections.*$"),
             Pattern.compile("^/api/admin.*$"),
             Pattern.compile("^/api/users.*$"),
             Pattern.compile("^/api/electionresults*$")
