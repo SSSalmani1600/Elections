@@ -109,7 +109,7 @@ public class JwtService {
         return refreshRepo.existsByTokenHashAndRevokedAtIsNullAndExpiresAtAfter(tokenHash, now);
     }
 
-    public RefreshToken refreshToken(String refreshToken) {
+    public RefreshToken rotateRefreshToken(String refreshToken) {
         Optional<RefreshToken> oldRefreshToken = refreshRepo.findByTokenHash(refreshToken);
         if (oldRefreshToken.isEmpty()) {
             return null;
