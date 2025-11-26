@@ -3,8 +3,11 @@ import { login } from '@/services/AuthService'
 import type { LoginResponse } from '@/types/api'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/useAuthStore'
 
+const auth = useAuthStore()
 const router = useRouter()
+
 const agree = ref(false)
 const email = ref('')
 const password = ref('')
@@ -34,10 +37,14 @@ async function loginHandler(): Promise<void> {
   try {
     const data: LoginResponse = await login(email.value, password.value)
 
-    // JWT opslaan
+    // JWT + user info opslaan
     localStorage.setItem("JWT", data.token)
     localStorage.setItem("userId", String(data.id))
     localStorage.setItem("username", data.displayName)
+    localStorage.setItem("isAdmin", String(data.isAdmin)) // ⭐ ADMIN
+
+    // Auth store updaten
+    auth.login(data.displayName, data.token, data.isAdmin)
 
     router.replace('/')
   } catch (err: unknown) {
@@ -85,9 +92,11 @@ async function loginHandler(): Promise<void> {
             placeholder="Wachtwoord"
           />
           <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
-            {{ error.password }}</span
-          >
+            {{ error.password }}
+          </span>
         </div>
+
+        <!-- Agree -->
         <div class="flex items-center gap-2 text-sm">
           <input id="agree" type="checkbox" v-model="agree" class="w-4 h-4 accent-[#EF3054]" />
           <label for="agree">
@@ -97,6 +106,7 @@ async function loginHandler(): Promise<void> {
             <span class="text-[#EF3054] cursor-pointer">privacyverklaring</span>.
           </label>
         </div>
+
         <!-- Submit -->
         <button
           type="submit"
