@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/electionresults")
+@RequestMapping("/api/electionresults")
 public class ElectionController {
 
     private final ElectionService electionService;
