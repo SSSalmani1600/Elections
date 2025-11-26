@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 type Reaction = {
+  id: number
   author: string
   message: string
   createdAt: string
@@ -25,6 +26,17 @@ const router = useRouter()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const discussion = ref<DiscussionDetail | null>(null)
+
+// Check of gebruiker is ingelogd
+const isLoggedIn = computed(() => {
+  const token = localStorage.getItem('JWT')
+  const userId = localStorage.getItem('userId')
+  return !!(token && userId)
+})
+
+function goToLogin() {
+  router.push('/inloggen')
+}
 
 onMounted(async () => {
   const id = route.params.id as string
@@ -65,15 +77,14 @@ async function postReaction() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: newReaction.value, // ✅ juiste variabele
-        userId: Number(localStorage.getItem('userId') ?? 1), // ✅ userId wordt meegestuurd
+        message: newReaction.value,
+        userId: Number(localStorage.getItem('userId') ?? 1),
       }),
     })
 
     if (!res.ok) throw new Error('Fout bij plaatsen reactie')
     const reaction = await res.json()
 
-    // update direct in UI
     if (discussion.value) {
       discussion.value.reactions.push(reaction)
       discussion.value.reactionsCount++
@@ -128,31 +139,55 @@ async function postReaction() {
         <div>
           <h2 class="text-2xl font-semibold mb-4 text-white">Reacties</h2>
 
-          <!-- reactieformulier -->
-          <form @submit.prevent="postReaction" class="flex flex-col gap-3 mb-8">
-            <textarea
-              v-model="newReaction"
-              placeholder="Schrijf hier je reactie..."
-              class="p-3 rounded-xl bg-[#0B132B] text-white border border-gray-700
-                     resize-none min-h-[100px] focus:outline-none focus:border-[#ef3054]"
-            ></textarea>
+          <!-- Reactieformulier (alleen voor ingelogde gebruikers) -->
+          <div v-if="isLoggedIn">
+            <form @submit.prevent="postReaction" class="flex flex-col gap-3 mb-8">
+              <textarea
+                v-model="newReaction"
+                placeholder="Schrijf hier je reactie..."
+                class="p-3 rounded-xl bg-[#0B132B] text-white border border-gray-700
+                       resize-none min-h-[100px] focus:outline-none focus:border-[#ef3054]"
+              ></textarea>
 
-            <button
-              type="submit"
-              :disabled="submitting"
-              class="self-start px-7 py-3 rounded-xl font-semibold
-                     bg-gradient-to-r from-[#d82f4c] to-[#ef3054]
-                     text-white shadow-[0_2px_10px_rgba(239,48,84,0.15)]
-                     hover:shadow-[0_3px_15px_rgba(239,48,84,0.25)]
-                     hover:scale-[1.03] transition-all duration-200 ease-out
-                     border border-[rgba(255,255,255,0.08)] mt-2
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {{ submitting ? 'Plaatsen…' : 'Plaatsen' }}
-            </button>
+              <button
+                type="submit"
+                :disabled="submitting"
+                class="self-start px-7 py-3 rounded-xl font-semibold
+                       bg-gradient-to-r from-[#d82f4c] to-[#ef3054]
+                       text-white shadow-[0_2px_10px_rgba(239,48,84,0.15)]
+                       hover:shadow-[0_3px_15px_rgba(239,48,84,0.25)]
+                       hover:scale-[1.03] transition-all duration-200 ease-out
+                       border border-[rgba(255,255,255,0.08)] mt-2
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ submitting ? 'Plaatsen…' : 'Plaatsen' }}
+              </button>
 
-            <p v-if="errorReaction" class="text-red-400">{{ errorReaction }}</p>
-          </form>
+              <p v-if="errorReaction" class="text-red-400">{{ errorReaction }}</p>
+            </form>
+          </div>
+
+          <!-- Login prompt voor niet-ingelogde gebruikers -->
+          <div v-else class="mb-8 p-5 rounded-xl bg-[#111830]/80 border border-white/10">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-gray-700/50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-300 font-medium">Wil je reageren?</p>
+                <p class="text-gray-500 text-sm">Log in of maak een account aan om deel te nemen aan de discussie.</p>
+              </div>
+              <button
+                @click="goToLogin"
+                class="px-5 py-2.5 rounded-xl font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c] 
+                       text-white hover:scale-[1.02] transition-all"
+              >
+                Inloggen
+              </button>
+            </div>
+          </div>
 
           <!-- Geen reacties -->
           <div v-if="discussion.reactions.length === 0" class="text-gray-400 italic">
@@ -167,8 +202,8 @@ async function postReaction() {
                    scrollbar-thin scrollbar-thumb-[#ef3054]/60 scrollbar-track-transparent"
           >
             <div
-              v-for="(r, i) in discussion.reactions"
-              :key="i"
+              v-for="r in discussion.reactions"
+              :key="r.id"
               class="bg-[#0B132B]/80 border border-gray-700 rounded-xl p-5
                      text-white transition hover:border-[#ef3054]"
             >

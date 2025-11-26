@@ -1,9 +1,7 @@
 package nl.hva.election_backend.controller.parser;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import nl.hva.election_backend.service.DiscussionService;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
