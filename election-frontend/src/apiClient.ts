@@ -17,7 +17,7 @@ export async function apiFetch(
     credentials: 'include',
   })
 
-  if (res.status === 401 || !retry) {
+  if (res.status !== 401 || !retry) {
     return res
   }
 

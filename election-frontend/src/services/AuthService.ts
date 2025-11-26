@@ -23,9 +23,13 @@ export async function loginRequest(email: string, password: string): Promise<Log
 }
 
 export async function logoutRequest(): Promise<void> {
-  await apiFetch('http://localhost:8080/api/auth/login/logout', {
-    method: 'POST',
-  })
+  await apiFetch(
+    'http://localhost:8080/api/auth/login/logout',
+    {
+      method: 'POST',
+    },
+    false,
+  )
 }
 
 export async function register(
