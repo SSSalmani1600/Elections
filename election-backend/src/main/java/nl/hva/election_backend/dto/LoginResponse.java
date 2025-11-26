@@ -4,13 +4,15 @@ public class LoginResponse {
     private Long id;
     private String displayName;
     private String token;
+    private Boolean isAdmin;
 
     public LoginResponse() {}
 
-    public LoginResponse(Long id, String token, String displayName) {
+    public LoginResponse(Long id, String token, String displayName, Boolean isAdmin) {
         this.id = id;
         this.token = token;
         this.displayName = displayName;
+        this.isAdmin = isAdmin;
     }
 
     public Long getId() {
@@ -35,5 +37,13 @@ public class LoginResponse {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 }
