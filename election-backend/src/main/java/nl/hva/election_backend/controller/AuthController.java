@@ -10,16 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:3000"})
 public class AuthController {
+
     private final AuthService authService;
     private final JwtService jwtService;
 
@@ -32,16 +28,20 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid email or password");
         }
 
+        // MAIN authenticatie flow (access + refresh token)
         AuthenticationResponse authResponse = authService.authenticate(req.getEmail(), req.getPassword());
         User user = authResponse.getUser();
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         }
 
+        // Cookies zetten
         ResponseCookie accessCookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
                 .httpOnly(true)
                 .secure(false)
@@ -58,9 +58,17 @@ public class AuthController {
                 .maxAge(86400)
                 .build();
 
+        // ⭐ Jouw toevoeging: LoginResponse moet ID + username + token + isAdmin bevatten
+        LoginResponse response = new LoginResponse(
+                user.getId(),
+                authResponse.getAccessToken(),
+                user.getUsername(),
+                user.getIsAdmin() // <── ADMIN SUPPORT
+        );
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
-                .body(new LoginResponse(user.getId(), user.getUsername(), authResponse.getAccessToken()));
+                .body(response);
     }
 
     @PostMapping("/register")
@@ -74,12 +82,15 @@ public class AuthController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
         }
     }
+
     @GetMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshToken, @CookieValue("jwt") String accessToken) {
-        System.out.println(refreshToken);
+    public ResponseEntity<?> refreshToken(
+            @CookieValue("refresh_token") String refreshToken,
+            @CookieValue("jwt") String accessToken
+    ) {
         if (refreshToken == null) return ResponseEntity.badRequest().build();
 
         RefreshToken newRefreshToken = jwtService.refreshToken(refreshToken);
@@ -93,6 +104,7 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).build();
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .build();
     }
 }

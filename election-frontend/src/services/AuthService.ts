@@ -6,12 +6,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-
-    credentials: 'include',
+    body: JSON.stringify({ email, password }),
+    credentials: 'include', // ⭐ nodig voor cookies (main)
   })
 
   if (!res.ok) {
@@ -19,6 +15,16 @@ export async function login(email: string, password: string): Promise<LoginRespo
   }
 
   const data = (await res.json()) as LoginResponse
+
+  // ⭐ Token opslaan als de backend hem meestuurt
+  if (data.token) {
+    localStorage.setItem('JWT', data.token)
+  }
+
+  // ⭐ Jouw extra informatie opslaan
+  localStorage.setItem('userId', String(data.id))
+  localStorage.setItem('username', data.displayName)
+  localStorage.setItem('isAdmin', String(data.isAdmin))
 
   return data
 }
@@ -32,9 +38,9 @@ export async function register(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: email,
-      password: password,
-      username: username,
+      email,
+      password,
+      username, // ⭐ main gebruikt "username" — correct
     }),
   })
 

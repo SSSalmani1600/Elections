@@ -34,7 +34,7 @@ public class DiscussionService {
         this.userRepository = userRepository;
     }
 
-    // ---------------------- LIST -----------------------
+
     public List<DiscussionListItemDto> list() {
 
         return discussionRepository.findAllWithUserOrdered()
@@ -43,7 +43,6 @@ public class DiscussionService {
                         entity.getId().toString(),
                         entity.getTitle(),
 
-                        // Altijd author ophalen via userId → betrouwbaar en 100% correct
                         userRepository.findById(entity.getUserId())
                                 .map(u -> u.getUsername())
                                 .orElse("Onbekend"),
@@ -54,19 +53,23 @@ public class DiscussionService {
                 .collect(Collectors.toList());
     }
 
-    // ---------------------- DETAIL ----------------------
     public DiscussionDetailDto getDetailById(Long id) {
         DiscussionEntity d = discussionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
 
         List<ReactionEntity> reactions =
-                reactionRepository.findAllByDiscussionIdOrderByCreatedAtAsc(id);
+                reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(id)
+                        .stream()
+                        .filter(r ->
+                                r.getModerationStatus().equals("APPROVED")
+                                        || r.getModerationStatus().equals("PENDING")
+                        )
+                        .collect(Collectors.toList());
 
         return new DiscussionDetailDto(
                 d.getId().toString(),
                 d.getTitle(),
 
-                // Author van discussion
                 userRepository.findById(d.getUserId())
                         .map(u -> u.getUsername())
                         .orElse("Onbekend"),
@@ -89,7 +92,8 @@ public class DiscussionService {
         );
     }
 
-    // ---------------------- CREATE DISCUSSION ----------------------
+
+
     public Long createDiscussion(String title, String content, String category, Long userId) {
 
         DiscussionEntity entity = new DiscussionEntity();
@@ -105,17 +109,31 @@ public class DiscussionService {
         return saved.getId();
     }
 
-    // ---------------------- ADD REACTION ----------------------
     public ReactionDto addReaction(Long discussionId, Long userId, String message) {
 
         DiscussionEntity discussion = discussionRepository.findById(discussionId)
                 .orElseThrow();
 
+        // 🔥 Scheldwoordenlijst
+        List<String> bannedWords = List.of(
+                "kanker", "kut", "tering", "hoer", "fuck", "sukkel", "idioot", "mongool"
+        );
+
+        String lower = message.toLowerCase();
+        for (String word : bannedWords) {
+            if (lower.contains(word)) {
+                // ❌ NIET OPSLAAN – direct blokkeren
+                throw new IllegalArgumentException("Reactie afgekeurd vanwege ongepast taalgebruik.");
+            }
+        }
+
+        // ✔ Geen scheldwoorden → wel opslaan als PENDING
         ReactionEntity r = new ReactionEntity();
         r.setDiscussion(discussion);
         r.setUserId(userId);
         r.setMessage(message);
         r.setCreatedAt(Instant.now());
+        r.setModerationStatus("PENDING");
 
         ReactionEntity saved = reactionRepository.save(r);
 
@@ -132,4 +150,5 @@ public class DiscussionService {
                 saved.getCreatedAt()
         );
     }
+
 }

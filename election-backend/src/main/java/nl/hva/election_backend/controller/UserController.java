@@ -2,6 +2,7 @@ package nl.hva.election_backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nl.hva.election_backend.dto.UpdateUserRequest;
+import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.model.User;
@@ -37,28 +38,42 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-    // 🔹 Ophalen van huidige gebruiker via JWT token
+    // 🔹 GET /api/users/me — huidig user ophalen via Bearer token
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization token required");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Authorization token required");
         }
 
         try {
-            String token = authHeader.substring(7); // Verwijder "Bearer " prefix
-            String userIdStr = jwtService.extractUsername(token); // Subject bevat user ID
-            Long userId = Long.parseLong(userIdStr);
+            String token = authHeader.substring("Bearer ".length());
+
+            // ⭐ JWT validatie
+            TokenValidationResponse tokenResponse = jwtService.validateToken(token);
+
+            if (!tokenResponse.isValid()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired token");
+            }
+
+            // ⭐ userId uit jouw custom claim
+            Long userId = Long.valueOf(jwtService.extractUserId(token));
 
             Optional<User> user = userRepository.findById(userId);
+
             return user.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid token: " + e.getMessage());
         }
     }
 
-    // 🔹 Ophalen van 1 gebruiker
+    // 🔹 GET /api/users/{id}
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);
@@ -66,21 +81,22 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 🔹 Bewerken van gebruiker (met wachtwoordverificatie)
+    // 🔹 PUT /api/users/{id} — user bewerken met wachtwoordverificatie
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+
         Optional<User> optionalUser = userRepository.findById(id);
-        
+
         if (optionalUser.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         User user = optionalUser.get();
 
-        // ⚠️ Verifieer huidig wachtwoord VOORDAT wijzigingen worden toegestaan
+        // Verplicht huidig wachtwoord
         if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Huidig wachtwoord is verplicht om wijzigingen door te voeren");
+                    .body("Huidig wachtwoord is verplicht");
         }
 
         if (!passwordHasher.matches(request.getCurrentPassword(), user.getPasswordHash())) {
@@ -88,49 +104,50 @@ public class UserController {
                     .body("Huidig wachtwoord is onjuist");
         }
 
-        // ✅ Wachtwoord geverifieerd - nu mogen wijzigingen worden doorgevoerd
-
-        // Update username als opgegeven
+        // Username wijzigen
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             user.setUsername(request.getUsername().trim());
         }
 
-        // Update email als opgegeven
+        // E-mail wijzigen
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             String normalizedEmail = request.getEmail().trim().toLowerCase();
-            // Check of email al in gebruik is door andere gebruiker
-            Optional<User> existingUser = userRepository.findByEmail(normalizedEmail);
-            if (existingUser.isPresent() && !existingUser.get().getId().equals(id)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail is al in gebruik door een ander account");
+
+            Optional<User> existing = userRepository.findByEmail(normalizedEmail);
+            if (existing.isPresent() && !existing.get().getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("E-mail is al in gebruik");
             }
+
             user.setEmail(normalizedEmail);
         }
 
-        // Update wachtwoord als nieuw wachtwoord is opgegeven
+        // Wachtwoord wijzigen
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             if (request.getPassword().length() < 8) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Nieuw wachtwoord moet minimaal 8 karakters zijn");
             }
-            String passwordHash = passwordHasher.hash(request.getPassword());
-            user.setPasswordHash(passwordHash);
+
+            user.setPasswordHash(passwordHasher.hash(request.getPassword()));
         }
 
-        User savedUser = userRepository.save(user);
-        return ResponseEntity.ok(savedUser);
+        User saved = userRepository.save(user);
+        return ResponseEntity.ok(saved);
     }
 
-    // 🔹 Ophalen van gebruikersactiviteit (topics en reacties)
+    // 🔹 GET /api/users/{id}/activity — topics + reacties
     @GetMapping("/{id}/activity")
     public ResponseEntity<?> getUserActivity(@PathVariable Long id) {
-        // Check of user bestaat
+
         if (!userRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
 
-        // Haal discussies op
+        // Topics
         List<DiscussionEntity> discussions = discussionRepository.findByUserIdOrderByCreatedAtDesc(id);
         List<Map<String, Object>> topicsList = new ArrayList<>();
+
         for (DiscussionEntity d : discussions) {
             Map<String, Object> topic = new HashMap<>();
             topic.put("id", d.getId());
@@ -140,9 +157,10 @@ public class UserController {
             topicsList.add(topic);
         }
 
-        // Haal reacties op
+        // Reacties
         List<ReactionEntity> reactions = reactionRepository.findByUserIdOrderByCreatedAtDesc(id);
         List<Map<String, Object>> reactionsList = new ArrayList<>();
+
         for (ReactionEntity r : reactions) {
             Map<String, Object> reaction = new HashMap<>();
             reaction.put("id", r.getId());
@@ -153,7 +171,7 @@ public class UserController {
             reactionsList.add(reaction);
         }
 
-        // Combineer in response
+        // Response
         Map<String, Object> activity = new HashMap<>();
         activity.put("topics", topicsList);
         activity.put("reactions", reactionsList);
