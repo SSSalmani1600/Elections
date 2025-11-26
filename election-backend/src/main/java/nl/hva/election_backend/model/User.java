@@ -19,43 +19,39 @@ public class User {
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @Column(name = "is_admin")
+    private Boolean isAdmin = false;
+
+
+
+
     public User() {}
 
     public User(String email, String passwordHash, String username) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.username = username;
+        this.isAdmin = false;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
+    public String getPasswordHash() { return passwordHash; }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public Boolean getIsAdmin() { return isAdmin; }
+
+    public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
+
 }
