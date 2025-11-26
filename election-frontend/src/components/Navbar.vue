@@ -6,18 +6,15 @@ const menuIsOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
 
-
 const auth = useAuthStore()
 
 const toggleMenu = () => {
   menuIsOpen.value = !menuIsOpen.value
 }
 
-
 const toggleUserMenu = () => {
   userMenuOpen.value = !userMenuOpen.value
 }
-
 
 const logout = () => {
   auth.logout()
@@ -53,10 +50,12 @@ onBeforeUnmount(() => {
 
     <div class="relative flex items-center gap-4 max-lg:hidden" ref="userMenuRef">
 
+
       <template v-if="!auth.isLoggedIn">
         <router-link to="/inloggen" class="btn btn-primary !py-[6px]">Inloggen</router-link>
         <router-link to="/registreren" class="btn btn-secondary !py-[6px]">Registreren</router-link>
       </template>
+
 
       <template v-else>
 
@@ -66,7 +65,6 @@ onBeforeUnmount(() => {
         >
           <i class="pi pi-user text-lg"></i>
         </button>
-
 
         <Transition
           enter-active-class="transition ease-out duration-200"
@@ -83,6 +81,17 @@ onBeforeUnmount(() => {
             <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
               👋 Hallo, <strong>{{ auth.user }}</strong>
             </p>
+
+
+            <router-link
+              v-if="auth.isAdmin"
+              to="/admin"
+              class="block px-4 py-2 text-sm text-yellow-400 hover:bg-gray-700"
+              @click="userMenuOpen = false"
+            >
+               Admin Paneel
+            </router-link>
+
             <router-link
               to="/account"
               class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
@@ -90,6 +99,7 @@ onBeforeUnmount(() => {
             >
               Mijn account
             </router-link>
+
             <button
               @click="logout"
               class="block w-full cursor-pointer text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
@@ -101,7 +111,7 @@ onBeforeUnmount(() => {
       </template>
     </div>
 
-    <!-- MOBIEL MENU -->
+
     <button type="button" @click="toggleMenu" class="text-white cursor-pointer lg:hidden">
       <i class="pi pi-bars text-2xl"></i>
     </button>
@@ -128,12 +138,26 @@ onBeforeUnmount(() => {
           <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
           <router-link to="/calendar" class="nav-link" @click="toggleMenu">Verkiezingskalender</router-link>
 
+
           <template v-if="!auth.isLoggedIn">
             <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu">Inloggen</router-link>
             <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu">Registreren</router-link>
           </template>
+
+
           <template v-else>
             <p class="text-gray-200">👋 Hallo, {{ auth.user }}</p>
+
+
+            <router-link
+              v-if="auth.isAdmin"
+              to="/admin"
+              class="btn btn-secondary"
+              @click="toggleMenu"
+            >
+               Admin Paneel
+            </router-link>
+
             <router-link to="/account" class="btn btn-primary" @click="toggleMenu">Mijn account</router-link>
             <button @click="logout" class="btn btn-secondary cursor-pointer">Uitloggen</button>
           </template>
