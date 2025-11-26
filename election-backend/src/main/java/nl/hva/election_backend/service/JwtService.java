@@ -6,7 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import nl.hva.election_backend.dto.TokenValidationResponse;
 import nl.hva.election_backend.model.RefreshToken;
-import nl.hva.election_backend.repo.RefreshTokenRepository;
+import nl.hva.election_backend.repository.RefreshTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
