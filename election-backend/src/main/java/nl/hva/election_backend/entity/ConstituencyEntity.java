@@ -3,6 +3,9 @@ package nl.hva.election_backend.entity;
 import jakarta.persistence.*;
 import nl.hva.election_backend.entity.id.ConstituencyId;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @IdClass(ConstituencyId.class)
 @Table(name = "constituencies")
@@ -15,8 +18,11 @@ public class ConstituencyEntity {
     @Id
     private int year;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "constituency", fetch = FetchType.LAZY)
+    private Set<ConstituencyResultEntity> results = new HashSet<>();
 
     public ConstituencyEntity(String constituencyId, int year, String name) {
         this.constituencyId = constituencyId;
@@ -49,5 +55,13 @@ public class ConstituencyEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<ConstituencyResultEntity> getResults() {
+        return results;
+    }
+
+    public void setResults(Set<ConstituencyResultEntity> results) {
+        this.results = results;
     }
 }
