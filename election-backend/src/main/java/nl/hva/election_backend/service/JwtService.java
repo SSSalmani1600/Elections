@@ -31,10 +31,10 @@ public class JwtService {
         this.refreshRepo = refreshRepo;
     }
 
-    public String generateToken(String displayName) {
+    public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
 
-        return Jwts.builder().claims().add(claims).subject(displayName)
+        return Jwts.builder().claims().add(claims).subject(username)
                 .issuer(issuer).issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
                 .and().signWith(this.getKey()).compact();
@@ -59,7 +59,7 @@ public class JwtService {
             .getPayload();
     }
 
-    public String extractDisplayName(String token) {
+    public String extractUsername(String token) {
         Claims claims = extractAllClaims(token);
         return claims.getSubject();
     }
@@ -90,14 +90,14 @@ public class JwtService {
             return new TokenValidationResponse(false, false);
         }
         if (isTokenExpired(token)) {
-            return new TokenValidationResponse(false, true);
+            return new TokenValidationResponse(false, false);
         };
 
         Date expirationDate = claims.getExpiration();
         long remainingTime = expirationDate.getTime() - (new Date().getTime());
         long totalTime =  expirationDate.getTime() - claims.getIssuedAt().getTime();
 
-        if (remainingTime / totalTime <= 25) {
+        if ((remainingTime / totalTime) * 100 <= 25) {
             return new TokenValidationResponse(true, true);
         }
 

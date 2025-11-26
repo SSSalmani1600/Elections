@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
@@ -26,27 +27,27 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
-    String[] whiteListURLs = {
-            "/api/auth/",
-            "/api/parties",
-            "/api/elections/",
-            "/api/discussions"
+    private static final Pattern[] whiteListPatterns = {
+            Pattern.compile("^/api/auth/.*$"),
+            Pattern.compile("^/api/parties/.*$"),
+            Pattern.compile("^/api/elections/.*$"),
+            Pattern.compile("^/api/discussions/.*$")
     };
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Preflight doorlaten
+        // Allow preflight
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // White listed endpoints altijd doorlaten
+        // Allow whitelisted endpoints
         String uri = request.getRequestURI();
-        for (String url : whiteListURLs) {
-            if (uri.startsWith(url)) {
+        for (Pattern pattern : whiteListPatterns) {
+            if (pattern.matcher(uri).matches()) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -77,11 +78,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (tokenResponse.shouldRefresh()) {
-                return;
-            }
+//            if (tokenResponse.shouldRefresh()) {
+//                return;
+//            }
 
-            String username = jwtService.extractDisplayName(jwtToken);
+            String username = jwtService.extractUsername(jwtToken);
             request.setAttribute("username", username);
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
