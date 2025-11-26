@@ -1,7 +1,6 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.*;
-import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
@@ -77,14 +76,15 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
-    @GetMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshToken, @CookieValue("jwt") String accessToken) {
-        System.out.println(refreshToken);
-        if (refreshToken == null) return ResponseEntity.badRequest().build();
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshTokenHash) {
+        if (refreshTokenHash == null) return ResponseEntity.status(401).body("Empty refresh token");
 
-        RefreshToken newRefreshToken = jwtService.refreshToken(refreshToken);
+        TokenRefreshResponse tokenPair = authService.refreshTokens(refreshTokenHash);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken.getTokenHash())
+        if (tokenPair.getRefreshTokenHash() == null) return ResponseEntity.status(401).body("Invalid refresh token");
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenPair.getRefreshTokenHash())
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -92,7 +92,15 @@ public class AuthController {
                 .maxAge(86400)
                 .build();
 
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", tokenPair.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(60 * 15)
+                .build();
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).build();
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString()).build();
     }
 }
