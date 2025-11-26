@@ -19,6 +19,17 @@ public class User {
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @Column(name = "is_admin")
+    private Boolean isAdmin;
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
     public User() {}
 
     public User(String email, String passwordHash, String username) {
