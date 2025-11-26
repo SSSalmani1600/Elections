@@ -2,9 +2,9 @@ package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.*;
 import nl.hva.election_backend.exception.InvalidRefreshTokenException;
+import nl.hva.election_backend.exception.UnauthorizedException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
-import nl.hva.election_backend.service.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
@@ -16,24 +16,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:3000"})
 public class AuthController {
     private final AuthService authService;
-    private final JwtService jwtService;
 
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.jwtService = jwtService;
     }
 
     @GetMapping("/session")
-    public ResponseEntity<LoginResponse> fetchUser(@CookieValue(value = "jwt", required = false) String accessToken) {
-        User user = authService.getUser(accessToken);
+    public ResponseEntity<?> fetchUser(@CookieValue(value = "jwt", required = false) String accessToken) {
+        User user;
+        try {
+            user = authService.getUser(accessToken);
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(401).build();
+        }
 
-        return ResponseEntity
-                .ok(new LoginResponse(user.getId(), user.getEmail(), user.getUsername(), user.getIsAdmin()));
+        return ResponseEntity.ok(
+                Map.of("user", new LoginResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getIsAdmin()
+                ))
+        );
     }
 
     @PostMapping("/login")
