@@ -6,10 +6,7 @@ import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
 import nl.hva.election_backend.service.JwtService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -74,9 +71,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody String token) {
-        RefreshToken newRefreshToken = jwtService.refreshToken(token);
+    @GetMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshToken, @CookieValue("jwt") String accessToken) {
+        System.out.println(refreshToken);
+        if (refreshToken == null) return ResponseEntity.badRequest().build();
+
+        RefreshToken newRefreshToken = jwtService.refreshToken(refreshToken);
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken.getTokenHash())
                 .httpOnly(true)
