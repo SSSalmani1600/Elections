@@ -27,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('JWT')
     localStorage.removeItem('username')
     localStorage.removeItem('isAdmin')
+    window.location.href = "/";
   }
 
   return { user, token, isAdmin, isLoggedIn, login, logout }
