@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
+import { votePoll } from "@/services/PollService"
 
 const { poll } = defineProps<{
   poll: {
@@ -10,30 +11,43 @@ const { poll } = defineProps<{
 
 const loading = ref(false)
 const hasVoted = ref(false)
-
+const errorMessage = ref("")
 const percentages = ref({ eens: 0, oneens: 0 })
 
-function vote(choice: "eens" | "oneens") {
+async function vote(choice: "eens" | "oneens") {
   loading.value = true
+  errorMessage.value = ""
 
-  setTimeout(() => {
+  try {
+    const result = await votePoll(poll.id, choice)
+
+    percentages.value = {
+      eens: Math.round((result.eens / result.total) * 100),
+      oneens: Math.round((result.oneens / result.total) * 100)
+    }
+
     hasVoted.value = true
-    percentages.value =
-      choice === "eens"
-        ? { eens: 72, oneens: 28 }
-        : { eens: 40, oneens: 60 }
 
+  } catch (err: any) {
+    errorMessage.value =
+      err.message.includes("Niet ingelogd")
+        ? "Je moet ingelogd zijn om te stemmen."
+        : err.message ?? "Er ging iets mis"
+  } finally {
     loading.value = false
-  }, 900)
+  }
 }
 </script>
 
 <template>
-  <div
-    class="poll-card max-w-3xl mx-auto p-8 rounded-2xl shadow-xl"
-  >
+  <div class="poll-card max-w-3xl mx-auto p-8 rounded-2xl shadow-xl">
+
     <p class="text-2xl font-semibold mb-6 leading-snug">
       {{ poll.question }}
+    </p>
+
+    <p v-if="errorMessage" class="text-red-400 mb-4 text-sm">
+      {{ errorMessage }}
     </p>
 
     <div
@@ -66,12 +80,13 @@ function vote(choice: "eens" | "oneens") {
       <span class="text-green-400">Eens: {{ percentages.eens }}%</span>
       <span class="text-red-400">Oneens: {{ percentages.oneens }}%</span>
     </div>
+
   </div>
 </template>
 
 <style scoped>
 .poll-card {
-  background: #0f1730;        /* past perfect bij jouw hero */
+  background: #0f1730;
   border: 1px solid #ffffff20;
   color: white;
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
@@ -86,6 +101,7 @@ function vote(choice: "eens" | "oneens") {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
 .animate-fadeIn {
   animation: fadeIn 0.35s ease-out;
 }
