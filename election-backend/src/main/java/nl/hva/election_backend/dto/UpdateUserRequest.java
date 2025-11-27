@@ -1,10 +1,12 @@
 package nl.hva.election_backend.dto;
 
+// DTO voor het updaten van gebruikersgegevens
+// Dit object wordt gebruikt wanneer een gebruiker zijn accountgegevens wil wijzigen
 public class UpdateUserRequest {
-    private String currentPassword; // Verplicht voor verificatie
-    private String username;
-    private String email;
-    private String password; // Nieuw wachtwoord (optioneel)
+    private String currentPassword; // Verplicht: huidig wachtwoord voor verificatie
+    private String username;         // Optioneel: nieuwe gebruikersnaam
+    private String email;            // Optioneel: nieuw email adres
+    private String password;         // Optioneel: nieuw wachtwoord
 
     public UpdateUserRequest() {}
 

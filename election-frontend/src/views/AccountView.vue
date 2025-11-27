@@ -407,27 +407,36 @@
 </template>
 
 <script setup lang="ts">
+// AccountView component: pagina waar gebruikers hun accountgegevens kunnen bekijken en bewerken
+// Toont gebruikersinfo, activiteit (topics en reacties), en mogelijkheid om gegevens te wijzigen
+
 import { ref, onMounted } from 'vue'
 import { getCurrentUser, updateUser, type UpdateUserRequest } from '@/services/UserService'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/store/authStore'
 
 const router = useRouter()
-const editMode = ref(false)
-const loading = ref(false)
-const activityLoading = ref(false)
-const error = ref('')
-const success = ref('')
+
+// State variabelen voor de component
+const editMode = ref(false)        // Of de gebruiker in bewerkmodus is
+const loading = ref(false)          // Of data wordt geladen
+const activityLoading = ref(false)  // Of activiteit wordt geladen
+const error = ref('')               // Foutmeldingen
+const success = ref('')             // Succesmeldingen
 
 const { user, logout, initialized } = useAuth()
 
+// Huidig wachtwoord (vereist voor wijzigingen)
 const currentPassword = ref('')
+
+// Tijdelijke edit data (wordt gebruikt tijdens bewerken)
 const editUser = ref({
   username: '',
   email: '',
   newPassword: '',
 })
 
+// Interface voor een topic (discussie)
 interface Topic {
   id: number
   title: string
@@ -435,6 +444,7 @@ interface Topic {
   reactionsCount: number
 }
 
+// Interface voor een reactie
 interface Reaction {
   id: number
   message: string
@@ -443,11 +453,13 @@ interface Reaction {
   discussionTitle: string
 }
 
+// Activiteit data: topics en reacties van de gebruiker
 const activity = ref<{ topics: Topic[]; reactions: Reaction[] }>({
   topics: [],
   reactions: [],
 })
 
+// Formatteert een datum string naar Nederlandse notatie (bijv. "15 jan 2024")
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('nl-NL', {
     day: 'numeric',
@@ -456,6 +468,7 @@ function formatDate(dateStr: string) {
   })
 }
 
+// Haalt alle activiteit op van een gebruiker (topics en reacties)
 async function fetchActivity(userId: number) {
   activityLoading.value = true
   try {
@@ -470,7 +483,9 @@ async function fetchActivity(userId: number) {
   }
 }
 
+// Wordt uitgevoerd wanneer de component wordt geladen
 onMounted(async () => {
+  // Als gebruiker niet ingelogd is, stuur door naar login pagina
   if (initialized.value && !user.value) {
     router.push('/inloggen')
     return
@@ -478,8 +493,11 @@ onMounted(async () => {
 
   try {
     loading.value = true
+    // Haal huidige gebruiker op via JWT token
     const userData = await getCurrentUser()
     user.value = userData
+    
+    // Vul edit formulier met huidige gegevens
     editUser.value = {
       username: userData.username,
       email: userData.email,
@@ -487,12 +505,13 @@ onMounted(async () => {
     }
     localStorage.setItem('userId', String(userData.id))
 
-    // Fetch activity
+    // Haal activiteit op (topics en reacties)
     await fetchActivity(userData.id)
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Onbekende fout'
     console.error('Error fetching user:', err)
 
+    // Toon specifieke foutmeldingen afhankelijk van het type fout
     if (
       errorMsg.includes('401') ||
       errorMsg.includes('Unauthorized') ||
@@ -511,6 +530,7 @@ onMounted(async () => {
   }
 })
 
+// Start bewerkmodus: zet editMode aan en reset velden
 function startEdit() {
   editMode.value = true
   currentPassword.value = ''
@@ -518,8 +538,11 @@ function startEdit() {
   success.value = ''
 }
 
+// Slaat gewijzigde gebruikersgegevens op
 async function saveChanges() {
   if (!user.value) return
+  
+  // Valideer dat huidig wachtwoord is ingevuld
   if (!currentPassword.value) {
     error.value = 'Voer je huidige wachtwoord in.'
     return
@@ -530,13 +553,16 @@ async function saveChanges() {
   loading.value = true
 
   try {
+    // Maak update request object
     const updates: UpdateUserRequest = {
       username: editUser.value.username,
       email: editUser.value.email,
-      currentPassword: currentPassword.value,
+      currentPassword: currentPassword.value, // Vereist voor verificatie
     }
 
+    // Als nieuw wachtwoord is ingevuld, voeg toe aan updates
     if (editUser.value.newPassword && editUser.value.newPassword.length > 0) {
+      // Valideer minimale lengte
       if (editUser.value.newPassword.length < 8) {
         error.value = 'Nieuw wachtwoord moet minimaal 8 karakters zijn'
         loading.value = false
@@ -545,14 +571,11 @@ async function saveChanges() {
       updates.password = editUser.value.newPassword
     }
 
+    // Stuur update request naar backend
     const updatedUser = await updateUser(user.value.id, updates)
     user.value = updatedUser
 
-    // if (updatedUser.username !== user.username) {
-    //   login(updatedUser.username, localStorage.getItem('JWT') || '')
-    //   localStorage.setItem('username', updatedUser.username)
-    // }
-
+    // Toon succesmelding en sluit bewerkmodus
     success.value = 'Gegevens opgeslagen!'
     editMode.value = false
     currentPassword.value = ''
@@ -566,8 +589,10 @@ async function saveChanges() {
   }
 }
 
+// Annuleert bewerkmodus: reset alle velden en ga terug naar view modus
 function cancelEdit() {
   if (user.value) {
+    // Reset edit velden naar originele waarden
     editUser.value = {
       username: user.value.username,
       email: user.value.email,
