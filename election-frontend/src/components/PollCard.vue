@@ -19,7 +19,6 @@ async function loadUserVote() {
     const result = await getMyVote(poll.id)
 
     if (result) {
-      // user heeft al gestemd → toon resultaten
       percentages.value = {
         eens: Math.round((result.eens / result.total) * 100),
         oneens: Math.round((result.oneens / result.total) * 100)
@@ -96,10 +95,24 @@ onMounted(async () => {
 
     <div
       v-else
-      class="mt-6 bg-white/10 rounded-xl px-6 py-4 animate-fadeIn flex justify-between text-lg font-semibold"
+      class="mt-6 bg-white/10 rounded-xl px-6 py-4 animate-fadeIn relative overflow-hidden"
     >
-      <span class="text-green-400">Eens: {{ percentages.eens }}%</span>
-      <span class="text-red-400">Oneens: {{ percentages.oneens }}%</span>
+      <div class="result-progress">
+        <div
+          class="result-green"
+          :style="{ width: percentages.eens + '%' }"
+        ></div>
+
+        <div
+          class="result-red"
+          :style="{ width: percentages.oneens + '%' }"
+        ></div>
+      </div>
+
+      <div class="flex justify-between text-lg font-semibold relative z-10">
+        <span class="text-green-400">Eens: {{ percentages.eens }}%</span>
+        <span class="text-red-400">Oneens: {{ percentages.oneens }}%</span>
+      </div>
     </div>
 
   </div>
@@ -116,6 +129,25 @@ onMounted(async () => {
 
 .poll-card:hover {
   box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+
+.result-progress {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+.result-green {
+  height: 100%;
+  background: rgba(34, 197, 94, 0.25); /* Groen 25% */
+  transition: width 0.5s ease;
+}
+
+.result-red {
+  height: 100%;
+  background: rgba(239, 68, 68, 0.25); /* Rood 25% */
+  transition: width 0.5s ease;
 }
 
 @keyframes fadeIn {
