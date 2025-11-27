@@ -34,3 +34,20 @@ export async function votePoll(
 
   return await res.json();
 }
+
+export async function getMyVote(pollId: string) {
+  const res = await apiFetch(`/api/polls/${pollId}/my-vote`);
+
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+export async function getPollResults(pollId: string): Promise<PollResult> {
+  const res = await apiFetch(`/api/polls/${pollId}/results`)
+
+  if (!res.ok) {
+    throw new Error("Kon resultaten niet ophalen")
+  }
+
+  return await res.json()
+}
