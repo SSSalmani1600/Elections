@@ -4,22 +4,28 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 
+// Database entiteit: representeert een reactie op een discussie
 @Entity
 @Table(name = "reactions")
 public class ReactionEntity {
 
+    // Primaire sleutel: automatisch gegenereerd door de database
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relatie naar de discussie waar deze reactie bij hoort
+    // @JsonIgnore: wordt niet meegestuurd in JSON responses (voorkomt oneindige loops)
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discussion_id", nullable = false)
     private DiscussionEntity discussion;
 
+    // ID van de gebruiker die de reactie heeft geschreven
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    // Relatie naar UserEntity: LAZY betekent pas ophalen als nodig
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -30,15 +36,19 @@ public class ReactionEntity {
     )
     private UserEntity user;
 
+    // De inhoud van de reactie (TEXT type voor lange teksten)
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    // Moderatiestatus: PENDING (wacht op goedkeuring), APPROVED (goedgekeurd), REJECTED (afgekeurd)
     @Column(name = "moderation_status", nullable = false)
     private String moderationStatus = "PENDING";
 
+    // Reden waarom de reactie is afgekeurd (optioneel)
     @Column(name = "flagged_reason")
     private String flaggedReason;
 
+    // Wanneer de reactie is aangemaakt
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
     private Instant createdAt = Instant.now();
 
