@@ -131,4 +131,22 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString()).build();
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .build();
+    }
 }
