@@ -1,5 +1,9 @@
 import type {User} from "@/types/api.ts";
 
+// Service voor gebruikers-gerelateerde API calls
+// Deze functies communiceren met de backend om gebruikersdata op te halen en te wijzigen
+
+// Haalt alle gebruikers op (waarschijnlijk alleen voor admin)
 export async function getAllUsers(): Promise<User[]> {
   const res = await fetch(`http://localhost:8080/api/users/all`, {
     method: 'GET',
@@ -15,6 +19,8 @@ export async function getAllUsers(): Promise<User[]> {
   return (await res.json()) as User[];
 }
 
+// Haalt de huidige ingelogde gebruiker op via JWT token
+// Gebruikt door de account pagina om gebruikersgegevens te tonen
 export async function getCurrentUser(): Promise<User> {
   const token = localStorage.getItem('JWT')
   if (!token) {
@@ -39,6 +45,7 @@ export async function getCurrentUser(): Promise<User> {
   return (await res.json()) as User;
 }
 
+// Haalt een specifieke gebruiker op op basis van ID
 export async function getUserById(id: number): Promise<User> {
   const token = localStorage.getItem('JWT')
   const res = await fetch(`http://localhost:8080/api/users/${id}`, {
@@ -59,13 +66,16 @@ export async function getUserById(id: number): Promise<User> {
   return (await res.json()) as User;
 }
 
+// Interface voor het updaten van gebruikersgegevens
 export interface UpdateUserRequest {
-  currentPassword?: string;  // Verplicht voor verificatie
-  username?: string;
-  email?: string;
-  password?: string;         // Nieuw wachtwoord (optioneel)
+  currentPassword?: string;  // Verplicht: huidig wachtwoord voor verificatie
+  username?: string;         // Optioneel: nieuwe gebruikersnaam
+  email?: string;           // Optioneel: nieuw email adres
+  password?: string;        // Optioneel: nieuw wachtwoord
 }
 
+// Werkt gebruikersgegevens bij (username, email, wachtwoord)
+// Gebruikt door de account pagina wanneer gebruiker zijn gegevens wil wijzigen
 export async function updateUser(id: number, updates: UpdateUserRequest): Promise<User> {
   const token = localStorage.getItem('JWT')
   const res = await fetch(`http://localhost:8080/api/users/${id}`, {

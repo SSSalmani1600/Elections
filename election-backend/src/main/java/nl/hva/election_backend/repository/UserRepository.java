@@ -11,15 +11,16 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.List;
 
+// Repository: interface voor database queries op gebruikers
+// Spring genereert automatisch de implementatie
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Find by username
-//    Optional<User> findByUsername(String username);
-
-    // Find by email
+    // Zoekt een gebruiker op basis van email adres
+    // Gebruikt voor login en email validatie
     Optional<User> findByEmail(String email);
 
-    // Check if a user exists by email
+    // Checkt of een email adres al in gebruik is
+    // Gebruikt bij registratie en email wijziging om duplicaten te voorkomen
     boolean existsByEmail(String email);
 }
