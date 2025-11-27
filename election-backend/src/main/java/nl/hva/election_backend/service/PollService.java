@@ -40,6 +40,13 @@ public class PollService {
         return getResults(pollId);
     }
 
+    public PollResult getUserVote(UUID pollId, Long userId) {
+        if (voteRepository.existsByPollIdAndUserId(pollId, userId)) {
+            return getResults(pollId);
+        }
+        return null;
+    }
+
     public PollResult getResults(UUID pollId) {
         List<PollVote> votes = voteRepository.findByPollId(pollId);
 
