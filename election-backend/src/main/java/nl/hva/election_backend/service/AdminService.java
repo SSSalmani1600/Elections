@@ -1,5 +1,6 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.repository.ReactionRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -7,9 +8,11 @@ import org.springframework.stereotype.Service;
 public class AdminService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ReactionRepository reactionRepository;
 
-    public AdminService(JdbcTemplate jdbcTemplate) {
+    public AdminService(JdbcTemplate jdbcTemplate, ReactionRepository reactionRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.reactionRepository = reactionRepository;
     }
 
 
@@ -26,6 +29,6 @@ public class AdminService {
 
     // ✔️ Openstaande reviews → niet aanwezig → return 0
     public int getPendingReviews() {
-        return 0;
+        return reactionRepository.findByModerationStatus("PENDING").size();
     }
 }
