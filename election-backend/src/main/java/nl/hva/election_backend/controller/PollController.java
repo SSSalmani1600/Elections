@@ -61,4 +61,14 @@ public class PollController {
     public PollResult getResults(@PathVariable UUID id) {
         return pollService.getResults(id);
     }
+    @GetMapping("/{id}/my-vote")
+    public PollResult myVote(
+            @PathVariable UUID id,
+            @CookieValue(value = "jwt", required = false) String jwt
+    ) {
+        if (jwt == null) return null;
+        Long userId = Long.parseLong(jwtService.extractUserId(jwt));
+        return pollService.getUserVote(id, userId);
+    }
+
 }
