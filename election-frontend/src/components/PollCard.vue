@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import { votePoll, getPollResults } from "@/services/PollService"
+import { votePoll, getMyVote } from "@/services/PollService"
 
 const { poll } = defineProps<{
   poll: {
@@ -14,13 +14,12 @@ const hasVoted = ref(false)
 const errorMessage = ref("")
 const percentages = ref({ eens: 0, oneens: 0 })
 
-const storageKey = `poll_voted_${poll.id}`
-
-async function loadResults() {
+async function loadUserVote() {
   try {
-    const result = await getPollResults(poll.id)
+    const result = await getMyVote(poll.id)
 
-    if (result.total > 0) {
+    if (result) {
+      // user heeft al gestemd → toon resultaten
       percentages.value = {
         eens: Math.round((result.eens / result.total) * 100),
         oneens: Math.round((result.oneens / result.total) * 100)
@@ -28,22 +27,15 @@ async function loadResults() {
       hasVoted.value = true
     }
   } catch (e) {
-    console.error("Kon pollresultaten niet ophalen", e)
+    console.error("Kon user vote status niet ophalen", e)
   }
 }
-
-onMounted(async () => {
-  if (localStorage.getItem(storageKey) === "true") {
-    await loadResults()
-  }
-})
 
 async function vote(choice: "eens" | "oneens") {
   loading.value = true
   errorMessage.value = ""
 
   try {
-    // stem opslaan in backend
     const result = await votePoll(poll.id, choice)
 
     percentages.value = {
@@ -52,7 +44,6 @@ async function vote(choice: "eens" | "oneens") {
     }
 
     hasVoted.value = true
-    localStorage.setItem(storageKey, "true")
 
   } catch (err: any) {
     const msg = err?.message ?? "Er ging iets mis"
@@ -63,6 +54,10 @@ async function vote(choice: "eens" | "oneens") {
     loading.value = false
   }
 }
+
+onMounted(async () => {
+  await loadUserVote()
+})
 </script>
 
 <template>
