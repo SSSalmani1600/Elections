@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
       <template v-else>
 
         <button @click.stop="toggleUserMenu"
-          class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-500 text-white hover:border-[#EF3054] transition">
+          class="flex items-center justify-center w-10 h-10 rounded-full border cursor-pointer border-gray-500 text-white hover:border-[#EF3054] transition">
           <i class="pi pi-user text-lg"></i>
         </button>
 
@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
           enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150"
           leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-1">
           <div v-if="userMenuOpen"
-            class="absolute top-full right-0 mt-3 w-48 bg-[#1c1f2b] shadow-lg rounded-lg border border-gray-700 py-2 z-50">
+            class="absolute top-full right-0 mt-3 w-48 bg-[#1c1f2b] shadow-lg rounded-lg border border-gray-700 z-50">
             <p class="px-4 py-2 text-sm text-gray-300 border-b border-gray-600">
               👋 Hallo, <strong>{{ user.username }}</strong>
             </p>
@@ -108,6 +108,7 @@ onBeforeUnmount(() => {
           <router-link to="/partijen" class="nav-link" @click="toggleMenu">Partijen</router-link>
           <router-link to="/forum" class="nav-link" @click="toggleMenu">Forum</router-link>
           <router-link to="/calendar" class="nav-link" @click="toggleMenu">Verkiezingskalender</router-link>
+          <router-link to="/stemwijzer" class="nav-link" @click="toggleMenu">Stemwijzer</router-link>
           <template v-if="!user">
             <router-link to="/inloggen" class="btn btn-primary" @click="toggleMenu">Inloggen</router-link>
             <router-link to="/registreren" class="btn btn-secondary" @click="toggleMenu">Registreren</router-link>
