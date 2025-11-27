@@ -7,9 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+// Repository: interface voor database queries op discussies
+// Spring genereert automatisch de implementatie
 @Repository
 public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Long> {
 
+    // Haalt alle discussies op met user data, gesorteerd op laatste activiteit
+    // LEFT JOIN FETCH zorgt ervoor dat user data in 1 query wordt opgehaald
     @Query("""
         SELECT d FROM DiscussionEntity d
         LEFT JOIN FETCH d.user
@@ -17,8 +21,9 @@ public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Lo
     """)
     List<DiscussionEntity> findAllWithUserOrdered();
 
+    // Haalt alle discussies op, gesorteerd op laatste activiteit (zonder user data)
     List<DiscussionEntity> findAllByOrderByLastActivityAtDesc();
 
-    // Haal alle discussies op van een specifieke gebruiker
+    // Haalt alle discussies op van een specifieke gebruiker, gesorteerd op aanmaakdatum
     List<DiscussionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
