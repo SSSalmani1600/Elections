@@ -166,7 +166,7 @@
 
               <button
                 @click="startEdit"
-                class="w-full mt-4 px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white shadow-lg shadow-[#ef3054]/20 hover:shadow-xl hover:shadow-[#ef3054]/30 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                class="w-full mt-4 px-5 py-3 rounded-xl cursor-pointer font-semibold bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white shadow-lg shadow-[#ef3054]/20 hover:shadow-xl hover:shadow-[#ef3054]/30 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -282,14 +282,14 @@
                   type="button"
                   @click="cancelEdit"
                   :disabled="loading"
-                  class="flex-1 px-4 py-3 rounded-lg font-medium bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-sm"
+                  class="flex-1 px-4 py-3 rounded-lg cursor-pointer font-medium bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-sm"
                 >
                   Annuleren
                 </button>
                 <button
                   type="submit"
                   :disabled="loading || !currentPassword"
-                  class="flex-1 px-4 py-3 rounded-lg font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white transition-all disabled:opacity-50 text-sm"
+                  class="flex-1 px-4 py-3 rounded-lg font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c] text-white transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 text-sm"
                 >
                   {{ loading ? 'Opslaan...' : 'Opslaan' }}
                 </button>
