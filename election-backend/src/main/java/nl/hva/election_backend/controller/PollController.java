@@ -8,14 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@CrossOrigin(
-        origins = {
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "http://localhost:3000"
-        },
-        allowCredentials = "true"
-)
 @RestController
 @RequestMapping("/api/polls")
 public class PollController {
