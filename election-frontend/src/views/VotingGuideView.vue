@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
-import type { Statement } from '@/types/api.ts'
-import { getAllStatements } from '@/services/StatementService.ts'
+import {nextTick, onMounted, ref, watch} from 'vue'
+import type {Statement} from '@/types/api.ts'
+import {getAllStatements} from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
 
 const data = ref<Statement[]>([])
@@ -129,7 +129,7 @@ onMounted(async () => {
               class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
             >
               <span class="font-bold block w-full text-lg truncate text-left"
-                >{{ index + 1 }} - {{ statement.statement }}</span
+              >{{ index + 1 }} - {{ statement.statement }}</span
               >
               <div class="block truncate w-full text-left">
                 <span class="opacity-80">{{ statement.category }}</span>
@@ -139,7 +139,7 @@ onMounted(async () => {
                     class="pi pi-check text-[#277D00] font-bold ml-2"
                     style="font-size: 1rem; font-weight: 700"
                   ></i
-                ></span>
+                  ></span>
               </div>
             </button>
           </template>
@@ -169,15 +169,16 @@ onMounted(async () => {
             <span>Jouw progressie</span>
             <span>{{ completedStatements }} / {{ totalStatements }} stellingen</span>
           </div>
-          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements" class="mt-1"></ProgressBar>
+          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements"
+                       class="mt-1"></ProgressBar>
         </div>
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
             <span class="px-2.5 text-sm py-2 rounded-[10px] font-bold bg-primary">{{
-              selectedStatement?.category
-            }}</span>
+                selectedStatement?.category
+              }}</span>
             <span class="font-bold text-xl lg:text-3xl"
-              >STELLING - {{ selectedStatement?.id }}</span
+            >STELLING - {{ selectedStatement?.id }}</span
             >
           </div>
           <div tabindex="-1" ref="focusTarget" class="sr-only"></div>
@@ -188,31 +189,35 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col gap-4">
           <span class="font-bold text-[28px]">Hiermee ben ik het</span>
-          <div class="flex flex-wrap items-center gap-3 text-lg lg:flex-row">
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'EENS')"
-              :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
-              class="btn opinion-btn !border-[#277D00] hover:bg-[#277D00]"
-            >
-              EENS
-            </button>
-            <span class="text-2xl">/</span>
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
-              :class="selectedStatement?.answer === 'NEUTRAAL' ? 'bg-white text-black' : ''"
-              class="btn opinion-btn hover:bg-white hover:text-black"
-            >
-              NEUTRAAL
-            </button>
-            <span class="text-2xl">/</span>
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
-              :class="selectedStatement?.answer === 'ONEENS' ? 'bg-[#FF1E00]' : ''"
-              class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
-            >
-              ONEENS
-            </button>
+          <div class="flex justify-between w-full">
+            <div class="flex flex-wrap items-center gap-3 text-lg lg:flex-row">
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'EENS')"
+                :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
+                class="btn opinion-btn !border-[#277D00] hover:bg-[#277D00]"
+              >
+                EENS
+              </button>
+              <span class="text-2xl">/</span>
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
+                :class="selectedStatement?.answer === 'NEUTRAAL' ? 'bg-white text-black' : ''"
+                class="btn opinion-btn hover:bg-white hover:text-black"
+              >
+                NEUTRAAL
+              </button>
+              <span class="text-2xl">/</span>
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
+                :class="selectedStatement?.answer === 'ONEENS' ? 'bg-[#FF1E00]' : ''"
+                class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
+              >
+                ONEENS
+              </button>
+            </div>
+            <button class="btn btn-primary" @click="calculateResults">Bekijk resultaat</button>
           </div>
+
         </div>
       </div>
     </div>
@@ -250,7 +255,7 @@ onMounted(async () => {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0,0,0,0);
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
 }
