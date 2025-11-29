@@ -5,6 +5,7 @@ import nl.hva.election_backend.repository.PartyViewpointRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class PartyViewpointService {
@@ -14,7 +15,7 @@ public class PartyViewpointService {
         this.partyViewpointRepository = partyViewpointRepository;
     }
 
-    public HashSet<PartyViewpointEntity> getAllPartyViewpoints() {
+    public List<PartyViewpointEntity> getAllPartyViewpoints() {
         return partyViewpointRepository.findAll();
     }
 }

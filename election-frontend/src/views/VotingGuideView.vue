@@ -215,7 +215,7 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
-            <button class="btn btn-primary" @click="calculateResults">Bekijk resultaat</button>
+            <button v-if="completedStatements === 30" class="btn btn-primary">Bekijk resultaat</button>
           </div>
 
         </div>
