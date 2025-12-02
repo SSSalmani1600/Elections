@@ -3,5 +3,5 @@ package nl.hva.election_backend.dto;
 import java.util.Set;
 
 public class VotingGuideRequestDto {
-    private Set<VotingGuideRequestDto> votingGuideRequests;
+    private Set<VotingGuideAnswerDto> votingGuideRequests;
 }
