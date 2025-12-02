@@ -1,22 +1,32 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.VotingGuideRequestDto;
+import nl.hva.election_backend.dto.VotingGuideResponseDto;
+import nl.hva.election_backend.dto.VotingGuideResultDto;
+import nl.hva.election_backend.entity.PartyViewpointEntity;
+import nl.hva.election_backend.service.PartyViewpointService;
 import nl.hva.election_backend.service.VotingGuideResultsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/voting-guide/results")
 public class VotingGuideResultsController {
-    private VotingGuideResultsService votingGuideResultsService;
+    private final VotingGuideResultsService votingGuideResultsService;
+    private final PartyViewpointService partyViewpointService;
 
-    public VotingGuideResultsController() {
+    public VotingGuideResultsController(VotingGuideResultsService votingGuideResultsService, PartyViewpointService partyViewpointService) {
+        this.votingGuideResultsService = votingGuideResultsService;
+        this.partyViewpointService = partyViewpointService;
     }
 
     @PostMapping("/calculate")
-    public void calculateResults(VotingGuideRequestDto votingGuideRequestDto) {
-
+    public VotingGuideResponseDto calculateResults(VotingGuideRequestDto votingGuideRequestDto) {
+        List<PartyViewpointEntity> partyViewpoints = partyViewpointService.getAllPartyViewpoints();
+        return votingGuideResultsService.calculate(votingGuideRequestDto, partyViewpoints);
     }
 }
