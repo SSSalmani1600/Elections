@@ -8,4 +8,8 @@ public class VotingGuideRequestDto {
     public Set<VotingGuideAnswerDto> getVotingGuideAnswers() {
         return votingGuideAnswers;
     }
+
+    public void setVotingGuideAnswers(Set<VotingGuideAnswerDto> votingGuideAnswers) {
+        this.votingGuideAnswers = votingGuideAnswers;
+    }
 }
