@@ -6,10 +6,7 @@ import nl.hva.election_backend.dto.VotingGuideResultDto;
 import nl.hva.election_backend.entity.PartyViewpointEntity;
 import nl.hva.election_backend.service.PartyViewpointService;
 import nl.hva.election_backend.service.VotingGuideResultsService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ public class VotingGuideResultsController {
     }
 
     @PostMapping("/calculate")
-    public VotingGuideResponseDto calculateResults(VotingGuideRequestDto votingGuideRequestDto) {
+    public VotingGuideResponseDto calculateResults(@RequestBody VotingGuideRequestDto votingGuideRequestDto) {
         List<PartyViewpointEntity> partyViewpoints = partyViewpointService.getAllPartyViewpoints();
         return votingGuideResultsService.calculate(votingGuideRequestDto, partyViewpoints);
     }
