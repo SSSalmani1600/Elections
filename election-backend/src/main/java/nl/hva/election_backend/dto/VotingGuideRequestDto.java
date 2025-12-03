@@ -4,4 +4,8 @@ import java.util.Set;
 
 public class VotingGuideRequestDto {
     private Set<VotingGuideAnswerDto> votingGuideAnswers;
+
+    public Set<VotingGuideAnswerDto> getVotingGuideAnswers() {
+        return votingGuideAnswers;
+    }
 }
