@@ -1,5 +1,6 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.dto.VotingGuideAnswerDto;
 import nl.hva.election_backend.dto.VotingGuideRequestDto;
 import nl.hva.election_backend.dto.VotingGuideResponseDto;
 import nl.hva.election_backend.dto.VotingGuideResultDto;
@@ -14,9 +15,16 @@ import java.util.Set;
 public class VotingGuideResultsService {
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
         Set<VotingGuideResultDto> votingGuideResults = new HashSet<>();
+        double totalAnswers = votingGuideAnswers.getVotingGuideAnswers().size();
 
-        for (PartyViewpointEntity partyViewpointEntity : partyViewpoints) {
 
+        for (PartyViewpointEntity partyViewpoint : partyViewpoints) {
+            double score = 0;
+
+            for (VotingGuideAnswerDto votingGuideAnswer : votingGuideAnswers.getVotingGuideAnswers()) {
+
+            }
+            double percentage = (score / totalAnswers) * 100;
         }
     }
 }
