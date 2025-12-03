@@ -7,24 +7,24 @@ import nl.hva.election_backend.dto.VotingGuideResultDto;
 import nl.hva.election_backend.entity.PartyViewpointEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class VotingGuideResultsService {
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
         Set<VotingGuideResultDto> votingGuideResults = new HashSet<>();
         double totalAnswers = votingGuideAnswers.getVotingGuideAnswers().size();
+        Map<Long, Map<Long, String>> partyViewpointsMap = new HashMap<>();
 
-
-        for (PartyViewpointEntity partyViewpoint : partyViewpoints) {
-            double score = 0;
-
-            for (VotingGuideAnswerDto votingGuideAnswer : votingGuideAnswers.getVotingGuideAnswers()) {
-
+        partyViewpoints.forEach(partyViewpoint -> {
+            if (!partyViewpointsMap.containsKey(partyViewpoint.getPartyId())) {
+                partyViewpointsMap.put(partyViewpoint.getPartyId(), new HashMap<>());
+                Map<Long, String> innerMap =  partyViewpointsMap.get(partyViewpoint.getPartyId());
+                innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
+            } else {
+                Map<Long, String> innerMap =  partyViewpointsMap.get(partyViewpoint.getPartyId());
+                innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
             }
-            double percentage = (score / totalAnswers) * 100;
-        }
+        });
     }
 }
