@@ -4,6 +4,7 @@ import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
 import { calculateResults } from '@/services/VotingGuideResultsService.ts'
+import router from '@/router'
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -29,11 +30,16 @@ const getResults = async () => {
   try {
     calculateLoading.value = true
     results.value = await calculateResults(payload)
-    console.log(results.value)
+    const jwtToken = localStorage.getItem("JWT") || null
+
+    if (!jwtToken) {
+      localStorage.setItem("voting_guide_results", JSON.stringify(results.value))
+    }
   } catch (err: any) {
     console.error(`Error calculating the results: ${err.message}`)
   } finally {
     calculateLoading.value = false
+    await router.replace({ path: '/stemwijzer/resultaten' })
   }
 }
 
@@ -258,6 +264,7 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
 </template>
 
 <style scoped>

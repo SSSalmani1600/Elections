@@ -12,6 +12,7 @@ import VotingGuideView from '@/views/VotingGuideView.vue'
 import { authStore } from '@/store/authStore'
 import AccountView from '@/views/AccountView.vue'
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
+import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,6 +71,11 @@ const router = createRouter({
       path: '/stemwijzer',
       name: 'voting-guide',
       component: VotingGuideView,
+    },
+    {
+      path: '/stemwijzer/resultaten',
+      name: 'voting-guide-results',
+      component: VotingGuideResultsView
     },
     {
       path: '/account',
