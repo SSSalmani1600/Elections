@@ -3,6 +3,7 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
+import { calculateResults } from '@/services/VotingGuideResultsService.ts'
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -12,10 +13,28 @@ const statementRefs = ref<Record<number, HTMLButtonElement | null>>({})
 const totalStatements = ref<number>(0)
 const completedStatements = ref<number>(0)
 const focusTarget = ref<HTMLDivElement | null>(null)
-
+const results = ref<VotingGuideResultResponse | null>(null)
+const calculateLoading = ref<boolean>(false)
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
+}
+
+const getResults = async () => {
+  const stored: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  const payload = {
+    votingGuideAnswers: stored
+  }
+
+  try {
+    calculateLoading.value = true
+    results.value = await calculateResults(payload)
+    console.log(results.value)
+  } catch (err: any) {
+    console.error(`Error calculating the results: ${err.message}`)
+  } finally {
+    calculateLoading.value = false
+  }
 }
 
 const saveAnswer = (statementId: number, answer: string) => {
@@ -231,7 +250,9 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
-            <button v-if="completedStatements === 30" class="btn btn-primary">Bekijk resultaat</button>
+            <button @click="getResults" v-if="completedStatements === 30" class="btn btn-primary">
+              Bekijk resultaat
+            </button>
           </div>
         </div>
       </div>
