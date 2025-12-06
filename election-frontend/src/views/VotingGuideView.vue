@@ -22,18 +22,20 @@ const selectStatement = (statement: Statement) => {
 }
 
 const getResults = async () => {
-  const stored: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  const stored: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
   const payload = {
-    votingGuideAnswers: stored
+    votingGuideAnswers: stored,
   }
 
   try {
     calculateLoading.value = true
     results.value = await calculateResults(payload)
-    const jwtToken = localStorage.getItem("JWT") || null
+    const jwtToken = localStorage.getItem('JWT') || null
 
     if (!jwtToken) {
-      localStorage.setItem("voting_guide_results", JSON.stringify(results.value))
+      localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
     }
   } catch (err: any) {
     console.error(`Error calculating the results: ${err.message}`)
@@ -74,14 +76,22 @@ const updateAnsweredStatements = (storedAnswers: VotingGuideAnswer[]) => {
 }
 
 const findUnansweredQuestion = () => {
-  const storedAnswers: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  const storedAnswers: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
 
-  const firstUnanswered = data.value.find((statement) => !storedAnswers.find(a => statement.id === a.statementId))
+  const firstUnanswered = data.value.find(
+    (statement) => !storedAnswers.find((a) => statement.id === a.statementId),
+  )
 
   if (firstUnanswered) {
     selectedStatement.value = firstUnanswered
   } else if (data.value.length > 0) {
-    selectedStatement.value = selectedStatement.value
+    if (selectedStatement.value) {
+      selectedStatement.value = selectedStatement.value
+    } else {
+      selectedStatement.value = data.value[0]
+    }
   }
 }
 
@@ -113,13 +123,15 @@ onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
-    const storedAnswers: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+    const storedAnswers: VotingGuideAnswer[] = JSON.parse(
+      localStorage.getItem('voting_guide_answers') || '[]',
+    )
     updateAnsweredStatements(storedAnswers)
-    data.value = data.value.map(statement => {
-      const match = storedAnswers.find(a => a.statementId === statement.id)
+    data.value = data.value.map((statement) => {
+      const match = storedAnswers.find((a) => a.statementId === statement.id)
       return {
         ...statement,
-        answer: match?.answer ?? null
+        answer: match?.answer ?? null,
       }
     })
 
@@ -264,7 +276,6 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
