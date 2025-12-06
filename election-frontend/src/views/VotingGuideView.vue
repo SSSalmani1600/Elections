@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {nextTick, onMounted, ref, watch} from 'vue'
-import type {Statement} from '@/types/api.ts'
-import {getAllStatements} from '@/services/StatementService.ts'
+import { nextTick, onMounted, ref, watch } from 'vue'
+import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
+import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
 
 const data = ref<Statement[]>([])
@@ -19,8 +19,18 @@ const selectStatement = (statement: Statement) => {
 }
 
 const saveAnswer = (statementId: number, answer: string) => {
-  const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
-  stored[statementId] = answer
+  const stored: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
+
+  const existingAnswer = stored.find((a) => a.statementId === statementId)
+
+  if (existingAnswer) {
+    existingAnswer.answer = answer
+  } else {
+    stored.push({ statementId, answer })
+  }
+
   localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
 
   const index = data.value.findIndex((item) => item.id === statementId)
@@ -34,19 +44,19 @@ const saveAnswer = (statementId: number, answer: string) => {
   findUnansweredQuestion()
 }
 
-const updateAnsweredStatements = (storedAnswers: object) => {
-  completedStatements.value = Object.entries(storedAnswers).length
+const updateAnsweredStatements = (storedAnswers: VotingGuideAnswer[]) => {
+  completedStatements.value = storedAnswers.length
 }
 
 const findUnansweredQuestion = () => {
-  const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
+  const storedAnswers: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
 
-  const firstUnanswered = data.value.find((statement) => !storedAnswers[statement.id])
+  const firstUnanswered = data.value.find((statement) => !storedAnswers.find(a => statement.id === a.statementId))
 
   if (firstUnanswered) {
     selectedStatement.value = firstUnanswered
   } else if (data.value.length > 0) {
-    selectedStatement.value = data.value[0]
+    selectedStatement.value = selectedStatement.value
   }
 }
 
@@ -78,12 +88,15 @@ onMounted(async () => {
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
-    const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
+    const storedAnswers: VotingGuideAnswer[] = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
     updateAnsweredStatements(storedAnswers)
-    data.value = data.value.map((statement) => ({
-      ...statement,
-      answer: storedAnswers[statement.id] ?? null,
-    }))
+    data.value = data.value.map(statement => {
+      const match = storedAnswers.find(a => a.statementId === statement.id)
+      return {
+        ...statement,
+        answer: match?.answer ?? null
+      }
+    })
 
     totalStatements.value = data.value.length
 
@@ -129,7 +142,7 @@ onMounted(async () => {
               class="flex flex-col cursor-pointer gap-1 w-full p-4 items-start hover:bg-primary duration-300"
             >
               <span class="font-bold block w-full text-lg truncate text-left"
-              >{{ index + 1 }} - {{ statement.statement }}</span
+                >{{ index + 1 }} - {{ statement.statement }}</span
               >
               <div class="block truncate w-full text-left">
                 <span class="opacity-80">{{ statement.category }}</span>
@@ -139,7 +152,7 @@ onMounted(async () => {
                     class="pi pi-check text-[#277D00] font-bold ml-2"
                     style="font-size: 1rem; font-weight: 700"
                   ></i
-                  ></span>
+                ></span>
               </div>
             </button>
           </template>
@@ -169,16 +182,19 @@ onMounted(async () => {
             <span>Jouw progressie</span>
             <span>{{ completedStatements }} / {{ totalStatements }} stellingen</span>
           </div>
-          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements"
-                       class="mt-1"></ProgressBar>
+          <ProgressBar
+            :totalAnswered="completedStatements"
+            :totalStatements="totalStatements"
+            class="mt-1"
+          ></ProgressBar>
         </div>
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
             <span class="px-2.5 text-sm py-2 rounded-[10px] font-bold bg-primary">{{
-                selectedStatement?.category
-              }}</span>
+              selectedStatement?.category
+            }}</span>
             <span class="font-bold text-xl lg:text-3xl"
-            >STELLING - {{ selectedStatement?.id }}</span
+              >STELLING - {{ selectedStatement?.id }}</span
             >
           </div>
           <div tabindex="-1" ref="focusTarget" class="sr-only"></div>
@@ -217,7 +233,6 @@ onMounted(async () => {
             </div>
             <button v-if="completedStatements === 30" class="btn btn-primary">Bekijk resultaat</button>
           </div>
-
         </div>
       </div>
     </div>
