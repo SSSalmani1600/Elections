@@ -1,17 +1,17 @@
 package nl.hva.election_backend.dto;
 
 public class VotingGuideResultDto {
-    private Number partyId;
+    private Long partyId;
     private String partyName;
-    private Number percentage;
+    private double percentage;
 
-    public VotingGuideResultDto(Number partyId, String partyName, Number percentage) {
+    public VotingGuideResultDto(Long partyId, String partyName, double percentage) {
         this.partyId = partyId;
         this.partyName = partyName;
         this.percentage = percentage;
     }
 
-    public Number getPartyId() {
+    public Long getPartyId() {
         return partyId;
     }
 
@@ -19,11 +19,11 @@ public class VotingGuideResultDto {
         return partyName;
     }
 
-    public Number getPercentage() {
+    public double getPercentage() {
         return percentage;
     }
 
-    public void setPartyId(Number partyId) {
+    public void setPartyId(Long partyId) {
         this.partyId = partyId;
     }
 
@@ -31,7 +31,7 @@ public class VotingGuideResultDto {
         this.partyName = partyName;
     }
 
-    public void setPercentage(Number percentage) {
+    public void setPercentage(double percentage) {
         this.percentage = percentage;
     }
 }

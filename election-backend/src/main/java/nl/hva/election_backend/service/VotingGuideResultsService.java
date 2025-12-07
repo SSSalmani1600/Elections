@@ -20,7 +20,7 @@ public class VotingGuideResultsService {
     }
 
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
-        Set<VotingGuideResultDto> votingGuideResults = new HashSet<>();
+        Set<VotingGuideResultDto> votingGuideResults = new TreeSet<>(Comparator.comparing(VotingGuideResultDto::getPercentage).reversed().thenComparing(VotingGuideResultDto::getPartyId));
         double totalAnswers = votingGuideAnswers.getVotingGuideAnswers().size();
         Map<Long, Map<Long, String>> partyViewpointsMap = new HashMap<>();
 
@@ -28,10 +28,10 @@ public class VotingGuideResultsService {
         partyViewpoints.forEach(partyViewpoint -> {
             if (!partyViewpointsMap.containsKey(partyViewpoint.getPartyId())) {
                 partyViewpointsMap.put(partyViewpoint.getPartyId(), new HashMap<>());
-                Map<Long, String> innerMap =  partyViewpointsMap.get(partyViewpoint.getPartyId());
+                Map<Long, String> innerMap = partyViewpointsMap.get(partyViewpoint.getPartyId());
                 innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
             } else {
-                Map<Long, String> innerMap =  partyViewpointsMap.get(partyViewpoint.getPartyId());
+                Map<Long, String> innerMap = partyViewpointsMap.get(partyViewpoint.getPartyId());
                 innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
             }
         });
@@ -40,7 +40,7 @@ public class VotingGuideResultsService {
         for (Map.Entry<Long, Map<Long, String>> entry : partyViewpointsMap.entrySet()) {
             double score = 0;
 
-            for (VotingGuideAnswerDto votingGuideAnswer :  votingGuideAnswers.getVotingGuideAnswers()) {
+            for (VotingGuideAnswerDto votingGuideAnswer : votingGuideAnswers.getVotingGuideAnswers()) {
                 Long userStatementId = votingGuideAnswer.getStatementId().longValue();
                 String userPosition = votingGuideAnswer.getAnswer();
 
@@ -55,10 +55,8 @@ public class VotingGuideResultsService {
 
             Optional<VotingGuidePartyEntity> party = votingGuidePartyRepository.findById(entry.getKey());
             String partyName = party.isPresent() ? party.get().getName() : "Onbekende partij";
-
             votingGuideResults.add(new VotingGuideResultDto(entry.getKey(), partyName, percentage));
         }
-
         return new VotingGuideResponseDto(votingGuideResults);
     }
 }
