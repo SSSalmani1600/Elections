@@ -24,7 +24,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full mt-10 gap-8">
+  <div class="flex flex-col items-center w-full my-10 gap-8 ">
     <div class="flex flex-col gap-2 items-center">
       <h1 class="text-4xl font-bold">Jouw Resultaten</h1>
       <p>Op basis van jouw antwoorden passen deze partijen het beste bij jou</p>
@@ -54,7 +54,7 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div class="flex flex-col gap-4 w-1/2">
+    <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-scroll">
       <div
         v-for="party in restOfResults"
         :key="party.partyId"
