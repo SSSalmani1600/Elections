@@ -71,11 +71,13 @@ const router = createRouter({
       path: '/stemwijzer',
       name: 'voting-guide',
       component: VotingGuideView,
-    },
-    {
-      path: '/stemwijzer/resultaten',
-      name: 'voting-guide-results',
-      component: VotingGuideResultsView
+      children: [
+        {
+          path: 'resultaten',
+          name: 'voting-guide-results',
+          component: VotingGuideResultsView,
+        },
+      ],
     },
     {
       path: '/account',

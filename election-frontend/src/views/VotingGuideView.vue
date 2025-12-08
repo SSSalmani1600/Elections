@@ -5,6 +5,7 @@ import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
 import { calculateResults } from '@/services/VotingGuideResultsService.ts'
 import router from '@/router'
+import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -120,9 +121,17 @@ watch(selectedStatement, async (newVal) => {
 })
 
 onMounted(async () => {
-  const resultsInLS = JSON.parse(localStorage.getItem('voting_guide_results') || '[]')
-  if (resultsInLS) {
-    await router.replace({ path: '/stemwijzer/resultaten' })
+  const storedRaw = localStorage.getItem('voting_guide_results')
+  const stored = storedRaw ? JSON.parse(storedRaw) : null
+
+  if (stored && stored.votingGuideResults?.length > 0) {
+    router.addRoute('voting-guide', {
+      path: 'resultaten',
+      name: 'voting-guide-results',
+      component: VotingGuideResultsView,
+    })
+
+    await router.push('/stemwijzer/resultaten')
     return
   }
 
