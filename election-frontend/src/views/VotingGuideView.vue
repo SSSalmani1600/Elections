@@ -120,6 +120,12 @@ watch(selectedStatement, async (newVal) => {
 })
 
 onMounted(async () => {
+  const resultsInLS = JSON.parse(localStorage.getItem('voting_guide_results') || '[]')
+  if (resultsInLS) {
+    await router.replace({ path: '/stemwijzer/resultaten' })
+    return
+  }
+
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
