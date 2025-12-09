@@ -24,8 +24,8 @@ onMounted(() => {
   });
 });
 
-watch(() => calculatedWidthPercentage, (val) => {
-  currentWidth.value = val.value;
+watch(() => calculatedWidthPercentage.value, (val) => {
+  currentWidth.value = val;
 });
 </script>
 
