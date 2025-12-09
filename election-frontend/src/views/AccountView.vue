@@ -471,10 +471,16 @@ function formatDate(dateStr: string) {
 // Haalt alle activiteit op van een gebruiker (topics en reacties)
 async function fetchActivity(userId: number) {
   activityLoading.value = true
+  console.log('Fetching activity for userId:', userId)
   try {
     const res = await fetch(`http://localhost:8080/api/users/${userId}/activity`)
+    console.log('Activity response status:', res.status)
     if (res.ok) {
-      activity.value = await res.json()
+      const data = await res.json()
+      console.log('Activity data received:', data)
+      activity.value = data
+    } else {
+      console.error('Activity fetch failed with status:', res.status, await res.text())
     }
   } catch (err) {
     console.error('Error fetching activity:', err)
@@ -493,9 +499,20 @@ onMounted(async () => {
 
   try {
     loading.value = true
-    // Haal huidige gebruiker op via JWT token
-    const userData = await getCurrentUser()
-    user.value = userData
+    
+    // Probeer huidige gebruiker op te halen via JWT cookie
+    let userData = user.value
+    try {
+      userData = await getCurrentUser()
+      user.value = userData
+    } catch (authErr) {
+      console.log('getCurrentUser failed, using authStore user:', authErr)
+      // Gebruik de user uit de authStore als fallback
+      if (!user.value) {
+        throw authErr // Geen fallback beschikbaar
+      }
+      userData = user.value
+    }
     
     // Vul edit formulier met huidige gegevens
     editUser.value = {
@@ -506,6 +523,7 @@ onMounted(async () => {
     localStorage.setItem('userId', String(userData.id))
 
     // Haal activiteit op (topics en reacties)
+    console.log('Calling fetchActivity with userId:', userData.id)
     await fetchActivity(userData.id)
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Onbekende fout'

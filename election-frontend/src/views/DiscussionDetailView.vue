@@ -68,6 +68,11 @@ async function postReaction() {
     return
   }
 
+  if (!user.value) {
+    errorReaction.value = 'Je moet ingelogd zijn om te reageren.'
+    return
+  }
+
   submitting.value = true
   errorReaction.value = ''
   const id = route.params.id as string
@@ -78,7 +83,7 @@ async function postReaction() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: newReaction.value,
-        userId: user.value?.id ?? 1,
+        userId: user.value.id,
       }),
     })
 

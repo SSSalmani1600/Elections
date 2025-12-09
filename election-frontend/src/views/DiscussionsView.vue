@@ -111,7 +111,7 @@ async function createDiscussion() {
         title: formTitle.value.trim(),
         body: formBody.value.trim(),
         category: 'algemeen',
-        userId: 14,
+        userId: user.value.id,
       }),
     })
 

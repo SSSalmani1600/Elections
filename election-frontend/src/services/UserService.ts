@@ -19,19 +19,14 @@ export async function getAllUsers(): Promise<User[]> {
   return (await res.json()) as User[];
 }
 
-// Haalt de huidige ingelogde gebruiker op via JWT token
+// Haalt de huidige ingelogde gebruiker op via JWT cookie
 // Gebruikt door de account pagina om gebruikersgegevens te tonen
 export async function getCurrentUser(): Promise<User> {
-  const token = localStorage.getItem('JWT')
-  if (!token) {
-    throw new Error('No authentication token found')
-  }
-
   const res = await fetch(`http://localhost:8080/api/users/me`, {
     method: 'GET',
+    credentials: 'include', // Stuur cookies mee (inclusief JWT cookie)
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
     },
   })
 
