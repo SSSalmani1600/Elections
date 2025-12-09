@@ -87,3 +87,22 @@ export interface LoginResponse {
   token: string
   isAdmin: boolean
 }
+
+export interface VotingGuideResultRequest {
+  votingGuideAnswers: VotingGuideAnswer[]
+}
+
+export interface VotingGuideAnswer {
+  statementId: number
+  answer: string
+}
+
+export interface VotingGuideResultResponse {
+  votingGuideResults: VotingGuideResult[]
+}
+
+export interface VotingGuideResult {
+  partyId: number
+  partyName: string
+  percentage: string
+}
