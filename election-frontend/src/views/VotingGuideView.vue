@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from 'vue'
-import type { Statement } from '@/types/api.ts'
+import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
+import { calculateResults } from '@/services/VotingGuideResultsService.ts'
+import router from '@/router'
+import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
+import {Spinner} from "@/components/ui/spinner";
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -12,15 +16,46 @@ const statementRefs = ref<Record<number, HTMLButtonElement | null>>({})
 const totalStatements = ref<number>(0)
 const completedStatements = ref<number>(0)
 const focusTarget = ref<HTMLDivElement | null>(null)
-
+const results = ref<VotingGuideResultResponse | null>(null)
+const calculateLoading = ref<boolean>(false)
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
 }
 
+const getResults = async () => {
+  const stored: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
+  const payload = {
+    votingGuideAnswers: stored,
+  }
+
+  try {
+    calculateLoading.value = true
+    results.value = await calculateResults(payload)
+    localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
+  } catch (err: any) {
+    console.error(`Error calculating the results: ${err.message}`)
+  } finally {
+    calculateLoading.value = false
+    await router.replace({ path: '/stemwijzer/resultaten' })
+  }
+}
+
 const saveAnswer = (statementId: number, answer: string) => {
-  const stored = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
-  stored[statementId] = answer
+  const stored: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
+
+  const existingAnswer = stored.find((a) => a.statementId === statementId)
+
+  if (existingAnswer) {
+    existingAnswer.answer = answer
+  } else {
+    stored.push({ statementId, answer })
+  }
+
   localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
 
   const index = data.value.findIndex((item) => item.id === statementId)
@@ -34,19 +69,27 @@ const saveAnswer = (statementId: number, answer: string) => {
   findUnansweredQuestion()
 }
 
-const updateAnsweredStatements = (storedAnswers: object) => {
-  completedStatements.value = Object.entries(storedAnswers).length
+const updateAnsweredStatements = (storedAnswers: VotingGuideAnswer[]) => {
+  completedStatements.value = storedAnswers.length
 }
 
 const findUnansweredQuestion = () => {
-  const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
+  const storedAnswers: VotingGuideAnswer[] = JSON.parse(
+    localStorage.getItem('voting_guide_answers') || '[]',
+  )
 
-  const firstUnanswered = data.value.find((statement) => !storedAnswers[statement.id])
+  const firstUnanswered = data.value.find(
+    (statement) => !storedAnswers.find((a) => statement.id === a.statementId),
+  )
 
   if (firstUnanswered) {
     selectedStatement.value = firstUnanswered
   } else if (data.value.length > 0) {
-    selectedStatement.value = data.value[0]
+    if (selectedStatement.value) {
+      selectedStatement.value = selectedStatement.value
+    } else {
+      selectedStatement.value = data.value[0]
+    }
   }
 }
 
@@ -75,15 +118,27 @@ watch(selectedStatement, async (newVal) => {
 })
 
 onMounted(async () => {
+  const storedRaw = localStorage.getItem('voting_guide_results')
+  const stored = storedRaw ? JSON.parse(storedRaw) : null
+  if (stored && stored.votingGuideResults?.length > 0) {
+    await router.push({ name: `voting-guide-results` })
+    return
+  }
+
   try {
     loading.value = true
     data.value = Array.from(await getAllStatements())
-    const storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '{}')
+    const storedAnswers: VotingGuideAnswer[] = JSON.parse(
+      localStorage.getItem('voting_guide_answers') || '[]',
+    )
     updateAnsweredStatements(storedAnswers)
-    data.value = data.value.map((statement) => ({
-      ...statement,
-      answer: storedAnswers[statement.id] ?? null,
-    }))
+    data.value = data.value.map((statement) => {
+      const match = storedAnswers.find((a) => a.statementId === statement.id)
+      return {
+        ...statement,
+        answer: match?.answer ?? null,
+      }
+    })
 
     totalStatements.value = data.value.length
 
@@ -169,7 +224,11 @@ onMounted(async () => {
             <span>Jouw progressie</span>
             <span>{{ completedStatements }} / {{ totalStatements }} stellingen</span>
           </div>
-          <ProgressBar :totalAnswered="completedStatements" :totalStatements="totalStatements" class="mt-1"></ProgressBar>
+          <ProgressBar
+            :totalAnswered="completedStatements"
+            :totalStatements="totalStatements"
+            class="mt-1"
+          ></ProgressBar>
         </div>
         <div class="flex flex-col gap-6">
           <div class="w-full flex justify-between items-center gap-2 pb-6 border-b-2 border-white">
@@ -188,29 +247,35 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col gap-4">
           <span class="font-bold text-[28px]">Hiermee ben ik het</span>
-          <div class="flex flex-wrap items-center gap-3 text-lg lg:flex-row">
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'EENS')"
-              :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
-              class="btn opinion-btn !border-[#277D00] hover:bg-[#277D00]"
-            >
-              EENS
-            </button>
-            <span class="text-2xl">/</span>
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
-              :class="selectedStatement?.answer === 'NEUTRAAL' ? 'bg-white text-black' : ''"
-              class="btn opinion-btn hover:bg-white hover:text-black"
-            >
-              NEUTRAAL
-            </button>
-            <span class="text-2xl">/</span>
-            <button
-              @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
-              :class="selectedStatement?.answer === 'ONEENS' ? 'bg-[#FF1E00]' : ''"
-              class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
-            >
-              ONEENS
+          <div class="flex justify-between w-full">
+            <div class="flex flex-wrap items-center gap-3 text-lg lg:flex-row">
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'EENS')"
+                :class="selectedStatement?.answer === 'EENS' ? 'bg-[#277D00]' : ''"
+                class="btn opinion-btn !border-[#277D00] hover:bg-[#277D00]"
+              >
+                EENS
+              </button>
+              <span class="text-2xl">/</span>
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'NEUTRAAL')"
+                :class="selectedStatement?.answer === 'NEUTRAAL' ? 'bg-white text-black' : ''"
+                class="btn opinion-btn hover:bg-white hover:text-black"
+              >
+                NEUTRAAL
+              </button>
+              <span class="text-2xl">/</span>
+              <button
+                @click="saveAnswer(selectedStatement!.id, 'ONEENS')"
+                :class="selectedStatement?.answer === 'ONEENS' ? 'bg-[#FF1E00]' : ''"
+                class="btn opinion-btn !border-[#FF1E00] hover:bg-[#FF1E00]"
+              >
+                ONEENS
+              </button>
+            </div>
+            <button @click="getResults" :disabled="calculateLoading" v-if="completedStatements === 30" class="btn btn-primary">
+              <span v-if="!calculateLoading">Bekijk resultaat</span>
+              <span v-else class="flex items-center gap-2"><Spinner></Spinner> resultaten berekenen</span>
             </button>
           </div>
         </div>
@@ -250,7 +315,7 @@ onMounted(async () => {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0,0,0,0);
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
 }
