@@ -96,6 +96,10 @@ public class AuthService {
             throw new IllegalStateException("E-mail is al in gebruik");
         }
 
+        String trimmedUsername = username.trim();
+        if (userRepo.existsByUsername(trimmedUsername)) {
+            throw new IllegalStateException("Gebruikersnaam is al in gebruik");
+        }
 
         String passwordHash = hasher.hash(rawPassword);
 

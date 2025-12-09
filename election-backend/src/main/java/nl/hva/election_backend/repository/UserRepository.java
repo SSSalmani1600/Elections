@@ -23,4 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Checkt of een email adres al in gebruik is
     // Gebruikt bij registratie en email wijziging om duplicaten te voorkomen
     boolean existsByEmail(String email);
+
+    // Checkt of een gebruikersnaam al in gebruik is
+    // Gebruikt bij registratie om duplicaten te voorkomen
+    boolean existsByUsername(String username);
 }
