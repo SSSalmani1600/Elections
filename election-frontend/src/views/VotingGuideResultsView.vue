@@ -85,17 +85,17 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-y-scroll">
+      <div class="flex flex-col gap-4 h-[400px] w-[85%] overflow-y-scroll md:w-[60%] lg:w-1/2">
         <div
           v-for="party in restOfResults"
           :key="party.partyId"
-          class="flex w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center"
+          class="flex flex-col w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center gap-3 lg:gap-0 lg:flex-row"
         >
           <div class="w-full flex flex-col">
-            <span class="text-xl">{{ party.partyName }}</span>
-            <span>Overeenkomst met jouw antwoorden</span>
+            <span class="text-xl font-bold">{{ party.partyName }}</span>
+            <span class="text-sm truncate lg:text-md">Overeenkomst met jouw antwoorden</span>
           </div>
-          <div class="text-right w-1/3 flex flex-col gap-2.5">
+          <div class="w-full flex flex-col gap-2.5 lg:w-1/3 lg:text-right">
             <span class="font-bold text-xl">{{ Math.ceil(Number(party.percentage)) }}%</span>
             <ProgressBar
               class="!h-1.5"
