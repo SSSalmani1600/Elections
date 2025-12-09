@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { VotingGuideResult, VotingGuideResultResponse } from '@/types/api.ts'
-import { onMounted, ref } from 'vue'
+import type {VotingGuideResult, VotingGuideResultResponse} from '@/types/api.ts'
+import {onMounted, ref} from 'vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import router from '@/router'
+import {Spinner} from "@/components/ui/spinner";
 
 const results = ref<VotingGuideResultResponse>({
   votingGuideResults: [],
@@ -43,53 +44,71 @@ onMounted(async () => {
       v-if="resultsIsEmpty"
       class="bg-background p-10 rounded-[10px] absolute transform translate-[-50%] top-1/2 left-1/2"
     >
-      <span class="text-red-400 font-bold text-xl">ERROR</span>
-      <p class="text-lg">Er zijn geenbekende resultaten, u wordt terug gestuurd naar de stemwijzer</p>
+      <div class="flex items-center w-full gap-2">
+        <span class="text-red-400 font-bold text-xl flex items-center gap-2">ERROR <Spinner></Spinner></span>
+        <div class="relative w-full flex">
+          <span class="w-full h-2 rounded-lg bg-white"></span>
+          <span class="progress w-full h-2 rounded-lg bg-primary absolute transition"></span>
+        </div>
+      </div>
+      <p class="text-lg">Er zijn geen bekende resultaten, u wordt terug gestuurd naar de
+        stemwijzer</p>
     </div>
-    <div class="flex gap-10 justify-between h-[290px] w-[55%]">
-      <div
-        v-for="(party, index) in resultsTop3"
-        :key="party.partyId"
-        class="flex flex-col w-full h-full bg-background rounded-lg p-3.5 justify-between shadow-lg"
-      >
-        <div class="flex gap-2 items-center">
-          <i
-            class="pi pi-crown"
-            :class="{
+    <div v-else class="flex flex-col gap-8">
+      <div class="flex gap-10 justify-between h-[290px] w-[55%]">
+        <div
+          v-for="(party, index) in resultsTop3"
+          :key="party.partyId"
+          class="flex flex-col w-full h-full bg-background rounded-lg p-3.5 justify-between shadow-lg"
+        >
+          <div class="flex gap-2 items-center">
+            <i
+              class="pi pi-crown"
+              :class="{
               'text-yellow-400': index === 0,
               'text-gray-400': index === 1,
               'text-amber-600': index === 2,
             }"
-          ></i>
-          <span class="font-bold text-xl">{{ index + 1 }}e plaats</span>
-        </div>
-        <div class="flex flex-col gap-1 text-xl font-bold">
-          <span>{{ party.partyName }}</span>
-          <span>{{ Math.ceil(Number(party.percentage)) }}%</span>
-          <ProgressBar :percentage="Math.ceil(Number(party.percentage))"></ProgressBar>
+            ></i>
+            <span class="font-bold text-xl">{{ index + 1 }}e plaats</span>
+          </div>
+          <div class="flex flex-col gap-1 text-xl font-bold">
+            <span>{{ party.partyName }}</span>
+            <span>{{ Math.ceil(Number(party.percentage)) }}%</span>
+            <ProgressBar :percentage="Math.ceil(Number(party.percentage))"></ProgressBar>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-scroll">
-      <div
-        v-for="party in restOfResults"
-        :key="party.partyId"
-        class="flex w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center"
-      >
-        <div class="w-full flex flex-col">
-          <span class="text-xl">{{ party.partyName }}</span>
-          <span>Overeenkomst met jouw antwoorden</span>
-        </div>
-        <div class="text-right w-1/3 flex flex-col gap-2.5">
-          <span class="font-bold text-xl">{{ Math.ceil(Number(party.percentage)) }}%</span>
-          <ProgressBar
-            class="!h-1.5"
-            :percentage="Math.ceil(Number(party.percentage))"
-          ></ProgressBar>
+      <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-scroll">
+        <div
+          v-for="party in restOfResults"
+          :key="party.partyId"
+          class="flex w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center"
+        >
+          <div class="w-full flex flex-col">
+            <span class="text-xl">{{ party.partyName }}</span>
+            <span>Overeenkomst met jouw antwoorden</span>
+          </div>
+          <div class="text-right w-1/3 flex flex-col gap-2.5">
+            <span class="font-bold text-xl">{{ Math.ceil(Number(party.percentage)) }}%</span>
+            <ProgressBar
+              class="!h-1.5"
+              :percentage="Math.ceil(Number(party.percentage))"
+            ></ProgressBar>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.progress {
+  animation: shrink 3s forwards;
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+</style>
