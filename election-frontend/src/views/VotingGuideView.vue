@@ -6,6 +6,7 @@ import ProgressBar from '@/components/ProgressBar.vue'
 import { calculateResults } from '@/services/VotingGuideResultsService.ts'
 import router from '@/router'
 import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
+import {Spinner} from "@/components/ui/spinner";
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -119,9 +120,7 @@ watch(selectedStatement, async (newVal) => {
 onMounted(async () => {
   const storedRaw = localStorage.getItem('voting_guide_results')
   const stored = storedRaw ? JSON.parse(storedRaw) : null
-  console.log(router.getRoutes())
   if (stored && stored.votingGuideResults?.length > 0) {
-    console.log('data bestaat')
     await router.push({ name: `voting-guide-results` })
     return
   }
@@ -274,8 +273,9 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
-            <button @click="getResults" v-if="completedStatements === 30" class="btn btn-primary">
-              Bekijk resultaat
+            <button @click="getResults" :disabled="calculateLoading" v-if="completedStatements === 30" class="btn btn-primary">
+              <span v-if="!calculateLoading">Bekijk resultaat</span>
+              <span v-else class="flex items-center gap-2"><Spinner></Spinner> resultaten berekenen</span>
             </button>
           </div>
         </div>

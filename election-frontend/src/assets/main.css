@@ -67,15 +67,20 @@ strong {
   transition-duration: 300ms;
 }
 
-.btn-primary:hover {
+.btn:disabled {
+  opacity: 80%;
+  cursor: not-allowed;
+}
+
+.btn-primary:hover:not(:disabled) {
   background-color: #C72745;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background-color: #E5E5E5;
 }
 
-.btn:active {
+.btn:active:not(:disabled) {
   transform: scale(0.95);
 }
 
