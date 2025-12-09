@@ -54,7 +54,7 @@ onMounted(async () => {
       <p class="text-lg">Er zijn geen bekende resultaten, u wordt terug gestuurd naar de
         stemwijzer</p>
     </div>
-    <div v-else class="flex flex-col gap-8">
+    <div v-else class="flex flex-col gap-8 w-full items-center">
       <div class="flex gap-10 justify-between h-[290px] w-[55%]">
         <div
           v-for="(party, index) in resultsTop3"
@@ -79,7 +79,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-scroll">
+      <div class="flex flex-col gap-4 w-1/2 h-[400px] overflow-y-scroll">
         <div
           v-for="party in restOfResults"
           :key="party.partyId"
