@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 abstract class AbstractParserTests {
     protected TestTransformer transformer;
 
-    protected nl.hva.ict.sm3.backend.utils.xml.DutchElectionParser electionProcessor;
+    protected nl.hva.election_backend.utils.xml.DutchElectionParser electionProcessor;
 
     /**
      * This transformer add the election data on each method invocation to a list.
      */
-    protected static class TestTransformer implements nl.hva.ict.sm3.backend.utils.xml.DefinitionTransformer, nl.hva.ict.sm3.backend.utils.xml.CandidateTransformer, nl.hva.ict.sm3.backend.utils.xml.VotesTransformer {
+    protected static class TestTransformer implements nl.hva.election_backend.utils.xml.DefinitionTransformer, nl.hva.election_backend.utils.xml.CandidateTransformer, nl.hva.election_backend.utils.xml.VotesTransformer {
         protected final List<Map<String, String>> data = new LinkedList<>();
         protected int regionCalls;
         protected int partyCalls;
@@ -71,7 +71,7 @@ abstract class AbstractParserTests {
     void setUp() {
         transformer = new TestTransformer();
 
-        electionProcessor = new nl.hva.ict.sm3.backend.utils.xml.DutchElectionParser(
+        electionProcessor = new nl.hva.election_backend.utils.xml.DutchElectionParser(
                 transformer,
                 transformer,
                 transformer,
