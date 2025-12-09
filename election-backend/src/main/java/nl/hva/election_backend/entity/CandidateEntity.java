@@ -10,7 +10,6 @@ public class CandidateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Dit is het ID uit de XML: "CandidateIdentifier Id"
     @Column(name = "candidate_id")
     private String candidateId;
 
