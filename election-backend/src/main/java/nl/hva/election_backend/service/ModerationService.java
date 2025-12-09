@@ -26,52 +26,99 @@ public class ModerationService {
         this.moderationLogService = moderationLogService;
     }
 
-    /**
-     * Hoofd moderatiemethode — ALLES via Gemini AI.
-     */
     public ModerationResult moderateText(String text) {
 
-        long start = System.currentTimeMillis();
         ModerationResult result = new ModerationResult(text);
+        ModerationResponse aiResponse = null;
 
-        ModerationResponse ai = aiModerationClient.analyzeText(text);
+        try {
+            aiResponse = aiModerationClient.analyzeText(text);
+        } catch (Exception e) {
+            System.err.println("❌ AI moderatie error: " + e.getMessage());
+        }
 
+        // AI faalt → fallback
+        if (aiResponse == null) {
+            System.err.println("⚠️ Gemini faalde → FALLBACK ACTIVE");
+            return applyFallbackModeration(text, new ModerationResult(text));
+        }
 
-        if (ai.isToxic()) {
+        // AI Resultaten verwerken
+        if (aiResponse.isToxic()) {
             result.setBlocked(true);
             result.setFlagged(true);
+            result.setModerationStatus("BLOCKED");
             result.addWarning("Dit bericht bevat haatdragende of beledigende taal.");
-            moderationLogService.logToxicity(text, ai.getToxicityReason());
+            moderationLogService.logToxicity(text, aiResponse.getToxicityReason());
         }
 
-        if (ai.isMisinformation()) {
+        if (aiResponse.isMisinformation()) {
             result.setFlagged(true);
             result.setRequiresConfirmation(true);
+            result.setModerationStatus("FLAGGED");
             result.addWarning("Dit bericht bevat mogelijk misinformatie.");
-            moderationLogService.logMisinformation(text, ai.getMisinformationDetails());
+            moderationLogService.logMisinformation(text, aiResponse.getMisinformationDetails());
         }
 
-
+        // Scheldwoorden maskeren
         String filtered = text;
-
-        if (ai.getFlaggedWords() != null) {
-            for (String word : ai.getFlaggedWords()) {
+        if (aiResponse.getFlaggedWords() != null) {
+            for (String word : aiResponse.getFlaggedWords()) {
                 filtered = filtered.replaceAll("(?i)" + word, "***");
             }
         }
 
         result.setModeratedText(filtered);
 
-
-        long duration = System.currentTimeMillis() - start;
-        if (duration > 300) {
-            System.err.println("⚠️ Moderatie duurde " + duration + "ms (max 300ms overschreden)");
+        // Als niets flagged of blocked → PENDING
+        if (!result.isFlagged() && !result.isBlocked()) {
+            result.setModerationStatus("PENDING");
         }
 
         return result;
     }
 
 
+    // -------------------------------
+    // FALLBACK VOOR ALS GEMINI FAALT
+    // -------------------------------
+
+    private static final String[] BANNED_WORDS = {
+            "kanker", "kkr", "tyfus", "mongool", "homo", "neger"
+    };
+
+    private ModerationResult applyFallbackModeration(String text, ModerationResult result) {
+
+        String filtered = text;
+        boolean containsBadWord = false;
+
+        for (String word : BANNED_WORDS) {
+            if (text.toLowerCase().contains(word)) {
+                filtered = filtered.replaceAll("(?i)" + word, "***");
+                result.setBlocked(true);
+                result.setFlagged(true);
+                result.addWarning("Bevat verboden taal: " + word);
+                containsBadWord = true;
+            }
+        }
+
+        // GEEN scheldwoorden → PENDING
+        if (!containsBadWord) {
+            result.setModerationStatus("PENDING");
+            result.setModeratedText(text);
+            return result;
+        }
+
+        // WEL scheldwoorden → BLOCKED
+        result.setModerationStatus("BLOCKED");
+        result.setModeratedText(filtered);
+        return result;
+    }
+
+
+    // -------------------------------
+    // ADMIN API METHODS
+    // -------------------------------
     public List<ReactionEntity> getPendingReactions() {
         return reactionRepository.findByModerationStatus("PENDING");
     }
