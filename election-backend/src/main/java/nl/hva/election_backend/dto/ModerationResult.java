@@ -5,21 +5,19 @@ import java.util.List;
 
 public class ModerationResult {
     private String originalText;
-    private String moderatedText; // De gefilterde tekst (met ***)
-    private boolean isFlagged = false;
-    private boolean isBlocked = false; // Automatisch blokkeren (bv. bij zware toxiciteit)
-    private boolean requiresConfirmation = false; // Voor misinformatie
-    private final List<String> warnings = new ArrayList<>(); // Meldingen voor de gebruiker
+    private String moderatedText;
 
-    /**
-     * @param originalText De tekst die gemodereerd wordt.
-     */
+    private boolean flagged = false;     // Verdacht → admin check
+    private boolean blocked = false;     // Te ernstig → niet tonen
+    private boolean requiresConfirmation = false;
+
+    private String moderationStatus = "PENDING"; // <- BELANGRIJK!!
+    private final List<String> warnings = new ArrayList<>();
+
     public ModerationResult(String originalText) {
         this.originalText = originalText;
-        this.moderatedText = originalText; // Initieel is de gemodereerde tekst hetzelfde
+        this.moderatedText = originalText;
     }
-
-
 
     public String getOriginalText() {
         return originalText;
@@ -34,19 +32,19 @@ public class ModerationResult {
     }
 
     public boolean isFlagged() {
-        return isFlagged;
+        return flagged;
     }
 
     public void setFlagged(boolean flagged) {
-        isFlagged = flagged;
+        this.flagged = flagged;
     }
 
     public boolean isBlocked() {
-        return isBlocked;
+        return blocked;
     }
 
     public void setBlocked(boolean blocked) {
-        isBlocked = blocked;
+        this.blocked = blocked;
     }
 
     public boolean isRequiresConfirmation() {
@@ -63,5 +61,14 @@ public class ModerationResult {
 
     public void addWarning(String warning) {
         this.warnings.add(warning);
+    }
+
+
+    public String getModerationStatus() {
+        return moderationStatus;
+    }
+
+    public void setModerationStatus(String moderationStatus) {
+        this.moderationStatus = moderationStatus;
     }
 }
