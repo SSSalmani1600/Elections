@@ -10,28 +10,24 @@ import java.time.Instant;
 public class ReactionService {
 
     private final ReactionRepository reactionRepository;
-    private final ProfanityService profanityService;
 
-    public ReactionService(ReactionRepository reactionRepository, ProfanityService profanityService) {
+    public ReactionService(ReactionRepository reactionRepository) {
         this.reactionRepository = reactionRepository;
-        this.profanityService = profanityService;
     }
 
-    public ReactionEntity addReaction(Long discussionId, Long userId, String message) {
+
+    public ReactionEntity addReaction(Long discussionId, Long userId, String moderatedMessage) {
 
         ReactionEntity reaction = new ReactionEntity();
         reaction.setDiscussionId(discussionId.intValue());
-        reaction.setUserId((long) userId.intValue());
-        reaction.setMessage(message);
+        reaction.setUserId(userId);
         reaction.setCreatedAt(Instant.now());
 
-        // 👉 Automatische moderatie check
-        if (profanityService.containsProfanity(message)) {
-            reaction.setModerationStatus("FLAGGED");
-            reaction.setFlaggedReason("Automatisch gedetecteerd scheldwoord");
-        } else {
-            reaction.setModerationStatus("PENDING");
-        }
+
+        reaction.setMessage(moderatedMessage);
+
+
+        reaction.setModerationStatus("APPROVED");
 
         return reactionRepository.save(reaction);
     }
