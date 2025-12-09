@@ -33,11 +33,7 @@ const getResults = async () => {
   try {
     calculateLoading.value = true
     results.value = await calculateResults(payload)
-    const jwtToken = localStorage.getItem('JWT') || null
-
-    if (!jwtToken) {
-      localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
-    }
+    localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
   } catch (err: any) {
     console.error(`Error calculating the results: ${err.message}`)
   } finally {
@@ -123,15 +119,10 @@ watch(selectedStatement, async (newVal) => {
 onMounted(async () => {
   const storedRaw = localStorage.getItem('voting_guide_results')
   const stored = storedRaw ? JSON.parse(storedRaw) : null
-
+  console.log(router.getRoutes())
   if (stored && stored.votingGuideResults?.length > 0) {
-    router.addRoute('voting-guide', {
-      path: 'resultaten',
-      name: 'voting-guide-results',
-      component: VotingGuideResultsView,
-    })
-
-    await router.push('/stemwijzer/resultaten')
+    console.log('data bestaat')
+    await router.push({ name: `voting-guide-results` })
     return
   }
 

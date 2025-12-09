@@ -2,6 +2,7 @@
 import type { VotingGuideResult, VotingGuideResultResponse } from '@/types/api.ts'
 import { onMounted, ref } from 'vue'
 import ProgressBar from '@/components/ProgressBar.vue'
+import router from '@/router'
 
 const results = ref<VotingGuideResultResponse>({
   votingGuideResults: [],
@@ -9,11 +10,19 @@ const results = ref<VotingGuideResultResponse>({
 const resultsTop3 = ref<VotingGuideResult[]>()
 const restOfResults = ref<VotingGuideResult[]>()
 const isLoadingResults = ref<boolean>(false)
+const resultsIsEmpty = ref<boolean>(false)
 
 onMounted(async () => {
   isLoadingResults.value = true
 
-  results.value = JSON.parse(localStorage.getItem('voting_guide_results') || '[]')
+  const resultsRaw = localStorage.getItem('voting_guide_results')
+  results.value = resultsRaw ? JSON.parse(resultsRaw) : null
+
+  if (!resultsRaw && results.value == null) {
+    resultsIsEmpty.value = true
+    setTimeout(() => router.replace({ name: "voting-guide" }), 3000)
+    return
+  }
 
   resultsTop3.value = results.value.votingGuideResults.slice(0, 3)
   restOfResults.value = results.value.votingGuideResults.slice(3)
@@ -30,6 +39,13 @@ onMounted(async () => {
       <p>Op basis van jouw antwoorden passen deze partijen het beste bij jou</p>
     </div>
 
+    <div
+      v-if="resultsIsEmpty"
+      class="bg-background p-10 rounded-[10px] absolute transform translate-[-50%] top-1/2 left-1/2"
+    >
+      <span class="text-red-400 font-bold text-xl">ERROR</span>
+      <p class="text-lg">Er zijn geenbekende resultaten, u wordt terug gestuurd naar de stemwijzer</p>
+    </div>
     <div class="flex gap-10 justify-between h-[290px] w-[55%]">
       <div
         v-for="(party, index) in resultsTop3"
