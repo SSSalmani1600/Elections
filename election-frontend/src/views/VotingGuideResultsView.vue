@@ -28,8 +28,6 @@ onMounted(async () => {
   resultsTop3.value = results.value.votingGuideResults.slice(0, 3)
   restOfResults.value = results.value.votingGuideResults.slice(3)
   isLoadingResults.value = false
-
-  console.log(results.value)
 })
 </script>
 
