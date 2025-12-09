@@ -42,6 +42,10 @@ strong {
   transition: ease-in-out 300ms;
 }
 
+.router-link-custom-active {
+  color: #EF3054;
+}
+
 .link {
   position: relative;
 }

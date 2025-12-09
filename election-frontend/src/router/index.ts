@@ -71,13 +71,11 @@ const router = createRouter({
       path: '/stemwijzer',
       name: 'voting-guide',
       component: VotingGuideView,
-      children: [
-        {
-          path: 'resultaten',
-          name: 'voting-guide-results',
-          component: VotingGuideResultsView,
-        },
-      ],
+    },
+    {
+      path: '/stemwijzer/resultaten',
+      name: 'voting-guide-results',
+      component: VotingGuideResultsView,
     },
     {
       path: '/account',
@@ -111,11 +109,6 @@ const router = createRouter({
       path: '/admin/positions',
       name: 'admin-positions',
       component: () => import('@/views/admin/AdminPositionsView.vue'),
-    },
-    {
-      path: '/stemwijzer',
-      name: 'voting-guide',
-      component: VotingGuideView,
     },
     {
       path: '/account',
