@@ -13,7 +13,7 @@ public class VotingGuideAnswerEntity {
     @Column(name = "user_id")
     private Long userId;
     @Column(name = "statement_id")
-    private Long statementId;
+    private Number statementId;
     private String answer;
     @Column(name = "created_at")
     private Date createdAt;
@@ -28,7 +28,7 @@ public class VotingGuideAnswerEntity {
         return userId;
     }
 
-    public Long getStatementId() {
+    public Number getStatementId() {
         return statementId;
     }
 
@@ -48,15 +48,11 @@ public class VotingGuideAnswerEntity {
         this.userId = userId;
     }
 
-    public void setStatementId(Long statementId) {
+    public void setStatementId(Number statementId) {
         this.statementId = statementId;
     }
 
     public void setAnswer(String answer) {
         this.answer = answer;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
     }
 }
