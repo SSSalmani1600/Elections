@@ -20,6 +20,12 @@ public class VotingGuideAnswerEntity {
 
     public VotingGuideAnswerEntity() {}
 
+    public VotingGuideAnswerEntity(Long userId, Number statementId, String answer) {
+        this.userId = userId;
+        this.statementId = statementId;
+        this.answer = answer;
+    }
+
     public Long getId() {
         return id;
     }
