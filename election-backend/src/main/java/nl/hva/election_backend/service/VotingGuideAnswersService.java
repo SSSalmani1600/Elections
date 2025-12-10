@@ -20,20 +20,20 @@ public class VotingGuideAnswersService {
         this.userRepository = userRepository;
     }
 
-    public void saveAnswers(VotingGuideRequestDto votingGuideAnswers, User user) {
+    public void saveAnswers(VotingGuideRequestDto votingGuideAnswers, Long userId) {
 //        Check if user is valid
-        boolean userExists = userRepository.existsById(user.getId());
+        boolean userExists = userRepository.existsById(userId);
         if (!userExists) throw new RuntimeException("User not found");
 
 //        Check if user has answers in database
-        boolean userHasAnswers = votingGuideAnswerRepository.existsByUserId(user.getId());
-        if (userHasAnswers) votingGuideAnswerRepository.deleteAllByUserId(user.getId());
+        boolean userHasAnswers = votingGuideAnswerRepository.existsByUserId(userId);
+        if (userHasAnswers) votingGuideAnswerRepository.deleteAllByUserId(userId);
 
 //        Convert set of answer dto's to list of answer entities
         List<VotingGuideAnswerEntity> listOfAnswerEntities = votingGuideAnswers.getVotingGuideAnswers()
                 .stream()
                 .map(answerDto -> new VotingGuideAnswerEntity(
-                        user.getId(),
+                        userId,
                         answerDto.getStatementId(),
                         answerDto.getAnswer()))
                 .toList();
