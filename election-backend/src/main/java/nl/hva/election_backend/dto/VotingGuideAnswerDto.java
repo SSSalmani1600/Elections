@@ -1,15 +1,15 @@
 package nl.hva.election_backend.dto;
 
 public class VotingGuideAnswerDto {
-    private Number statementId;
+    private Long statementId;
     private String answer;
 
-    public VotingGuideAnswerDto(Number statementId, String answer) {
+    public VotingGuideAnswerDto(Long statementId, String answer) {
         this.statementId = statementId;
         this.answer = answer;
     }
 
-    public Number getStatementId() {
+    public Long getStatementId() {
         return statementId;
     }
 
@@ -17,7 +17,7 @@ public class VotingGuideAnswerDto {
         return answer;
     }
 
-    public void setStatementId(Number statementId) {
+    public void setStatementId(Long statementId) {
         this.statementId = statementId;
     }
 

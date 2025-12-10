@@ -1,49 +1,56 @@
 package nl.hva.election_backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
 @Entity
+@Table(name = "voting_guide_answers")
 public class VotingGuideAnswerEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "user_id")
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
-    @Column(name = "statement_id")
-    private Number statementId;
+
+    @Column(name = "statement_id", nullable = false)
+    private Long statementId;
+
+    @Column(nullable = false)
     private String answer;
-    @Column(name = "created_at")
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     public VotingGuideAnswerEntity() {}
 
-    public VotingGuideAnswerEntity(Long userId, Number statementId, String answer) {
+    public VotingGuideAnswerEntity(Long userId, Long statementId, String answer) {
         this.userId = userId;
         this.statementId = statementId;
         this.answer = answer;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Number getStatementId() {
-        return statementId;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public String getAnswer() {
         return answer;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Long getStatementId() {
+        return statementId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public void setId(Long id) {
@@ -54,11 +61,15 @@ public class VotingGuideAnswerEntity {
         this.userId = userId;
     }
 
-    public void setStatementId(Number statementId) {
+    public void setStatementId(Long statementId) {
         this.statementId = statementId;
     }
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }
