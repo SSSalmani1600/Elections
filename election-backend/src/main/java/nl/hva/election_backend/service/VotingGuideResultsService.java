@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VotingGuideResultsService {
@@ -30,7 +31,8 @@ public class VotingGuideResultsService {
     }
 
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
-        Set<VotingGuideResultDto> votingGuideResults = new TreeSet<>(Comparator.comparing(VotingGuideResultDto::getPercentage).reversed().thenComparing(VotingGuideResultDto::getPartyId));
+
+        Set<VotingGuideResultDto> sortedSet = new TreeSet<>(Comparator.comparing(VotingGuideResultDto::getPercentage).reversed().thenComparing(VotingGuideResultDto::getPartyId));
         double totalAnswers = votingGuideAnswers.getVotingGuideAnswers().size();
         Map<Long, Map<Long, String>> partyViewpointsMap = new HashMap<>();
 
@@ -65,14 +67,18 @@ public class VotingGuideResultsService {
 
             Optional<VotingGuidePartyEntity> party = votingGuidePartyRepository.findById(entry.getKey());
             String partyName = party.isPresent() ? party.get().getName() : "Onbekende partij";
-            votingGuideResults.add(new VotingGuideResultDto(entry.getKey(), partyName, percentage));
+            sortedSet.add(new VotingGuideResultDto(entry.getKey(), partyName, percentage));
         }
-        return new VotingGuideResponseDto(votingGuideResults);
+
+        List<VotingGuideResultDto> sortedList = new ArrayList<>(sortedSet);
+
+        return new VotingGuideResponseDto(sortedList);
     }
 
     @Transactional
     public void saveResults(VotingGuideResponseDto votingGuideResults, Long userId) {
 //        Check if user is valid
+
         boolean userExists = userRepository.existsById(userId);
         if (!userExists) throw new RuntimeException("User not found");
 
