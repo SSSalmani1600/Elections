@@ -10,4 +10,6 @@ public interface VotingGuideResultsRepository extends JpaRepository<VotingGuideR
     boolean existsByUserId(Long userId);
 
     void deleteAllByUserId(Long userId);
+
+    List<VotingGuideResultEntity> findAllByUserIdOrderByPercentageDescPartyIdAsc(Long userId);
 }
