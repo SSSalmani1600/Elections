@@ -34,16 +34,16 @@ public class ModerationService {
         try {
             aiResponse = aiModerationClient.analyzeText(text);
         } catch (Exception e) {
-            System.err.println("❌ AI moderatie error: " + e.getMessage());
+            System.err.println(" AI moderatie error: " + e.getMessage());
         }
 
-        // AI faalt → fallback
+
         if (aiResponse == null) {
-            System.err.println("⚠️ Gemini faalde → FALLBACK ACTIVE");
+            System.err.println("⚠ Gemini faalde → FALLBACK ACTIVE");
             return applyFallbackModeration(text, new ModerationResult(text));
         }
 
-        // AI Resultaten verwerken
+
         if (aiResponse.isToxic()) {
             result.setBlocked(true);
             result.setFlagged(true);
@@ -60,7 +60,7 @@ public class ModerationService {
             moderationLogService.logMisinformation(text, aiResponse.getMisinformationDetails());
         }
 
-        // Scheldwoorden maskeren
+
         String filtered = text;
         if (aiResponse.getFlaggedWords() != null) {
             for (String word : aiResponse.getFlaggedWords()) {
@@ -79,9 +79,7 @@ public class ModerationService {
     }
 
 
-    // -------------------------------
-    // FALLBACK VOOR ALS GEMINI FAALT
-    // -------------------------------
+
 
     private static final String[] BANNED_WORDS = {
             "kanker", "kkr", "tyfus", "mongool", "homo", "neger"
@@ -102,23 +100,20 @@ public class ModerationService {
             }
         }
 
-        // GEEN scheldwoorden → PENDING
         if (!containsBadWord) {
             result.setModerationStatus("PENDING");
             result.setModeratedText(text);
             return result;
         }
 
-        // WEL scheldwoorden → BLOCKED
+
         result.setModerationStatus("BLOCKED");
         result.setModeratedText(filtered);
         return result;
     }
 
 
-    // -------------------------------
-    // ADMIN API METHODS
-    // -------------------------------
+
     public List<ReactionEntity> getPendingReactions() {
         return reactionRepository.findByModerationStatus("PENDING");
     }
