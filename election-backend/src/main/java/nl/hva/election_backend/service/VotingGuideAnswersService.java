@@ -3,12 +3,14 @@ package nl.hva.election_backend.service;
 import nl.hva.election_backend.dto.VotingGuideAnswerDto;
 import nl.hva.election_backend.dto.VotingGuideRequestDto;
 import nl.hva.election_backend.entity.VotingGuideAnswerEntity;
-import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.UserRepository;
 import nl.hva.election_backend.repository.VotingGuideAnswerRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class VotingGuideAnswersService {
@@ -39,5 +41,17 @@ public class VotingGuideAnswersService {
                 .toList();
 //        Save all answer entities
         votingGuideAnswerRepository.saveAll(listOfAnswerEntities);
+    }
+
+    public Set<VotingGuideAnswerDto> getAnswers(Long userId) {
+        Set<VotingGuideAnswerEntity> entitySet = new HashSet<>(votingGuideAnswerRepository.findAllByUserId(userId));
+
+//        Transform entity set to dto set
+        return entitySet
+                .stream()
+                .map(entity -> new VotingGuideAnswerDto(
+                        entity.getStatementId(),
+                        entity.getAnswer()))
+                .collect(Collectors.toSet());
     }
 }
