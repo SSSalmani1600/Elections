@@ -111,4 +111,8 @@ public class VotingGuideResultsService {
                         entity.getPercentage()))
                 .collect(Collectors.toList()));
     }
+
+    public boolean userHasResults(Long userId) {
+        return votingGuideResultsRepository.existsByUserId(userId);
+    }
 }
