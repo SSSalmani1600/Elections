@@ -3,13 +3,12 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
-import { calculateResults } from '@/services/VotingGuideResultsService.ts'
+import { calculateResults, saveResults } from '@/services/VotingGuideResultsService.ts'
 import router from '@/router'
-import {Spinner} from "@/components/ui/spinner";
+import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/store/authStore.ts'
 import { saveAnswers } from '@/services/VotingGuideAnswersService.ts'
-import {useToast} from "primevue";
-
+import { useToast } from 'primevue'
 
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
@@ -22,8 +21,7 @@ const focusTarget = ref<HTMLDivElement | null>(null)
 const results = ref<VotingGuideResultResponse | null>(null)
 const calculateLoading = ref<boolean>(false)
 const { user } = useAuth()
-const toast = useToast();
-
+const toast = useToast()
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
@@ -39,14 +37,16 @@ const getResults = async () => {
 
   try {
     calculateLoading.value = true
-    if (user.value) {
-      await saveAnswers(payload)
-      localStorage.removeItem('voting_guide_answers')
-    }
 
     results.value = await calculateResults(payload)
 
-    localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
+    if (user.value) {
+      await saveAnswers(payload)
+
+      await saveResults(results.value)
+    } else {
+      localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
+    }
 
     await router.replace({ path: '/stemwijzer/resultaten' })
   } catch (err: any) {
@@ -55,7 +55,7 @@ const getResults = async () => {
       summary: 'Fout bij opslaan',
       detail: 'Er ging iets mis met het opslaan van de antwoorden',
       life: 2000,
-    });
+    })
     console.error(err.message)
   } finally {
     calculateLoading.value = false
@@ -293,9 +293,16 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
-            <button @click="getResults" :disabled="calculateLoading" v-if="completedStatements === 30" class="btn btn-primary">
+            <button
+              @click="getResults"
+              :disabled="calculateLoading"
+              v-if="completedStatements === 30"
+              class="btn btn-primary"
+            >
               <span v-if="!calculateLoading">Bekijk resultaat</span>
-              <span v-else class="flex items-center gap-2"><Spinner></Spinner> resultaten berekenen</span>
+              <span v-else class="flex items-center gap-2"
+                ><Spinner></Spinner> resultaten berekenen</span
+              >
             </button>
           </div>
         </div>
