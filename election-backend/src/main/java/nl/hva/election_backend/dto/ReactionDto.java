@@ -6,6 +6,7 @@ import java.time.Instant;
 // Bevat alleen de data die nodig is voor weergave
 public class ReactionDto {
     private Long id;                    // Unieke ID van de reactie
+    private Long userId;                // ID van de auteur (voor eigenaar check)
     private String username;            // Username van de auteur
     private String message;             // Inhoud van de reactie
     private Instant createdAt;          // Wanneer de reactie is aangemaakt
@@ -13,11 +14,20 @@ public class ReactionDto {
     public ReactionDto() {}
 
     // Constructor: maakt een nieuwe ReactionDto aan
-    public ReactionDto(Long id, String username, String message, Instant createdAt) {
+    public ReactionDto(Long id, Long userId, String username, String message, Instant createdAt) {
         this.id = id;
+        this.userId = userId;
         this.username = username;
         this.message = message;
         this.createdAt = createdAt;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getId() {

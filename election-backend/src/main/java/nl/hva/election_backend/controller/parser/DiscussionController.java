@@ -97,4 +97,34 @@ public class DiscussionController {
                     .body("Error adding reaction: " + e.getMessage());
         }
     }
+
+    // DELETE /api/discussions/reactions/{reactionId} - Verwijdert een reactie (alleen eigen reacties)
+    @DeleteMapping("/reactions/{reactionId}")
+    public ResponseEntity<?> deleteReaction(
+            @PathVariable Long reactionId,
+            @RequestBody Map<String, Object> body) {
+        try {
+            // Haal de userId uit de request body
+            Object userIdObj = body.get("userId");
+            if (userIdObj == null) {
+                return ResponseEntity.badRequest().body("userId is verplicht");
+            }
+
+            Long userId = Long.parseLong(userIdObj.toString());
+
+            // Verwijder de reactie (service checkt of gebruiker eigenaar is)
+            service.deleteReaction(reactionId, userId);
+
+            return ResponseEntity.ok().body(Map.of("message", "Reactie verwijderd"));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Error deleting reaction: " + e.getMessage());
+        }
+    }
 }

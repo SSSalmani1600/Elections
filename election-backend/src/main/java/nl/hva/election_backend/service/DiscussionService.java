@@ -89,6 +89,7 @@ public class DiscussionService {
                 reactions.stream()
                         .map(r -> new ReactionDto(
                                 r.getId(),
+                                r.getUserId(),
                                 userRepository.findById(r.getUserId())
                                         .map(u -> u.getUsername())
                                         .orElse("Onbekend"),
@@ -153,12 +154,35 @@ public class DiscussionService {
         // Geef de opgeslagen reactie terug als DTO
         return new ReactionDto(
                 saved.getId(),
+                saved.getUserId(),
                 userRepository.findById(saved.getUserId())
                         .map(u -> u.getUsername())
                         .orElse("Onbekend"),
                 saved.getMessage(),
                 saved.getCreatedAt()
         );
+    }
+
+    // Verwijdert een reactie als de gebruiker de eigenaar is
+    public void deleteReaction(Long reactionId, Long userId) {
+        // Zoek de reactie in de database
+        ReactionEntity reaction = reactionRepository.findById(reactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de reactie
+        if (!reaction.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen reacties verwijderen");
+        }
+
+        // Haal de discussie op om de teller te updaten
+        DiscussionEntity discussion = reaction.getDiscussion();
+
+        // Verwijder de reactie
+        reactionRepository.delete(reaction);
+
+        // Update de reactie teller van de discussie
+        discussion.setReactionsCount(Math.max(0, discussion.getReactionsCount() - 1));
+        discussionRepository.save(discussion);
     }
 
 }
