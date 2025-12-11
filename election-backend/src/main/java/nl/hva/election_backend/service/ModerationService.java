@@ -70,7 +70,7 @@ public class ModerationService {
 
         result.setModeratedText(filtered);
 
-        // Als niets flagged of blocked → PENDING
+
         if (!result.isFlagged() && !result.isBlocked()) {
             result.setModerationStatus("PENDING");
         }
