@@ -64,6 +64,69 @@ const submitting = ref(false)
 const errorReaction = ref('')
 const deletingId = ref<number | null>(null)
 
+// Edit state
+const editingId = ref<number | null>(null)
+const editMessage = ref('')
+const savingEdit = ref(false)
+const editError = ref('')
+
+function startEdit(reaction: Reaction) {
+  editingId.value = reaction.id
+  editMessage.value = reaction.message
+  editError.value = ''
+}
+
+function cancelEdit() {
+  editingId.value = null
+  editMessage.value = ''
+  editError.value = ''
+}
+
+async function saveEdit(reactionId: number) {
+  if (!user.value) return
+  if (!editMessage.value.trim()) {
+    editError.value = 'Reactie mag niet leeg zijn.'
+    return
+  }
+
+  savingEdit.value = true
+  editError.value = ''
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.value.id,
+        message: editMessage.value,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij bewerken reactie')
+    }
+
+    const updated = await res.json()
+
+    // Update de reactie in de lijst
+    if (discussion.value) {
+      const index = discussion.value.reactions.findIndex(r => r.id === reactionId)
+      if (index !== -1) {
+        discussion.value.reactions[index] = updated
+      }
+    }
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    cancelEdit()
+  } catch (e) {
+    console.error(e)
+    editError.value = 'Er ging iets mis bij het bewerken van de reactie.'
+  } finally {
+    savingEdit.value = false
+  }
+}
+
 async function deleteReaction(reactionId: number) {
   if (!user.value) return
   
@@ -225,32 +288,79 @@ async function postReaction() {
                    scrollbar-thin scrollbar-thumb-[#ef3054]/60 scrollbar-track-transparent">
             <div v-for="r in discussion.reactions" :key="r.id" class="bg-[#0B132B]/80 border border-gray-700 rounded-xl p-5
                      text-white transition hover:border-[#ef3054] relative group">
-              <div class="flex justify-between items-start">
+              <!-- Edit mode -->
+              <div v-if="editingId === r.id" class="space-y-3">
+                <p class="text-sm text-gray-400 mb-1">
+                  {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
+                </p>
+                <textarea
+                  v-model="editMessage"
+                  class="w-full p-3 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                         resize-none min-h-[80px] focus:outline-none focus:border-[#ef3054]"
+                  placeholder="Bewerk je reactie..."
+                ></textarea>
+                <p v-if="editError" class="text-red-400 text-sm">{{ editError }}</p>
+                <div class="flex gap-2">
+                  <button
+                    @click="saveEdit(r.id)"
+                    :disabled="savingEdit"
+                    class="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
+                           text-white hover:scale-[1.02] transition-all text-sm
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {{ savingEdit ? 'Opslaan...' : 'Opslaan' }}
+                  </button>
+                  <button
+                    @click="cancelEdit"
+                    :disabled="savingEdit"
+                    class="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white 
+                           hover:bg-gray-600 transition-all text-sm
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+
+              <!-- Normal view -->
+              <div v-else class="flex justify-between items-start">
                 <div class="flex-1">
                   <p class="text-sm text-gray-400 mb-1">
                     {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
                   </p>
                   <p class="text-base leading-relaxed">{{ r.message }}</p>
                 </div>
-                <!-- Verwijderknop (alleen zichtbaar voor eigen reacties) -->
-                <button
-                  v-if="user && user.id === r.userId"
-                  @click="deleteReaction(r.id)"
-                  :disabled="deletingId === r.id"
-                  class="ml-3 p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 
-                         transition-all opacity-0 group-hover:opacity-100 focus:opacity-100
-                         disabled:opacity-50 disabled:cursor-not-allowed"
-                  :title="deletingId === r.id ? 'Verwijderen...' : 'Reactie verwijderen'"
-                >
-                  <svg v-if="deletingId !== r.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                </button>
+                <!-- Bewerk en verwijder knoppen (alleen zichtbaar voor eigen reacties) -->
+                <div v-if="user && user.id === r.userId" class="flex gap-1 ml-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all">
+                  <!-- Bewerk knop -->
+                  <button
+                    @click="startEdit(r)"
+                    class="p-2 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all"
+                    title="Reactie bewerken"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <!-- Verwijder knop -->
+                  <button
+                    @click="deleteReaction(r.id)"
+                    :disabled="deletingId === r.id"
+                    class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 
+                           transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    :title="deletingId === r.id ? 'Verwijderen...' : 'Reactie verwijderen'"
+                  >
+                    <svg v-if="deletingId !== r.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
