@@ -57,6 +57,22 @@ public class VotingGuideResultsController {
         return ResponseEntity.ok(Map.of("message", "Answers successfully saved"));
     }
 
+    @GetMapping("/exists")
+    public ResponseEntity<?> userHasResults(@CookieValue(value = "jwt", required = false) String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "No authentication token is provided "));
+        }
+
+        String userIdStr = jwtService.extractUserId(accessToken);
+        if (userIdStr == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or expired authentication token"));
+        }
+
+        Long userId = Long.parseLong(userIdStr);
+        return ResponseEntity.ok(votingGuideResultsService.userHasResults(userId));
+    }
+
     @GetMapping("/get-results")
     public ResponseEntity<?> getResults(@CookieValue(value = "jwt", required = false) String accessToken) {
         if (accessToken == null || accessToken.isBlank()) {
