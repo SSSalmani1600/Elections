@@ -98,4 +98,17 @@ public class VotingGuideResultsService {
 //        Save all result entities
         votingGuideResultsRepository.saveAll(listOfResultEntities);
     }
+
+    public VotingGuideResponseDto getResults(Long userId) {
+        List<VotingGuideResultEntity> entitySet = new ArrayList<>(votingGuideResultsRepository.findAllByUserIdOrderByPercentageDescPartyIdAsc(userId));
+
+//        Convert entity set to dto set
+        return new VotingGuideResponseDto(entitySet
+                .stream()
+                .map(entity -> new VotingGuideResultDto(
+                        entity.getPartyId(),
+                        entity.getPartyName(),
+                        entity.getPercentage()))
+                .collect(Collectors.toList()));
+    }
 }
