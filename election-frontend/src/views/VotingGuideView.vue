@@ -3,7 +3,11 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
-import { calculateResults, saveResults } from '@/services/VotingGuideResultsService.ts'
+import {
+  calculateResults,
+  saveResults,
+  userHasResults,
+} from '@/services/VotingGuideResultsService.ts'
 import router from '@/router'
 import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/store/authStore.ts'
@@ -137,16 +141,33 @@ watch(selectedStatement, async (newVal) => {
 })
 
 onMounted(async () => {
+  loading.value = true
+
   // Send user to result page when results exists
-  const storedRaw = localStorage.getItem('voting_guide_results')
-  const stored = storedRaw ? JSON.parse(storedRaw) : null
-  if (stored && stored.votingGuideResults?.length > 0) {
-    await router.push({ name: `voting-guide-results` })
-    return
+  try {
+    if (user.value) {
+      const hasResults = await userHasResults()
+      const hasLocalAnswers = !!localStorage.getItem('voting_guide_answers')
+
+      if (hasResults && !hasLocalAnswers) {
+        await router.push({ name: 'voting-guide-results' })
+        return
+      }
+    }
+
+    // If user does not exist, check localStorage
+    const storedRaw = localStorage.getItem('voting_guide_results')
+    const stored = storedRaw ? JSON.parse(storedRaw) : null
+
+    if (stored && stored.votingGuideResults?.length > 0) {
+      await router.push({ name: `voting-guide-results` })
+      return
+    }
+  } catch (err: any) {
+    console.error(err.message)
   }
 
   try {
-    loading.value = true
     data.value = Array.from(await getAllStatements())
     const storedAnswers: VotingGuideAnswer[] = JSON.parse(
       localStorage.getItem('voting_guide_answers') || '[]',
