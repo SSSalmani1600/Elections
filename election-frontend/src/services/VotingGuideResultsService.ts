@@ -35,3 +35,23 @@ export async function saveResults(request: VotingGuideResultResponse) {
     throw new Error(`Saving answers error: ${err}`)
   }
 }
+
+export async function getResults(): Promise<VotingGuideResultResponse> {
+  try {
+    const res = await fetch(`http://localhost:8080/api/voting-guide/results/get-results`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    })
+
+    if (!res.ok) {
+      throw new Error(`Fetching results failed ${res.status}`);
+    }
+
+    return await res.json()
+  } catch (err: any) {
+    throw new Error(`Fetching results error: ${err}`)
+  }
+}
