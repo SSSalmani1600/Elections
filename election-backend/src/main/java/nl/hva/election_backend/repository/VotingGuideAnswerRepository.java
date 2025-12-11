@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface VotingGuideAnswerRepository extends JpaRepository<VotingGuideAnswerEntity, Long> {
-    boolean existsByUserId(Long id);
+    boolean existsByUserId(Long userId);
 
-    void deleteAllByUserId(Long id);
+    void deleteAllByUserId(Long userId);
 
     List<VotingGuideAnswerEntity> findAllByUserId(Long userId);
 }
