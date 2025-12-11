@@ -20,7 +20,7 @@ onMounted(async () => {
   isLoadingResults.value = true
 
   try {
-    if (user) {
+    if (user.value) {
       results.value = await getResults()
       if (results.value.votingGuideResults !== undefined) localStorage.removeItem("voting_guide_answers")
     } else {
@@ -35,7 +35,7 @@ onMounted(async () => {
       return
     }
 
-    resultsTop3.value = results.value.votingGuideResults.slice(0, 3)
+    resultsTop3.value = results.value?.votingGuideResults.slice(0, 3)
     restOfResults.value = results.value.votingGuideResults.slice(3)
     isLoadingResults.value = false
   } catch(err: any) {
