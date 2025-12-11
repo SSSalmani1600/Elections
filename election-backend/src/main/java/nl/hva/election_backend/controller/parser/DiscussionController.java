@@ -98,6 +98,38 @@ public class DiscussionController {
         }
     }
 
+    // PUT /api/discussions/reactions/{reactionId} - Bewerkt een reactie (alleen eigen reacties)
+    @PutMapping("/reactions/{reactionId}")
+    public ResponseEntity<?> updateReaction(
+            @PathVariable Long reactionId,
+            @RequestBody Map<String, Object> body) {
+        try {
+            // Haal de data uit de request body
+            Object userIdObj = body.get("userId");
+            String message = (String) body.get("message");
+
+            if (userIdObj == null || message == null) {
+                return ResponseEntity.badRequest().body("userId en message zijn verplicht");
+            }
+
+            Long userId = Long.parseLong(userIdObj.toString());
+
+            // Bewerk de reactie (service checkt of gebruiker eigenaar is)
+            ReactionDto updated = service.updateReaction(reactionId, userId, message);
+
+            return ResponseEntity.ok(updated);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Error updating reaction: " + e.getMessage());
+        }
+    }
+
     // DELETE /api/discussions/reactions/{reactionId} - Verwijdert een reactie (alleen eigen reacties)
     @DeleteMapping("/reactions/{reactionId}")
     public ResponseEntity<?> deleteReaction(
