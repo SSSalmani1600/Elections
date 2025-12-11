@@ -7,11 +7,11 @@ public class ModerationResult {
     private String originalText;
     private String moderatedText;
 
-    private boolean flagged = false;     // Verdacht → admin check
-    private boolean blocked = false;     // Te ernstig → niet tonen
+    private boolean flagged = false;
+    private boolean blocked = false;
     private boolean requiresConfirmation = false;
 
-    private String moderationStatus = "PENDING"; // <- BELANGRIJK!!
+    private String moderationStatus = "PENDING";
     private final List<String> warnings = new ArrayList<>();
 
     public ModerationResult(String originalText) {
