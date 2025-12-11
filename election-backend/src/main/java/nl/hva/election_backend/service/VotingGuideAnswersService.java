@@ -1,5 +1,6 @@
 package nl.hva.election_backend.service;
 
+import jakarta.transaction.Transactional;
 import nl.hva.election_backend.dto.VotingGuideAnswerDto;
 import nl.hva.election_backend.dto.VotingGuideRequestDto;
 import nl.hva.election_backend.entity.VotingGuideAnswerEntity;
@@ -22,6 +23,7 @@ public class VotingGuideAnswersService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void saveAnswers(VotingGuideRequestDto votingGuideAnswers, Long userId) {
 //        Check if user is valid
         boolean userExists = userRepository.existsById(userId);
@@ -46,7 +48,7 @@ public class VotingGuideAnswersService {
     public Set<VotingGuideAnswerDto> getAnswers(Long userId) {
         Set<VotingGuideAnswerEntity> entitySet = new HashSet<>(votingGuideAnswerRepository.findAllByUserId(userId));
 
-//        Transform entity set to dto set
+//        Convert entity set to dto set
         return entitySet
                 .stream()
                 .map(entity -> new VotingGuideAnswerDto(

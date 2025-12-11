@@ -2,7 +2,6 @@ package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.VotingGuideRequestDto;
 import nl.hva.election_backend.dto.VotingGuideResponseDto;
-import nl.hva.election_backend.dto.VotingGuideResultDto;
 import nl.hva.election_backend.entity.PartyViewpointEntity;
 import nl.hva.election_backend.service.PartyViewpointService;
 import nl.hva.election_backend.service.VotingGuideResultsService;
