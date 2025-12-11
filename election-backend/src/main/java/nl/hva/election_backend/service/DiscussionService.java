@@ -163,6 +163,45 @@ public class DiscussionService {
         );
     }
 
+    // Bewerkt een reactie als de gebruiker de eigenaar is
+    public ReactionDto updateReaction(Long reactionId, Long userId, String newMessage) {
+        // Zoek de reactie in de database
+        ReactionEntity reaction = reactionRepository.findById(reactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de reactie
+        if (!reaction.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen reacties bewerken");
+        }
+
+        // Moderatiefilter: check of er scheldwoorden in zitten
+        List<String> bannedWords = List.of(
+                "kanker", "kut", "tering", "hoer", "fuck", "sukkel", "idioot", "mongool"
+        );
+
+        String lower = newMessage.toLowerCase();
+        for (String word : bannedWords) {
+            if (lower.contains(word)) {
+                throw new IllegalArgumentException("Reactie afgekeurd vanwege ongepast taalgebruik.");
+            }
+        }
+
+        // Update de reactie
+        reaction.setMessage(newMessage);
+        ReactionEntity saved = reactionRepository.save(reaction);
+
+        // Geef de bijgewerkte reactie terug als DTO
+        return new ReactionDto(
+                saved.getId(),
+                saved.getUserId(),
+                userRepository.findById(saved.getUserId())
+                        .map(u -> u.getUsername())
+                        .orElse("Onbekend"),
+                saved.getMessage(),
+                saved.getCreatedAt()
+        );
+    }
+
     // Verwijdert een reactie als de gebruiker de eigenaar is
     public void deleteReaction(Long reactionId, Long userId) {
         // Zoek de reactie in de database
