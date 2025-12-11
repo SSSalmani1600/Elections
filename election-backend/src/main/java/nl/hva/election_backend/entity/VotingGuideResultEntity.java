@@ -26,9 +26,9 @@ public class VotingGuideResultEntity {
     private String partyName;
 
     @Column(nullable = false)
-    private Number percentage;
+    private Long percentage;
 
-    public VotingGuideResultEntity(Long userId, Long partyId, String partyName, Number percentage) {
+    public VotingGuideResultEntity(Long userId, Long partyId, String partyName, Long percentage) {
         this.userId = userId;
         this.partyId = partyId;
         this.partyName = partyName;
@@ -59,7 +59,7 @@ public class VotingGuideResultEntity {
         return partyName;
     }
 
-    public Number getPercentage() {
+    public Long getPercentage() {
         return percentage;
     }
 
@@ -83,7 +83,7 @@ public class VotingGuideResultEntity {
         this.partyName = partyName;
     }
 
-    public void setPercentage(Number percentage) {
+    public void setPercentage(Long percentage) {
         this.percentage = percentage;
     }
 }

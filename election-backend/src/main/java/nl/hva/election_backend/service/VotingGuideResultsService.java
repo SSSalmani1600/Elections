@@ -87,7 +87,7 @@ public class VotingGuideResultsService {
                         userId,
                         resultDto.getPartyId(),
                         resultDto.getPartyName(),
-                        resultDto.getPercentage()))
+                        (long) resultDto.getPercentage()))
                 .toList();
 //        Save all result entities
         votingGuideResultsRepository.saveAll(listOfResultEntities);
