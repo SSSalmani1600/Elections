@@ -16,8 +16,8 @@ public class GoogleGenAiClient implements AiModerationClient {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
+    @Value("${gemini.api.url}")
+    private String geminiUrl;
 
     private final OkHttpClient http = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -57,7 +57,7 @@ Analyze this message: "%s"
         """.formatted(prompt.replace("\"", "'"));
 
         Request request = new Request.Builder()
-                .url(GEMINI_URL + "?key=" + apiKey)
+                .url(geminiUrl + "?key=" + apiKey)
                 .addHeader("Content-Type", "application/json; charset=utf-8")
                 .post(RequestBody.create(requestJson, MediaType.get("application/json; charset=utf-8")))
                 .build();
@@ -69,7 +69,7 @@ Analyze this message: "%s"
             if (!response.isSuccessful()) {
                 System.err.println("❌ Gemini error: " + response.code());
                 System.err.println("❌ Gemini body: " + body);
-                return null;   // → zorg dat je fallback pakt
+                return null;
             }
 
             JsonNode root = mapper.readTree(body);
@@ -103,7 +103,7 @@ Analyze this message: "%s"
 
         } catch (Exception e) {
             System.err.println("⚠ AI Moderation parse error: " + e.getMessage());
-            return null; // altijd fallback
+            return null;
         }
     }
 }
