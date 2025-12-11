@@ -15,3 +15,23 @@ export async function calculateResults(request: VotingGuideResultRequest): Promi
 
   return await res.json()
 }
+
+export async function saveResults(request: VotingGuideResultResponse) {
+  try {
+    const res = await fetch(`http://localhost:8080/api/voting-guide/results/save-results`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(request)
+    })
+
+    if (!res.ok) {
+      throw new Error(`Saving answers failed (status ${res.status})`);
+    }
+
+  } catch (err: any) {
+    throw new Error(`Saving answers error: ${err}`)
+  }
+}
