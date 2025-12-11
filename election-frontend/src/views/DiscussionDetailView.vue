@@ -331,11 +331,12 @@ async function postReaction() {
                   <p class="text-base leading-relaxed">{{ r.message }}</p>
                 </div>
                 <!-- Bewerk en verwijder knoppen (alleen zichtbaar voor eigen reacties) -->
-                <div v-if="user && user.id === r.userId" class="flex gap-1 ml-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all">
+                <div v-if="user && user.id === r.userId" class="flex gap-2 ml-3">
                   <!-- Bewerk knop -->
                   <button
                     @click="startEdit(r)"
-                    class="p-2 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all"
+                    class="p-2 rounded-lg text-[#ef3054] border border-[#ef3054]/50 
+                           hover:bg-[#ef3054]/10 hover:border-[#ef3054] transition-all"
                     title="Reactie bewerken"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,8 +348,9 @@ async function postReaction() {
                   <button
                     @click="deleteReaction(r.id)"
                     :disabled="deletingId === r.id"
-                    class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 
-                           transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="p-2 rounded-lg text-[#ef3054] border border-[#ef3054]/50 
+                           hover:bg-[#ef3054]/10 hover:border-[#ef3054] transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed"
                     :title="deletingId === r.id ? 'Verwijderen...' : 'Reactie verwijderen'"
                   >
                     <svg v-if="deletingId !== r.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
