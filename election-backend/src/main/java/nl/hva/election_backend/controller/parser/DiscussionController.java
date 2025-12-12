@@ -52,6 +52,53 @@ public class DiscussionController {
         return discussionService.getDetailById(id);
     }
 
+    // PUT /api/discussions/{id} - Bewerkt een discussie (alleen eigen discussies)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDiscussion(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        try {
+            // Haal de data uit de request body
+            Object userIdObj = body.get("userId");
+            String title = (String) body.get("title");
+            String content = (String) body.get("body");
+
+            if (userIdObj == null || title == null || content == null) {
+                return ResponseEntity.badRequest().body("userId, title en body zijn verplicht");
+            }
+
+            Long userId = Long.parseLong(userIdObj.toString());
+
+            // AI moderation for title + body
+            ModerationResult modTitle = moderationService.moderateText(title);
+            ModerationResult modBody = moderationService.moderateText(content);
+
+            // Block heavy toxic content
+            if (modTitle.isBlocked() || modBody.isBlocked()) {
+                return ResponseEntity.status(403).body("Bericht bevat verboden inhoud.");
+            }
+
+            // Bewerk de discussie (service checkt of gebruiker eigenaar is)
+            DiscussionDetailDto updated = discussionService.updateDiscussion(
+                    id,
+                    userId,
+                    modTitle.getModeratedText(),
+                    modBody.getModeratedText()
+            );
+
+            return ResponseEntity.ok(updated);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Error updating discussion: " + e.getMessage());
+        }
+    }
+
     // POST /api/discussions - Maakt een nieuwe discussie aan
     @PostMapping
     public ResponseEntity<?> createDiscussion(@RequestBody Map<String, Object> body) {
