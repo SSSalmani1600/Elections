@@ -54,9 +54,14 @@ public class PartyService {
         dto.name = newest.getName();
         dto.year = newest.getYear();
         dto.candidates = candidates.stream()
-                .map(this::mapCandidate)
+                .collect(java.util.stream.Collectors.toMap(
+                        CandidateEntity::getCandidateId,
+                        this::mapCandidate,
+                        (existing, duplicate) -> existing
+                ))
+                .values()
+                .stream()
                 .toList();
-
         return dto;
     }
 
