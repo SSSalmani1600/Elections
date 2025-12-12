@@ -8,5 +8,10 @@ import java.util.List;
 
 @Repository
 public interface CandidateRepository extends JpaRepository<CandidateEntity, String> {
-    List<CandidateEntity> findByParty_PartyIdOrderByCandidateIdAsc(String partyId);
+
+    List<CandidateEntity> findByParty_PartyIdAndYearOrderByCandidateIdAsc(
+            String partyId,
+            int year
+    );
+
 }
