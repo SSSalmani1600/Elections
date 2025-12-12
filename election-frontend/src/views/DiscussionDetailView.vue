@@ -198,7 +198,7 @@ async function postReaction() {
     newReaction.value = ''
   } catch (e) {
     console.log(e);
-    errorReaction.value = 'Er ging iets mis bij het plaatsen van je reactie.'
+    errorReaction.value = 'Uw bericht kan niet worden geplaatst omdat het ongepast of beledigend taalgebruik bevat. Pas uw bericht aan en probeer opnieuw.'
   } finally {
     submitting.value = false
   }

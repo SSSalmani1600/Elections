@@ -1,12 +1,15 @@
 package nl.hva.election_backend.controller.parser;
 
+import nl.hva.election_backend.dto.ReactionDto;
+import nl.hva.election_backend.dto.DiscussionDetailDto;
+import nl.hva.election_backend.dto.DiscussionListItemDto;
+import nl.hva.election_backend.dto.ModerationResult;
+import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.service.DiscussionService;
+import nl.hva.election_backend.service.ModerationService;
+import nl.hva.election_backend.service.ReactionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import nl.hva.election_backend.service.DiscussionService;
-import nl.hva.election_backend.dto.DiscussionListItemDto;
-import nl.hva.election_backend.dto.DiscussionDetailDto;
-import nl.hva.election_backend.dto.ReactionDto;
 
 import java.util.List;
 import java.util.Map;
@@ -18,18 +21,24 @@ import java.util.Map;
 @CrossOrigin
 public class DiscussionController {
 
-    private final DiscussionService service;
+    private final DiscussionService discussionService;
+    private final ReactionService reactionService;
+    private final ModerationService moderationService;
 
-    // Constructor injection: Spring geeft automatisch de service door
-    public DiscussionController(DiscussionService service) {
-        this.service = service;
+    // Constructor injection: Spring geeft automatisch de services door
+    public DiscussionController(DiscussionService discussionService,
+                                ReactionService reactionService,
+                                ModerationService moderationService) {
+        this.discussionService = discussionService;
+        this.reactionService = reactionService;
+        this.moderationService = moderationService;
     }
 
     // GET /api/discussions - Haalt alle discussies op voor de overzichtspagina
     @GetMapping
     public ResponseEntity<?> list() {
         try {
-            List<DiscussionListItemDto> discussions = service.list();
+            List<DiscussionListItemDto> discussions = discussionService.list();
             return ResponseEntity.ok(discussions);
         } catch (Exception e) {
             return ResponseEntity.status(500)
@@ -40,7 +49,7 @@ public class DiscussionController {
     // GET /api/discussions/{id} - Haalt 1 specifieke discussie op met alle details en reacties
     @GetMapping("/{id}")
     public DiscussionDetailDto get(@PathVariable Long id) {
-        return service.getDetailById(id);
+        return discussionService.getDetailById(id);
     }
 
     // POST /api/discussions - Maakt een nieuwe discussie aan
@@ -54,17 +63,34 @@ public class DiscussionController {
             Object userIdObj = body.get("userId");
 
             // Valideer dat verplichte velden aanwezig zijn
-            if (title == null || content == null)
+            if (title == null || content == null) {
                 return ResponseEntity.badRequest().body("Missing fields");
+            }
 
-            if (userIdObj == null)
+            if (userIdObj == null) {
                 return ResponseEntity.badRequest().body("userId required");
+            }
 
             Long userId = Long.parseLong(userIdObj.toString());
 
-            // Maak de discussie aan en geef de nieuwe discussie terug
-            Long newId = service.createDiscussion(title, content, category, userId);
-            return ResponseEntity.status(201).body(service.getDetailById(newId));
+            // AI moderation for title + body
+            ModerationResult modTitle = moderationService.moderateText(title);
+            ModerationResult modBody = moderationService.moderateText(content);
+
+            // Block heavy toxic content
+            if (modTitle.isBlocked() || modBody.isBlocked()) {
+                return ResponseEntity.status(403).body("Bericht bevat verboden inhoud.");
+            }
+
+            // Maak de discussie aan met gemodereerde tekst en geef de nieuwe discussie terug
+            Long newId = discussionService.createDiscussion(
+                    modTitle.getModeratedText(),
+                    modBody.getModeratedText(),
+                    category,
+                    userId
+            );
+
+            return ResponseEntity.status(201).body(discussionService.getDetailById(newId));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,20 +101,31 @@ public class DiscussionController {
 
     // POST /api/discussions/{id}/reactions - Voegt een reactie toe aan een discussie
     @PostMapping("/{id}/reactions")
-    public ResponseEntity<?> addReaction(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> addReaction(@PathVariable Long id,
+                                         @RequestBody Map<String, Object> body) {
         try {
             // Haal de reactie data uit de request
             String message = (String) body.get("message");
             Object userIdObj = body.get("userId");
 
             // Valideer dat verplichte velden aanwezig zijn
-            if (message == null || userIdObj == null)
+            if (message == null || userIdObj == null) {
                 return ResponseEntity.badRequest().body("Missing fields");
+            }
 
             Long userId = Long.parseLong(userIdObj.toString());
 
-            // Voeg de reactie toe (met automatische moderatie check)
-            ReactionDto saved = service.addReaction(id, userId, message);
+            // AI moderation
+            ModerationResult mod = moderationService.moderateText(message);
+
+            // Block heavy toxicity
+            if (mod.isBlocked()) {
+                return ResponseEntity.status(403).body("Reactie bevat verboden inhoud.");
+            }
+
+            // Voeg de reactie toe met gemodereerde tekst
+            ReactionEntity saved = reactionService.addReaction(id, userId, mod.getModeratedText());
+
             return ResponseEntity.status(201).body(saved);
 
         } catch (Exception e) {
@@ -114,8 +151,16 @@ public class DiscussionController {
 
             Long userId = Long.parseLong(userIdObj.toString());
 
+            // AI moderation
+            ModerationResult mod = moderationService.moderateText(message);
+
+            // Block heavy toxicity
+            if (mod.isBlocked()) {
+                return ResponseEntity.status(403).body("Reactie bevat verboden inhoud.");
+            }
+
             // Bewerk de reactie (service checkt of gebruiker eigenaar is)
-            ReactionDto updated = service.updateReaction(reactionId, userId, message);
+            ReactionEntity updated = reactionService.updateReaction(reactionId, userId, mod.getModeratedText());
 
             return ResponseEntity.ok(updated);
 
@@ -145,7 +190,7 @@ public class DiscussionController {
             Long userId = Long.parseLong(userIdObj.toString());
 
             // Verwijder de reactie (service checkt of gebruiker eigenaar is)
-            service.deleteReaction(reactionId, userId);
+            reactionService.deleteReaction(reactionId, userId);
 
             return ResponseEntity.ok().body(Map.of("message", "Reactie verwijderd"));
 

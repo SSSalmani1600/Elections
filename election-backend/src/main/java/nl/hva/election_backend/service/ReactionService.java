@@ -1,6 +1,9 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.dto.ModerationResult;
+import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,29 +13,88 @@ import java.time.Instant;
 public class ReactionService {
 
     private final ReactionRepository reactionRepository;
-    private final ProfanityService profanityService;
+    private final DiscussionRepository discussionRepository;
+    private final ModerationService moderationService;
 
-    public ReactionService(ReactionRepository reactionRepository, ProfanityService profanityService) {
+    public ReactionService(ReactionRepository reactionRepository,
+                           DiscussionRepository discussionRepository,
+                           ModerationService moderationService) {
         this.reactionRepository = reactionRepository;
-        this.profanityService = profanityService;
+        this.discussionRepository = discussionRepository;
+        this.moderationService = moderationService;
     }
 
+    /**
+     * Voeg een reactie toe met AI-moderatie:
+     *  - BLOCKED → te ernstig, wordt niet getoond
+     *  - FLAGGED → verdacht, admin moet beoordelen
+     *  - PENDING → geen problemen, admin moet nog steeds keuren
+     */
     public ReactionEntity addReaction(Long discussionId, Long userId, String message) {
 
-        ReactionEntity reaction = new ReactionEntity();
-        reaction.setDiscussionId(discussionId.intValue());
-        reaction.setUserId((long) userId.intValue());
-        reaction.setMessage(message);
-        reaction.setCreatedAt(Instant.now());
+        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
 
-        // 👉 Automatische moderatie check
-        if (profanityService.containsProfanity(message)) {
-            reaction.setModerationStatus("FLAGGED");
-            reaction.setFlaggedReason("Automatisch gedetecteerd scheldwoord");
-        } else {
-            reaction.setModerationStatus("PENDING");
+        // 📌 AI wordt ALLEEN hier aangeroepen
+        ModerationResult moderation = moderationService.moderateText(message);
+
+        ReactionEntity reaction = new ReactionEntity();
+        reaction.setDiscussion(discussion);
+        reaction.setUserId(userId);
+        reaction.setCreatedAt(Instant.now());
+        reaction.setMessage(moderation.getModeratedText());
+
+        // Status exact overnemen
+        reaction.setModerationStatus(moderation.getModerationStatus());
+
+        if (moderation.isFlagged() || moderation.isBlocked()) {
+            reaction.setFlaggedReason(String.join(", ", moderation.getWarnings()));
         }
 
         return reactionRepository.save(reaction);
     }
+
+    /**
+     * Bewerkt een reactie als de gebruiker de eigenaar is
+     */
+    public ReactionEntity updateReaction(Long reactionId, Long userId, String newMessage) {
+        // Zoek de reactie in de database
+        ReactionEntity reaction = reactionRepository.findById(reactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de reactie
+        if (!reaction.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen reacties bewerken");
+        }
+
+        // Update de reactie met de gemodereerde tekst
+        reaction.setMessage(newMessage);
+        
+        return reactionRepository.save(reaction);
+    }
+
+    /**
+     * Verwijdert een reactie als de gebruiker de eigenaar is
+     */
+    public void deleteReaction(Long reactionId, Long userId) {
+        // Zoek de reactie in de database
+        ReactionEntity reaction = reactionRepository.findById(reactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de reactie
+        if (!reaction.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen reacties verwijderen");
+        }
+
+        // Haal de discussie op om de teller te updaten
+        DiscussionEntity discussion = reaction.getDiscussion();
+
+        // Verwijder de reactie
+        reactionRepository.delete(reaction);
+
+        // Update de reactie teller van de discussie
+        discussion.setReactionsCount(Math.max(0, discussion.getReactionsCount() - 1));
+        discussionRepository.save(discussion);
+    }
+
 }
