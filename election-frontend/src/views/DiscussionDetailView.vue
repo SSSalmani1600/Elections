@@ -190,7 +190,8 @@ async function postReaction() {
     const reaction = await res.json()
 
     if (discussion.value) {
-      discussion.value.reactions.push(reaction)
+      discussion.value.reactions.unshift(reaction)
+
       discussion.value.reactionsCount++
     }
 
@@ -209,7 +210,7 @@ async function postReaction() {
   <main class="min-h-screen bg-[--color-background] text-white">
     <section class="max-w-4xl mx-auto px-6 py-20">
       <button @click="backToList"
-        class="flex items-center gap-2 mb-10 text-[--color-primary] font-medium hover:underline">
+              class="flex items-center gap-2 mb-10 text-[--color-primary] font-medium hover:underline">
         ← Terug naar forum
       </button>
 
@@ -263,7 +264,7 @@ async function postReaction() {
               <div class="w-12 h-12 rounded-full bg-gray-700/50 flex items-center justify-center">
                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div class="flex-1">
