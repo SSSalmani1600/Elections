@@ -1,6 +1,10 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.dto.Candidate;
+import nl.hva.election_backend.dto.PartyDetail;
+import nl.hva.election_backend.entity.CandidateEntity;
 import nl.hva.election_backend.entity.PartyEntity;
+import nl.hva.election_backend.repository.CandidateRepository;
 import nl.hva.election_backend.repository.PartyRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +16,11 @@ import java.util.Set;
 public class PartyService {
 
     private final PartyRepository partyRepository;
+    private final CandidateRepository candidateRepository;
 
-    public PartyService(PartyRepository repository) {
-        this.partyRepository = repository;
+    public PartyService(PartyRepository partyRepository, CandidateRepository candidateRepository) {
+        this.partyRepository = partyRepository;
+        this.candidateRepository = candidateRepository;
     }
 
     public PartyEntity saveIfNotExists(String name, int year, String partyId) {
@@ -24,7 +30,43 @@ public class PartyService {
     }
 
     public Set<PartyEntity> getParties() {
-        List<PartyEntity> partyList = partyRepository.findAll();
-        return new HashSet<>(partyList);
+        return new HashSet<>(partyRepository.findAll());
+    }
+
+    public PartyDetail getPartyDetail(String partyName) {
+
+        PartyEntity newest = partyRepository
+                .findTopByNameIgnoreCaseOrderByYearDesc(partyName)
+                .orElseThrow(() ->
+                        new RuntimeException("Partij niet gevonden: " + partyName)
+                );
+
+        String partyId = newest.getPartyId();
+
+        List<CandidateEntity> candidates =
+                candidateRepository.findByParty_PartyIdAndYearOrderByCandidateIdAsc(
+                        partyId,
+                        newest.getYear()
+                );
+
+        PartyDetail dto = new PartyDetail();
+        dto.partyId = partyId;
+        dto.name = newest.getName();
+        dto.year = newest.getYear();
+        dto.candidates = candidates.stream()
+                .map(this::mapCandidate)
+                .toList();
+
+        return dto;
+    }
+
+    private Candidate mapCandidate(CandidateEntity c) {
+        Candidate dto = new Candidate();
+        dto.candidateId = c.getCandidateId();
+        dto.firstName = c.getFirstName();
+        dto.namePrefix = c.getNamePrefix();
+        dto.lastName = c.getLastName();
+        dto.gender = c.getGender();
+        return dto;
     }
 }
