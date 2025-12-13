@@ -8,6 +8,7 @@ import java.util.List;
 // Record class: automatisch getters, equals, hashCode, etc.
 public record DiscussionDetailDto(
         String id,                      // Unieke ID van de discussie
+        Long userId,                    // ID van de auteur (voor eigenaar check)
         String title,                   // Titel van de discussie
         String author,                  // Username van de auteur
         String body,                    // Volledige inhoud van de discussie
