@@ -1,15 +1,12 @@
-import type { Party2 } from '@/types/api.ts'
+import { apiFetch } from "@/apiClient"
+import type { Party2 } from "@/types/api"
 
-export async function getParties(): Promise<Set<Party2>> {
-  const res = await fetch("http://localhost:8080/api/parties", {
-    method: "GET",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
+export async function getParties(): Promise<Party2[]> {
+  const res = await apiFetch("/api/parties")
 
   if (!res.ok) {
-    throw new Error(`Failed to retrieve parties: ${res.status}`)
+    throw new Error("Kon partijen niet ophalen")
   }
-  return (await res.json()) as Set<Party2>
+
+  return await res.json()
 }
