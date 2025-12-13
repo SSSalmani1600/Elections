@@ -61,6 +61,7 @@ export interface User {
   email: string
   username: string
   isAdmin?: boolean
+  token: string;
 }
 
 export interface Statement {
