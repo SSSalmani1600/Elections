@@ -7,82 +7,69 @@ import jakarta.persistence.*;
 public class CandidateEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "candidate_id")
+    @Column(name = "candidate_id", nullable = false)
     private String candidateId;
 
-    private String firstName;
-    private String namePrefix;
-    private String lastName;
-    private String gender;
-    private String localityName;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "party_id")
+    @JoinColumn(name = "party_id", nullable = false)
     private PartyEntity party;
 
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "name_prefix")
+    private String namePrefix;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "initials")
+    private String initials;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "birth_year")
+    private Integer birthYear;
+
+    @Column(name = "year")
+    private int year;
 
     public CandidateEntity() {}
 
-    public Long getId() {
-        return id;
-    }
-
     public String getCandidateId() {
         return candidateId;
-    }
-
-    public void setCandidateId(String candidateId) {
-        this.candidateId = candidateId;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getNamePrefix() {
-        return namePrefix;
-    }
-
-    public void setNamePrefix(String namePrefix) {
-        this.namePrefix = namePrefix;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getLocalityName() {
-        return localityName;
-    }
-
-    public void setLocalityName(String localityName) {
-        this.localityName = localityName;
     }
 
     public PartyEntity getParty() {
         return party;
     }
 
-    public void setParty(PartyEntity party) {
-        this.party = party;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getNamePrefix() {
+        return namePrefix;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getInitials() {
+        return initials;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public Integer getBirthYear() {
+        return birthYear;
+    }
+
+    public int getYear() {
+        return year;
     }
 }
