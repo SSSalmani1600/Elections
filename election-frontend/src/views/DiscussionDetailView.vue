@@ -191,11 +191,11 @@ async function saveEdit(reactionId: number) {
 
 async function deleteReaction(reactionId: number) {
   if (!user.value) return
-  
+
   if (!confirm('Weet je zeker dat je deze reactie wilt verwijderen?')) return
-  
+
   deletingId.value = reactionId
-  
+
   try {
     const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
       method: 'DELETE',
@@ -282,7 +282,7 @@ async function postReaction() {
       <div v-else-if="discussion" class="rounded-2xl p-10 border border-[rgba(255,255,255,0.08)]
                bg-gradient-to-br from-[#0B132B]/90 to-[#111830]/90
                shadow-[0_0_25px_rgba(0,0,0,0.3)] backdrop-blur-md">
-        
+
         <!-- Edit mode voor topic -->
         <div v-if="editingTopic" class="space-y-4 mb-10">
           <div>
@@ -317,7 +317,7 @@ async function postReaction() {
             <button
               @click="cancelEditTopic"
               :disabled="savingTopic"
-              class="px-5 py-3 rounded-xl font-medium bg-gray-700 text-white 
+              class="px-5 py-3 rounded-xl font-medium bg-gray-700 text-white
                      hover:bg-gray-600 transition-all
                      disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -339,19 +339,40 @@ async function postReaction() {
                      hover:bg-[#ef3054] hover:text-white transition-all"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Bewerken
             </button>
           </div>
 
-          <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8">
-            <span class="text-[--color-primary] font-medium">{{ discussion.author }}</span>
-            <span>•</span>
-            <span>{{ new Date(discussion.lastActivityAt).toLocaleString() }}</span>
-            <span>•</span>
-            <span>{{ discussion.reactionsCount }} reacties</span>
+          <div class="flex flex-wrap items-center gap-4 text-sm mb-8">
+            <!-- Author badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef3054]/10 border border-[#ef3054]/20">
+              <svg class="w-4 h-4 text-[#ef3054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span class="text-[#ef3054] font-medium">{{ discussion.author }}</span>
+            </div>
+
+            <!-- Date badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-gray-300">{{ new Date(discussion.lastActivityAt).toLocaleString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
+            </div>
+
+            <!-- Reactions badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span class="text-gray-300">{{ discussion.reactionsCount }} reacties</span>
+            </div>
           </div>
 
           <article class="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]
@@ -439,7 +460,7 @@ async function postReaction() {
                   <button
                     @click="cancelEdit"
                     :disabled="savingEdit"
-                    class="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white 
+                    class="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white
                            hover:bg-gray-600 transition-all text-sm
                            disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -465,7 +486,7 @@ async function postReaction() {
                     title="Reactie bewerken"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
@@ -478,7 +499,7 @@ async function postReaction() {
                     :title="deletingId === r.id ? 'Verwijderen...' : 'Reactie verwijderen'"
                   >
                     <svg v-if="deletingId !== r.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                     <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
