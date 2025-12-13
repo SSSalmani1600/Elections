@@ -251,4 +251,34 @@ public class DiscussionController {
                     .body("Error deleting reaction: " + e.getMessage());
         }
     }
+
+    // DELETE /api/discussions/{id} - Verwijdert een discussie (alleen eigen discussies)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDiscussion(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        try {
+            // Haal de userId uit de request body
+            Object userIdObj = body.get("userId");
+            if (userIdObj == null) {
+                return ResponseEntity.badRequest().body("userId is verplicht");
+            }
+
+            Long userId = Long.parseLong(userIdObj.toString());
+
+            // Verwijder de discussie (service checkt of gebruiker eigenaar is)
+            discussionService.deleteDiscussion(id, userId);
+
+            return ResponseEntity.ok().body(Map.of("message", "Discussie verwijderd"));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body("Error deleting discussion: " + e.getMessage());
+        }
+    }
 }
