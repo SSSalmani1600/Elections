@@ -38,7 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
             Pattern.compile("^/api/electionresults.*$"),
             Pattern.compile("^/api/voting-guide.*$"),
             Pattern.compile("^/api/polls/latest$"),
-            Pattern.compile("^/api/polls/[a-fA-F0-9\\-]+/results$")
+            Pattern.compile("^/api/polls/[a-fA-F0-9\\-]+/results$"),
+            Pattern.compile("^/api/moderateText$")
     };
 
     @Override
