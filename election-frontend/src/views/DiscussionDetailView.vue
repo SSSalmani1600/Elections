@@ -13,6 +13,7 @@ type Reaction = {
 
 type DiscussionDetail = {
   id: string
+  userId: number
   title: string
   author: string
   body: string
@@ -64,11 +65,72 @@ const submitting = ref(false)
 const errorReaction = ref('')
 const deletingId = ref<number | null>(null)
 
-// Edit state
+// Edit state for reactions
 const editingId = ref<number | null>(null)
 const editMessage = ref('')
 const savingEdit = ref(false)
 const editError = ref('')
+
+// Edit state for discussion topic
+const editingTopic = ref(false)
+const editTitle = ref('')
+const editBody = ref('')
+const savingTopic = ref(false)
+const topicError = ref('')
+
+function startEditTopic() {
+  if (!discussion.value) return
+  editTitle.value = discussion.value.title
+  editBody.value = discussion.value.body
+  editingTopic.value = true
+  topicError.value = ''
+}
+
+function cancelEditTopic() {
+  editingTopic.value = false
+  editTitle.value = ''
+  editBody.value = ''
+  topicError.value = ''
+}
+
+async function saveEditTopic() {
+  if (!user.value || !discussion.value) return
+  if (!editTitle.value.trim() || !editBody.value.trim()) {
+    topicError.value = 'Titel en bericht mogen niet leeg zijn.'
+    return
+  }
+
+  savingTopic.value = true
+  topicError.value = ''
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.value.id,
+        title: editTitle.value,
+        body: editBody.value,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij bewerken discussie')
+    }
+
+    const updated = await res.json()
+    discussion.value = updated
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    cancelEditTopic()
+  } catch (e) {
+    console.error(e)
+    topicError.value = 'Er ging iets mis bij het bewerken van de discussie.'
+  } finally {
+    savingTopic.value = false
+  }
+}
 
 function startEdit(reaction: Reaction) {
   editingId.value = reaction.id
@@ -220,20 +282,83 @@ async function postReaction() {
       <div v-else-if="discussion" class="rounded-2xl p-10 border border-[rgba(255,255,255,0.08)]
                bg-gradient-to-br from-[#0B132B]/90 to-[#111830]/90
                shadow-[0_0_25px_rgba(0,0,0,0.3)] backdrop-blur-md">
-        <h1 class="text-4xl font-bold mb-4 tracking-tight text-white">{{ discussion.title }}</h1>
-
-        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8">
-          <span class="text-[--color-primary] font-medium">{{ discussion.author }}</span>
-          <span>•</span>
-          <span>{{ new Date(discussion.lastActivityAt).toLocaleString() }}</span>
-          <span>•</span>
-          <span>{{ discussion.reactionsCount }} reacties</span>
+        
+        <!-- Edit mode voor topic -->
+        <div v-if="editingTopic" class="space-y-4 mb-10">
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Titel</label>
+            <input
+              v-model="editTitle"
+              class="w-full p-4 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                     focus:outline-none focus:border-[#ef3054] text-xl font-bold"
+              placeholder="Titel van je discussie..."
+            />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Bericht</label>
+            <textarea
+              v-model="editBody"
+              class="w-full p-4 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                     resize-none min-h-[150px] focus:outline-none focus:border-[#ef3054]"
+              placeholder="Schrijf je bericht..."
+            ></textarea>
+          </div>
+          <p v-if="topicError" class="text-red-400 text-sm">{{ topicError }}</p>
+          <div class="flex gap-3">
+            <button
+              @click="saveEditTopic"
+              :disabled="savingTopic"
+              class="px-5 py-3 rounded-xl font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
+                     text-white hover:scale-[1.02] transition-all
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ savingTopic ? 'Opslaan...' : 'Opslaan' }}
+            </button>
+            <button
+              @click="cancelEditTopic"
+              :disabled="savingTopic"
+              class="px-5 py-3 rounded-xl font-medium bg-gray-700 text-white 
+                     hover:bg-gray-600 transition-all
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Annuleren
+            </button>
+          </div>
         </div>
 
-        <article class="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]
-                 p-6 rounded-xl text-[--color-text-base] leading-relaxed mb-10">
-          <p class="whitespace-pre-line text-lg">{{ discussion.body }}</p>
-        </article>
+        <!-- Normal view voor topic -->
+        <div v-else>
+          <div class="flex justify-between items-start mb-4">
+            <h1 class="text-4xl font-bold tracking-tight text-white">{{ discussion.title }}</h1>
+            <!-- Bewerk knop (alleen zichtbaar voor eigenaar) -->
+            <button
+              v-if="user && user.id === discussion.userId"
+              @click="startEditTopic"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+                     border border-[#ef3054] text-[#ef3054]
+                     hover:bg-[#ef3054] hover:text-white transition-all"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Bewerken
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8">
+            <span class="text-[--color-primary] font-medium">{{ discussion.author }}</span>
+            <span>•</span>
+            <span>{{ new Date(discussion.lastActivityAt).toLocaleString() }}</span>
+            <span>•</span>
+            <span>{{ discussion.reactionsCount }} reacties</span>
+          </div>
+
+          <article class="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]
+                   p-6 rounded-xl text-[--color-text-base] leading-relaxed mb-10">
+            <p class="whitespace-pre-line text-lg">{{ discussion.body }}</p>
+          </article>
+        </div>
 
         <div>
           <h2 class="text-2xl font-semibold mb-4 text-white">Reacties</h2>
