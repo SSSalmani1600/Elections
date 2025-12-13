@@ -76,6 +76,7 @@ public class DiscussionService {
         // Maak een DTO object met alle discussie details
         return new DiscussionDetailDto(
                 d.getId().toString(),
+                d.getUserId(),  // userId voor eigenaar check in frontend
                 d.getTitle(),
                 // Zoek de username van de auteur
                 userRepository.findById(d.getUserId())
@@ -222,6 +223,27 @@ public class DiscussionService {
         // Update de reactie teller van de discussie
         discussion.setReactionsCount(Math.max(0, discussion.getReactionsCount() - 1));
         discussionRepository.save(discussion);
+    }
+
+    // Bewerkt een discussie als de gebruiker de eigenaar is
+    public DiscussionDetailDto updateDiscussion(Long discussionId, Long userId, String newTitle, String newBody) {
+        // Zoek de discussie in de database
+        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new IllegalArgumentException("Discussie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de discussie
+        if (!discussion.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen discussies bewerken");
+        }
+
+        // Update de discussie
+        discussion.setTitle(newTitle);
+        discussion.setBody(newBody);
+        discussion.setLastActivityAt(Instant.now());
+        discussionRepository.save(discussion);
+
+        // Geef de bijgewerkte discussie terug
+        return getDetailById(discussionId);
     }
 
 }
