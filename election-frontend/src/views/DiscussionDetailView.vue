@@ -77,7 +77,7 @@ const editTitle = ref('')
 const editBody = ref('')
 const savingTopic = ref(false)
 const topicError = ref('')
-const deletingTopic = ref(false)
+const deletingTopic = ref(false) // Loading state voor verwijderen
 
 function startEditTopic() {
   if (!discussion.value) return
@@ -133,14 +133,17 @@ async function saveEditTopic() {
   }
 }
 
+// Verwijdert de discussie (alleen voor eigenaar)
 async function deleteTopic() {
   if (!user.value || !discussion.value) return
 
+  // Bevestiging vragen
   if (!confirm('Weet je zeker dat je deze discussie wilt verwijderen? Alle reacties worden ook verwijderd.')) return
 
   deletingTopic.value = true
 
   try {
+    // API call naar backend
     const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -152,6 +155,7 @@ async function deleteTopic() {
       throw new Error(errorText || 'Fout bij verwijderen discussie')
     }
 
+    // Terug naar forum lijst
     localStorage.setItem('forumRefresh', Date.now().toString())
     router.push({ name: 'forum' })
   } catch (e) {
