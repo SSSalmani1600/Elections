@@ -66,7 +66,7 @@ async function loginHandler(): Promise<void> {
           severity: 'error',
           summary: 'Fout bij opslaan',
           detail: 'Er ging iets mis met het opslaan van de stemwijzer antwoorden',
-          life: 2000,
+          life: 3000,
         })
         console.error(err.message)
       }
@@ -77,7 +77,7 @@ async function loginHandler(): Promise<void> {
           severity: 'error',
           summary: 'Fout bij opslaan',
           detail: 'Er ging iets mis met het opslaan van de stemwijzer resultaten',
-          life: 2000,
+          life: 3000,
         })
         console.log(err.message)
       }

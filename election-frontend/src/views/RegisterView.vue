@@ -55,13 +55,13 @@ async function onSubmit() {
     if (results !== null && answers.length === 30) {
       try {
         await saveAnswers(answerPayload)
-        localStorage.remove('voting_guide_answers')
+        localStorage.removeItem('voting_guide_answers')
       } catch (err: any) {
         toast.add({
           severity: 'error',
           summary: 'Fout bij opslaan',
           detail: 'Er ging iets mis met het opslaan van de stemwijzer antwoorden',
-          life: 2000,
+          life: 3000,
         })
         console.error(err.message)
       }
@@ -73,7 +73,7 @@ async function onSubmit() {
           severity: 'error',
           summary: 'Fout bij opslaan',
           detail: 'Er ging iets mis met het opslaan van de stemwijzer resultaten',
-          life: 2000,
+          life: 3000,
         })
         console.log(err.message)
       }
