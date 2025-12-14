@@ -77,6 +77,7 @@ const editTitle = ref('')
 const editBody = ref('')
 const savingTopic = ref(false)
 const topicError = ref('')
+const deletingTopic = ref(false)
 
 function startEditTopic() {
   if (!discussion.value) return
@@ -129,6 +130,35 @@ async function saveEditTopic() {
     topicError.value = 'Er ging iets mis bij het bewerken van de discussie.'
   } finally {
     savingTopic.value = false
+  }
+}
+
+async function deleteTopic() {
+  if (!user.value || !discussion.value) return
+
+  if (!confirm('Weet je zeker dat je deze discussie wilt verwijderen? Alle reacties worden ook verwijderd.')) return
+
+  deletingTopic.value = true
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.value.id }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij verwijderen discussie')
+    }
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    router.push({ name: 'forum' })
+  } catch (e) {
+    console.error(e)
+    alert('Er ging iets mis bij het verwijderen van de discussie.')
+  } finally {
+    deletingTopic.value = false
   }
 }
 
@@ -330,20 +360,39 @@ async function postReaction() {
         <div v-else>
           <div class="flex justify-between items-start mb-4">
             <h1 class="text-4xl font-bold tracking-tight text-white">{{ discussion.title }}</h1>
-            <!-- Bewerk knop (alleen zichtbaar voor eigenaar) -->
-            <button
-              v-if="user && user.id === discussion.userId"
-              @click="startEditTopic"
-              class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
-                     border border-[#ef3054] text-[#ef3054]
-                     hover:bg-[#ef3054] hover:text-white transition-all"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Bewerken
-            </button>
+            <!-- Bewerk en verwijder knoppen (alleen zichtbaar voor eigenaar) -->
+            <div v-if="user && user.id === discussion.userId" class="flex items-center gap-2">
+              <button
+                @click="startEditTopic"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+                       border border-[#ef3054] text-[#ef3054]
+                       hover:bg-[#ef3054] hover:text-white transition-all"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Bewerken
+              </button>
+              <button
+                @click="deleteTopic"
+                :disabled="deletingTopic"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+                       border border-red-500 text-red-500
+                       hover:bg-red-500 hover:text-white transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg v-if="!deletingTopic" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ deletingTopic ? 'Verwijderen...' : 'Verwijderen' }}
+              </button>
+            </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-4 text-sm mb-8">
