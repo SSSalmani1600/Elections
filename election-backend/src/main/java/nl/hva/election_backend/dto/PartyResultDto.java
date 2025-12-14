@@ -3,12 +3,12 @@ package nl.hva.election_backend.dto;
 public class PartyResultDto {
     private String partyId;
     private String name;
-    private int validVotes;
+    private int votes;
 
-    public PartyResultDto(String partyId, String name, int validVotes) {
+    public PartyResultDto(String partyId, String name, int votes) {
         this.partyId = partyId;
         this.name = name;
-        this.validVotes = validVotes;
+        this.votes = votes;
     }
 
     public String getPartyId() {
@@ -27,11 +27,11 @@ public class PartyResultDto {
         this.name = name;
     }
 
-    public int getValidVotes() {
-        return validVotes;
+    public int getVotes() {
+        return votes;
     }
 
-    public void setValidVotes(int validVotes) {
-        this.validVotes = validVotes;
+    public void setVotes(int votes) {
+        this.votes = votes;
     }
 }
