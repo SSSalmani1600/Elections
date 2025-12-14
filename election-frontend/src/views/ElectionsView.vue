@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getConstituencies, getElectionYears, getMunicipalityData } from '@/services/ElectionService'
-import { type Municipality, type Constituency, type Party } from '@/types/api'
+import { type Municipality, type Constituency, type Party, type PartyResult } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
 import Select from 'primevue/select'
 import Chart from 'primevue/chart'
@@ -58,7 +58,7 @@ async function onMapSelect(municipalityName: string) {
 
     selectedMunicipality.value = data;
   } catch (error) {
-    console.error("Error in onMapSelect:", error);
+    console.error("Error in map selection:", error);
   }
 }
 
@@ -68,7 +68,13 @@ const setChartData = () => {
     selectedConstituencyId.value ?? '9',
   )!
 
-  const sorted: Party[] = [...selectedConstituency.value.parties].sort((a, b) => b.votes - a.votes)
+  let sorted: Party[] | PartyResult[];
+
+  if (selectedMunicipality.value == null) {
+    sorted = [...selectedConstituency.value.parties].sort((a, b) => b.votes - a.votes)
+  } else {
+    sorted = [...selectedMunicipality.value.parties].sort((a, b) => b.votes - a.votes)
+  }
 
   const labels = sorted.map((p) => p.name)
   const values = sorted.map((p) => p.votes)
@@ -177,7 +183,7 @@ onMounted(async () => {
 })
 
 // Update chart when user changes selection
-watch(selectedConstituencyId, () => {
+watch([selectedConstituencyId, selectedMunicipality], () => {
   if (!constituencies.value.length) return
   chartData.value = setChartData()
 })
