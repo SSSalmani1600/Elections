@@ -22,6 +22,7 @@ onMounted(async () => {
   try {
     if (user.value) {
       results.value = await getResults()
+      console.log(results.value)
       if (results.value.votingGuideResults !== undefined) localStorage.removeItem("voting_guide_answers")
     } else {
       const resultsRaw = localStorage.getItem('voting_guide_results')
@@ -29,7 +30,7 @@ onMounted(async () => {
     }
 
     // Send user back to voting guide when results are non-existing
-    if (results.value == null) {
+    if (results.value == null || results.value?.votingGuideResults.length === 0) {
       resultsIsEmpty.value = true
       setTimeout(() => router.replace({ name: 'voting-guide' }), 3000)
       return
