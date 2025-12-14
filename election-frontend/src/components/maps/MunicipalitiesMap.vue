@@ -3,6 +3,9 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import L, { Layer, type LeafletMouseEvent } from 'leaflet'
 import type { Feature, GeoJsonProperties, Geometry } from 'geojson'
 
+defineProps<{
+  year: string
+}>()
 const mapEl = ref<string | HTMLElement>('')
 
 let geojsonLayer: L.GeoJSON
@@ -19,10 +22,10 @@ function baseStyle() {
   }
 }
 
-const emit = defineEmits(['update:selectedConstituency'])
+const emit = defineEmits(['update:selectedMunicipality'])
 
-function changeConstituency(constituencyName: string): void {
-  emit('update:selectedConstituency', constituencyName)
+function changeMunicipality(municipalityName: string): void {
+  emit('update:selectedMunicipality', municipalityName)
 }
 
 function getName(props: GeoJsonProperties) {
@@ -59,7 +62,7 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
       if (l._path) l._path.classList.remove('hovered-muni')
     },
     click: () => {
-      changeConstituency(name)
+      changeMunicipality(name)
     },
   })
 }
@@ -96,7 +99,7 @@ onMounted(async () => {
   const nlBounds = L.latLngBounds([50.5, 3.2], [53.7, 7.3])
   // "Viscosity" makes the map resist leaving the bounds
   map.setMaxBounds(nlBounds.pad(0.5))
-  ;(map as L.Map).options.maxBoundsViscosity = 0.9
+    ; (map as L.Map).options.maxBoundsViscosity = 0.9
 
   const container = map.getContainer()
 
@@ -141,16 +144,13 @@ onUnmounted(() => {
     <!-- Header -->
     <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
       <h3 class="text-sm font-semibold text-white/90">Gemeentenkaart</h3>
-      <span class="text-xs text-white/60">2025</span>
+      <span class="text-xs text-white/60">{{ year }}</span>
     </div>
 
     <!-- Map container -->
     <div class="p-3">
       <!-- responsive height by breakpoint; full width -->
-      <div
-        ref="mapEl"
-        class="w-full h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-xl overflow-hidden"
-      />
+      <div ref="mapEl" class="w-full h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px] rounded-xl overflow-hidden" />
     </div>
   </div>
 </template>
