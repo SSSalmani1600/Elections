@@ -21,5 +21,6 @@ public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> 
 
     List<ReactionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    // Verwijdert alle reacties van een discussie
     void deleteAllByDiscussion_Id(Long discussionId);
 }
