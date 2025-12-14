@@ -14,6 +14,7 @@ import { useAuth } from '@/store/authStore.ts'
 import { saveAnswers } from '@/services/VotingGuideAnswersService.ts'
 import { useToast } from 'primevue'
 
+const retryVotingGuideExists = ref<boolean>(!!localStorage.getItem('retry_voting_guide_answers'))
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
 const selectedStatement = ref<Statement | null>(null)
@@ -205,6 +206,11 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const cancelRetryVotingGuide = () => {
+  localStorage.removeItem('retry_voting_guide_answers')
+  location.reload()
+}
 </script>
 
 <template>
@@ -328,6 +334,9 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
+          </div>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button @click="cancelRetryVotingGuide" v-show="retryVotingGuideExists" class="btn btn-secondary" :disabled="calculateLoading">Annuleer nieuwe poging</button>
             <button
               @click="getResults"
               :disabled="calculateLoading"
