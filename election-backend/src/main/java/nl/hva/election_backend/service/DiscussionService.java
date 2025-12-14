@@ -12,6 +12,7 @@ import nl.hva.election_backend.repository.ReactionRepository;
 import nl.hva.election_backend.repository.TestRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -244,6 +245,25 @@ public class DiscussionService {
 
         // Geef de bijgewerkte discussie terug
         return getDetailById(discussionId);
+    }
+
+    // Verwijdert een discussie als de gebruiker de eigenaar is
+    @Transactional
+    public void deleteDiscussion(Long discussionId, Long userId) {
+        // Zoek de discussie in de database
+        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new IllegalArgumentException("Discussie niet gevonden"));
+
+        // Check of de gebruiker de eigenaar is van de discussie
+        if (!discussion.getUserId().equals(userId)) {
+            throw new SecurityException("Je kunt alleen je eigen discussies verwijderen");
+        }
+
+        // Verwijder eerst alle reacties van deze discussie
+        reactionRepository.deleteAllByDiscussion_Id(discussionId);
+
+        // Verwijder de discussie zelf
+        discussionRepository.delete(discussion);
     }
 
 }
