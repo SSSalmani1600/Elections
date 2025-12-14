@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { saveResults } from '@/services/VotingGuideResultsService.ts'
 import { useToast } from 'primevue'
 import { saveAnswers } from '@/services/VotingGuideAnswersService.ts'
+import type { VotingGuideAnswer, VotingGuideResult } from '@/types/api.ts'
 
 const router = useRouter()
 const agree = ref(false)
@@ -45,17 +46,21 @@ async function loginHandler(): Promise<void> {
   try {
     await login(email.value, password.value)
 
-    router.replace('/')
+    await router.replace('/')
 
     // Saving existing voting guide localstorage data into db
     const resultsRaw = localStorage.getItem('voting_guide_results')
     const results = resultsRaw ? JSON.parse(resultsRaw) : null
-    const answersRaw = localStorage.getItem('voting_guide_answers')
-    const answers = answersRaw ? JSON.parse(answersRaw) : null
+    const answers: VotingGuideAnswer[] = JSON.parse(
+      localStorage.getItem('voting_guide_answers') || '[]',
+    )
+    const answerPayload = {
+      votingGuideAnswers: answers,
+    }
 
-    if (results && answers.length === 30) {
+    if (results !== null && answers.length === 30) {
       try {
-        await saveAnswers(answers)
+        await saveAnswers(answerPayload)
       } catch (err: any) {
         toast.add({
           severity: 'error',
@@ -65,17 +70,17 @@ async function loginHandler(): Promise<void> {
         })
         console.error(err.message)
       }
-    }
-    try {
-      await saveResults(results)
-    } catch (err: any) {
-      toast.add({
-        severity: 'error',
-        summary: 'Fout bij opslaan',
-        detail: 'Er ging iets mis met het opslaan van de stemwijzer resultaten',
-        life: 2000,
-      })
-      console.log(err.message)
+      try {
+        await saveResults(results)
+      } catch (err: any) {
+        toast.add({
+          severity: 'error',
+          summary: 'Fout bij opslaan',
+          detail: 'Er ging iets mis met het opslaan van de stemwijzer resultaten',
+          life: 2000,
+        })
+        console.log(err.message)
+      }
     }
   } catch (err: unknown) {
     console.log(err)
