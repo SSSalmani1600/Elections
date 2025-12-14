@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getConstituencies, getElectionYears } from '@/services/ElectionService'
-import type { Constituency, Party } from '@/types/api'
+import { getConstituencies, getElectionYears, getMunicipalityData } from '@/services/ElectionService'
+import { type Municipality, type Constituency, type Party } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
 import Select from 'primevue/select'
 import Chart from 'primevue/chart'
@@ -21,7 +21,7 @@ const constituencyOptions = computed(() =>
   [...constituencies.value]
     .map((c) => ({
       label: c.name,
-      value: c.name,
+      value: c.constituencyId,
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 )
@@ -42,13 +42,33 @@ const palette: string[] = [
   '#F87171', // red-400
 ]
 
-const selectedConstituency = ref<string | null>(null)
+const selectedMunicipality = ref<Municipality | null>(null);
+const selectedConstituencyId = ref<string | null>(null)
+const selectedConstituency = ref<Constituency | null>(null);
+
+async function onMapSelect(municipalityName: string) {
+  try {
+    const data = await getMunicipalityData(selectedYear.value, municipalityName);
+
+    if (!data) return;
+
+    if (selectedConstituencyId.value !== data.constituencyId) {
+      selectedConstituencyId.value = data.constituencyId;
+    }
+
+    selectedMunicipality.value = data;
+  } catch (error) {
+    console.error("Error in onMapSelect:", error);
+  }
+}
+
+// Constituency
 const setChartData = () => {
-  const currentConstituency: Constituency | null = getConstituencyByName(
-    selectedConstituency.value ?? 'Amsterdam',
+  selectedConstituency.value = getConstituencyById(
+    selectedConstituencyId.value ?? '9',
   )!
 
-  const sorted: Party[] = [...currentConstituency.parties].sort((a, b) => b.votes - a.votes)
+  const sorted: Party[] = [...selectedConstituency.value.parties].sort((a, b) => b.votes - a.votes)
 
   const labels = sorted.map((p) => p.name)
   const values = sorted.map((p) => p.votes)
@@ -127,9 +147,9 @@ function scrollToSection(id: string) {
   }
 }
 
-function getConstituencyByName(name: string): Constituency | null {
+function getConstituencyById(id: string): Constituency | null {
   for (const constituency of constituencies.value) {
-    if (constituency.name === name) return constituency
+    if (constituency.constituencyId === id) return constituency
   }
   return null
 }
@@ -148,8 +168,8 @@ onMounted(async () => {
   await fetchConstituencies()
 
   if (!selectedConstituency.value && constituencies.value.length) {
-    selectedConstituency.value = constituencies.value.find(c => c.name === "Amsterdam")?.name
-      || constituencies.value[0].name;
+    selectedConstituency.value = constituencies.value.find(c => c.name === "Amsterdam")
+      || constituencies.value[0];
   }
 
   chartOptions.value = setChartOptions()
@@ -157,7 +177,7 @@ onMounted(async () => {
 })
 
 // Update chart when user changes selection
-watch(selectedConstituency, () => {
+watch(selectedConstituencyId, () => {
   if (!constituencies.value.length) return
   chartData.value = setChartData()
 })
@@ -242,7 +262,7 @@ watch(selectedYear, async () => {
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <Select v-model="selectedYear" name="Jaren" placeholder="Selecteer een jaar" :options="yearOptions"
           optionLabel="label" optionValue="value" />
-        <Select v-model="selectedConstituency" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
+        <Select v-model="selectedConstituencyId" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
           optionValue="value" placeholder="Selecteer een kieskring" class="sm:max-w-md" />
       </div>
 
@@ -250,7 +270,7 @@ watch(selectedYear, async () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <!-- Map -->
         <div class="order-2 lg:order-1 h-full">
-          <MunicipalitiesMap v-model:selectedConstituency="selectedConstituency" />
+          <MunicipalitiesMap :year="selectedYear.toString()" @update:selectedMunicipality="onMapSelect" />
         </div>
 
         <!-- Chart card -->
@@ -258,9 +278,9 @@ watch(selectedYear, async () => {
           <div class="w-full h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg">
             <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-white/90">
-                Uitslag per partij: {{ selectedConstituency || '—' }}
+                Uitslag per partij: {{ selectedMunicipality?.name || selectedConstituency?.name || '-' }}
               </h3>
-              <span class="text-xs text-white/60">stemmen</span>
+              <span class="text-xs text-white/60">Stemmen</span>
             </div>
             <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
               <Chart v-if="chartData" type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
