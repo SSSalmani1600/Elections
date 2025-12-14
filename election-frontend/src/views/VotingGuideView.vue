@@ -32,9 +32,7 @@ const selectStatement = (statement: Statement) => {
 }
 
 const getResults = async () => {
-  const stored: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
+  const stored: VotingGuideAnswer[] = checkStoredAnswers()
   const payload = {
     votingGuideAnswers: stored,
   }
@@ -67,10 +65,8 @@ const getResults = async () => {
 }
 
 const saveAnswer = (statementId: number, answer: string) => {
-  const stored: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
-
+  const stored: VotingGuideAnswer[] = checkStoredAnswers()
+  console.log(stored)
   const existingAnswer = stored.find((a) => a.statementId === statementId)
 
   if (existingAnswer) {
@@ -79,7 +75,10 @@ const saveAnswer = (statementId: number, answer: string) => {
     stored.push({ statementId, answer })
   }
 
-  localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
+  const keyString = !!localStorage.getItem('retry_voting_guide_answers')
+    ? 'retry_voting_guide_answers'
+    : 'voting_guide_answers'
+  localStorage.setItem(keyString, JSON.stringify(stored))
 
   const index = data.value.findIndex((item) => item.id === statementId)
 
@@ -96,10 +95,21 @@ const updateAnsweredStatements = (storedAnswers: VotingGuideAnswer[]) => {
   completedStatements.value = storedAnswers.length
 }
 
+const checkStoredAnswers = (): VotingGuideAnswer[] => {
+  let storedAnswers: VotingGuideAnswer[] = []
+  const userRetriedVotingGuide = !!localStorage.getItem('retry_voting_guide_answers')
+
+  if (userRetriedVotingGuide) {
+    storedAnswers = JSON.parse(localStorage.getItem('retry_voting_guide_answers') || '[]')
+  } else {
+    storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  }
+
+  return storedAnswers
+}
+
 const findUnansweredQuestion = () => {
-  const storedAnswers: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
+  const storedAnswers: VotingGuideAnswer[] = checkStoredAnswers()
 
   const firstUnanswered = data.value.find(
     (statement) => !storedAnswers.find((a) => statement.id === a.statementId),
@@ -143,35 +153,36 @@ watch(selectedStatement, async (newVal) => {
 onMounted(async () => {
   loading.value = true
 
-  // Send user to result page when results exists
-  try {
-    if (user.value) {
-      const hasResults = await userHasResults()
-      const hasLocalAnswers = !!localStorage.getItem('voting_guide_answers')
+  const userRetriedVotingGuide = !!localStorage.getItem('retry_voting_guide_answers')
+  if (!userRetriedVotingGuide) {
+    // Send user to result page when results exists
+    try {
+      if (user.value) {
+        const hasResults = await userHasResults()
+        const hasLocalAnswers = !!localStorage.getItem('voting_guide_answers')
 
-      if (hasResults && !hasLocalAnswers) {
-        await router.push({ name: 'voting-guide-results' })
+        if (hasResults && !hasLocalAnswers) {
+          await router.push({ name: 'voting-guide-results' })
+          return
+        }
+      }
+
+      // If user does not exist, check localStorage
+      const storedRaw = localStorage.getItem('voting_guide_results')
+      const stored = storedRaw ? JSON.parse(storedRaw) : null
+
+      if (stored && stored.votingGuideResults?.length > 0) {
+        await router.push({ name: `voting-guide-results` })
         return
       }
+    } catch (err: any) {
+      console.error(err.message)
     }
-
-    // If user does not exist, check localStorage
-    const storedRaw = localStorage.getItem('voting_guide_results')
-    const stored = storedRaw ? JSON.parse(storedRaw) : null
-
-    if (stored && stored.votingGuideResults?.length > 0) {
-      await router.push({ name: `voting-guide-results` })
-      return
-    }
-  } catch (err: any) {
-    console.error(err.message)
   }
 
   try {
     data.value = Array.from(await getAllStatements())
-    const storedAnswers: VotingGuideAnswer[] = JSON.parse(
-      localStorage.getItem('voting_guide_answers') || '[]',
-    )
+    const storedAnswers: VotingGuideAnswer[] = checkStoredAnswers()
     updateAnsweredStatements(storedAnswers)
     data.value = data.value.map((statement) => {
       const match = storedAnswers.find((a) => a.statementId === statement.id)
