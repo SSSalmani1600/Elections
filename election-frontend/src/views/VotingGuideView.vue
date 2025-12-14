@@ -47,8 +47,11 @@ const getResults = async () => {
 
       await saveResults(results.value)
     } else {
+      localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
       localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
     }
+
+    localStorage.removeItem('retry_voting_guide_answers')
 
     await router.replace({ path: '/stemwijzer/resultaten' })
   } catch (err: any) {
