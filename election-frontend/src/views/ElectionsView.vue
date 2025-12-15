@@ -104,6 +104,8 @@ const setChartData = () => {
     selectedConstituency.value?.name ?? 'Amsterdam',
   )!
 
+  if (selectedLevel.value === "Kieskring") selectedMunicipality.value = null;
+
   let sorted: Party[] | PartyResult[];
 
   if (selectedMunicipality.value == null) {
@@ -212,8 +214,11 @@ onMounted(async () => {
 })
 
 // Update chart when user changes selection
-watch([selectedConstituency, selectedMunicipality], () => {
+watch([selectedConstituency, selectedMunicipality, selectedLevel], async () => {
   if (!constituencies.value.length) return
+  if (selectedLevel.value === "Gemeente" && selectedMunicipality.value === null) {
+    selectedMunicipality.value = await getMunicipalityData(selectedYear.value, "Amsterdam")
+  }
   chartData.value = setChartData()
 })
 watch(selectedYear, async () => {
