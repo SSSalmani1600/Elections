@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import L, { Layer, type LeafletMouseEvent } from 'leaflet'
 import type { Feature, GeoJsonProperties, Geometry } from 'geojson'
 
-defineProps<{
+const { year } = defineProps<{
   year: string
 }>()
 const mapEl = ref<string | HTMLElement>('')
