@@ -54,7 +54,6 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
         fillOpacity: 0.28,
       })
       if (l._path) l._path.classList.add('hovered-muni')
-      // l.bringToFront(); // optional: usually not needed anymore
     },
     mouseout: (e: LeafletMouseEvent) => {
       geojsonLayer.resetStyle(e.target)
@@ -70,7 +69,6 @@ function onEachFeature(feature: Feature<Geometry>, layer: Layer) {
 async function load_shapefile() {
   const response = await fetch(DATA_URL)
   const shape_obj = await response.json()
-  console.log(shape_obj)
   return shape_obj
 }
 
