@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getConstituencies, getElectionYears, getMunicipalityData } from '@/services/ElectionService'
+import { getConstituencies, getElectionYears, getMunicipalities, getMunicipalityData } from '@/services/ElectionService'
 import { type Municipality, type Constituency, type Party, type PartyResult } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
 import { type ChartData, type ChartOptions } from 'chart.js'
@@ -198,7 +198,7 @@ function getConstituencyByName(name: string): Constituency | null {
 const fetchData = async () => {
   try {
     constituencies.value = await getConstituencies(selectedYear.value)
-
+    municipalities.value = await getMunicipalities(selectedYear.value)
   } catch (e) {
     console.error('Failed to fetch constituencies', e)
   }
@@ -206,7 +206,7 @@ const fetchData = async () => {
 
 onMounted(async () => {
   years.value = await getElectionYears();
-  await fetchConstituencies()
+  await fetchData()
 
   chartData.value = setChartData()
 })
@@ -217,7 +217,7 @@ watch([selectedConstituency, selectedMunicipality], () => {
   chartData.value = setChartData()
 })
 watch(selectedYear, async () => {
-  await fetchConstituencies()
+  await fetchData()
   chartData.value = setChartData()
 })
 </script>
