@@ -68,12 +68,13 @@ export interface Constituency {
   parties: Party[]
 }
 
+// User interface - wordt gebruikt in AccountView en authStore
 export interface User {
-  id: number
-  email: string
-  username: string
-  isAdmin?: boolean
-  token: string
+  id: number           // Unieke gebruikers-ID uit database
+  email: string        // Email adres van gebruiker
+  username: string     // Weergavenaam
+  isAdmin?: boolean    // Of gebruiker admin rechten heeft
+  token: string        // JWT token voor authenticatie
 }
 
 export interface Statement {
