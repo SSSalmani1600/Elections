@@ -1,5 +1,5 @@
 import { apiFetch } from '@/apiClient'
-import type { Constituency } from '@/types/api'
+import type { Constituency, Municipality } from '@/types/api'
 
 export interface Election {
   id: string
@@ -44,6 +44,25 @@ export async function getConstituencies(electionId: number): Promise<Constituenc
   }
 
   return (await res.json()) as Constituency[]
+}
+
+export async function getMunicipalityData(electionId: number, name: string): Promise<Municipality> {
+  const res = await apiFetch(
+    `http://localhost:8080/api/electionresults/${electionId}/municipalities/${name}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+    false,
+  )
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch municipality')
+  }
+
+  return (await res.json()) as Municipality
 }
 
 export async function getElectionYears(): Promise<number[]> {

@@ -3,11 +3,18 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import type { Statement, VotingGuideAnswer, VotingGuideResultResponse } from '@/types/api.ts'
 import { getAllStatements } from '@/services/StatementService.ts'
 import ProgressBar from '@/components/ProgressBar.vue'
-import { calculateResults } from '@/services/VotingGuideResultsService.ts'
+import {
+  calculateResults,
+  saveResults,
+  userHasResults,
+} from '@/services/VotingGuideResultsService.ts'
 import router from '@/router'
-import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
-import {Spinner} from "@/components/ui/spinner";
+import { Spinner } from '@/components/ui/spinner'
+import { useAuth } from '@/store/authStore.ts'
+import { saveAnswers } from '@/services/VotingGuideAnswersService.ts'
+import { useToast } from 'primevue'
 
+const retryVotingGuideExists = ref<boolean>(!!localStorage.getItem('retry_voting_guide_answers'))
 const data = ref<Statement[]>([])
 const loading = ref<boolean>(false)
 const selectedStatement = ref<Statement | null>(null)
@@ -18,36 +25,52 @@ const completedStatements = ref<number>(0)
 const focusTarget = ref<HTMLDivElement | null>(null)
 const results = ref<VotingGuideResultResponse | null>(null)
 const calculateLoading = ref<boolean>(false)
+const { user } = useAuth()
+const toast = useToast()
 
 const selectStatement = (statement: Statement) => {
   selectedStatement.value = statement
 }
 
 const getResults = async () => {
-  const stored: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
+  const stored: VotingGuideAnswer[] = checkStoredAnswers()
   const payload = {
     votingGuideAnswers: stored,
   }
 
   try {
     calculateLoading.value = true
+
     results.value = await calculateResults(payload)
-    localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
+
+    if (user.value) {
+      await saveAnswers(payload)
+
+      await saveResults(results.value)
+    } else {
+      localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
+      localStorage.setItem('voting_guide_results', JSON.stringify(results.value))
+    }
+
+    localStorage.removeItem('retry_voting_guide_answers')
+
+    await router.replace({ path: '/stemwijzer/resultaten' })
   } catch (err: any) {
-    console.error(`Error calculating the results: ${err.message}`)
+    toast.add({
+      severity: 'error',
+      summary: 'Fout bij opslaan',
+      detail: 'Er ging iets mis met het opslaan van de antwoorden',
+      life: 2000,
+    })
+    console.error(err.message)
   } finally {
     calculateLoading.value = false
-    await router.replace({ path: '/stemwijzer/resultaten' })
   }
 }
 
 const saveAnswer = (statementId: number, answer: string) => {
-  const stored: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
-
+  const stored: VotingGuideAnswer[] = checkStoredAnswers()
+  console.log(stored)
   const existingAnswer = stored.find((a) => a.statementId === statementId)
 
   if (existingAnswer) {
@@ -56,7 +79,10 @@ const saveAnswer = (statementId: number, answer: string) => {
     stored.push({ statementId, answer })
   }
 
-  localStorage.setItem('voting_guide_answers', JSON.stringify(stored))
+  const keyString = !!localStorage.getItem('retry_voting_guide_answers')
+    ? 'retry_voting_guide_answers'
+    : 'voting_guide_answers'
+  localStorage.setItem(keyString, JSON.stringify(stored))
 
   const index = data.value.findIndex((item) => item.id === statementId)
 
@@ -73,10 +99,21 @@ const updateAnsweredStatements = (storedAnswers: VotingGuideAnswer[]) => {
   completedStatements.value = storedAnswers.length
 }
 
+const checkStoredAnswers = (): VotingGuideAnswer[] => {
+  let storedAnswers: VotingGuideAnswer[] = []
+  const userRetriedVotingGuide = !!localStorage.getItem('retry_voting_guide_answers')
+
+  if (userRetriedVotingGuide) {
+    storedAnswers = JSON.parse(localStorage.getItem('retry_voting_guide_answers') || '[]')
+  } else {
+    storedAnswers = JSON.parse(localStorage.getItem('voting_guide_answers') || '[]')
+  }
+
+  return storedAnswers
+}
+
 const findUnansweredQuestion = () => {
-  const storedAnswers: VotingGuideAnswer[] = JSON.parse(
-    localStorage.getItem('voting_guide_answers') || '[]',
-  )
+  const storedAnswers: VotingGuideAnswer[] = checkStoredAnswers()
 
   const firstUnanswered = data.value.find(
     (statement) => !storedAnswers.find((a) => statement.id === a.statementId),
@@ -118,19 +155,38 @@ watch(selectedStatement, async (newVal) => {
 })
 
 onMounted(async () => {
-  const storedRaw = localStorage.getItem('voting_guide_results')
-  const stored = storedRaw ? JSON.parse(storedRaw) : null
-  if (stored && stored.votingGuideResults?.length > 0) {
-    await router.push({ name: `voting-guide-results` })
-    return
+  loading.value = true
+
+  const userRetriedVotingGuide = !!localStorage.getItem('retry_voting_guide_answers')
+  if (!userRetriedVotingGuide) {
+    // Send user to result page when results exists
+    try {
+      if (user.value) {
+        const hasResults = await userHasResults()
+        const hasLocalAnswers = !!localStorage.getItem('voting_guide_answers')
+
+        if (hasResults && !hasLocalAnswers) {
+          await router.push({ name: 'voting-guide-results' })
+          return
+        }
+      }
+
+      // If user does not exist, check localStorage
+      const storedRaw = localStorage.getItem('voting_guide_results')
+      const stored = storedRaw ? JSON.parse(storedRaw) : null
+
+      if (stored && stored.votingGuideResults?.length > 0) {
+        await router.push({ name: `voting-guide-results` })
+        return
+      }
+    } catch (err: any) {
+      console.error(err.message)
+    }
   }
 
   try {
-    loading.value = true
     data.value = Array.from(await getAllStatements())
-    const storedAnswers: VotingGuideAnswer[] = JSON.parse(
-      localStorage.getItem('voting_guide_answers') || '[]',
-    )
+    const storedAnswers: VotingGuideAnswer[] = checkStoredAnswers()
     updateAnsweredStatements(storedAnswers)
     data.value = data.value.map((statement) => {
       const match = storedAnswers.find((a) => a.statementId === statement.id)
@@ -150,6 +206,11 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const cancelRetryVotingGuide = () => {
+  localStorage.removeItem('retry_voting_guide_answers')
+  location.reload()
+}
 </script>
 
 <template>
@@ -273,9 +334,19 @@ onMounted(async () => {
                 ONEENS
               </button>
             </div>
-            <button @click="getResults" :disabled="calculateLoading" v-if="completedStatements === 30" class="btn btn-primary">
+          </div>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button @click="cancelRetryVotingGuide" v-show="retryVotingGuideExists" class="btn btn-secondary" :disabled="calculateLoading">Annuleer nieuwe poging</button>
+            <button
+              @click="getResults"
+              :disabled="calculateLoading"
+              v-if="completedStatements === 30"
+              class="btn btn-primary"
+            >
               <span v-if="!calculateLoading">Bekijk resultaat</span>
-              <span v-else class="flex items-center gap-2"><Spinner></Spinner> resultaten berekenen</span>
+              <span v-else class="flex items-center gap-2"
+                ><Spinner></Spinner> resultaten berekenen</span
+              >
             </button>
           </div>
         </div>

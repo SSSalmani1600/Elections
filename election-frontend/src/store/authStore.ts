@@ -54,6 +54,7 @@ async function login(email: string, password: string) {
 async function logout() {
   await logoutRequest()
   state.user = null
+  location.reload()
 }
 
 export const authStore = {
