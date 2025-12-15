@@ -52,7 +52,7 @@ export interface Party {
 export interface PartyResult {
   partyId: string
   name: string
-  validVotes: number
+  votes: number
 }
 
 export interface Municipality {

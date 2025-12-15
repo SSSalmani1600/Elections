@@ -2,9 +2,10 @@
 import { getConstituencies, getElectionYears, getMunicipalityData } from '@/services/ElectionService'
 import { type Municipality, type Constituency, type Party, type PartyResult } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
+import { type ChartData, type ChartOptions } from 'chart.js'
 import Select from 'primevue/select'
-import Chart from 'primevue/chart'
 import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
+import ChartComponent from '@/components/ChartComponent.vue'
 
 const constituencies = ref<Constituency[]>([])
 const years = ref<number[]>([])
@@ -26,8 +27,7 @@ const constituencyOptions = computed(() =>
     .sort((a, b) => a.label.localeCompare(b.label))
 )
 
-const chartData = ref()
-const chartOptions = ref()
+const chartData = ref<ChartData<'bar'> | null>(null)
 
 const palette: string[] = [
   '#60A5FA', // blue-400
@@ -92,15 +92,13 @@ const setChartData = () => {
         hoverBackgroundColor: colors,
         borderRadius: 8,
         borderSkipped: false,
-        barThickness: 14,
-        maxBarThickness: 18,
         minBarLength: 2,
       },
     ],
   }
 }
 
-const setChartOptions = () => ({
+const setChartOptions = (): ChartOptions<'bar'> => ({
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
@@ -127,14 +125,14 @@ const setChartOptions = () => ({
   },
   scales: {
     x: {
-      grid: { display: false, drawBorder: false },
+      grid: { display: false },
       ticks: {
         color: '#e2e8f0',
         font: { weight: 500 },
       },
     },
     y: {
-      grid: { display: false, drawBorder: false },
+      grid: { display: false },
       ticks: {
         autoSkip: false,
         color: '#cbd5e1',
@@ -142,9 +140,9 @@ const setChartOptions = () => ({
       },
     },
   },
-  categoryPercentage: 0.85,
-  barPercentage: 0.9,
 })
+
+const chartOptions: ChartOptions<'bar'> = setChartOptions()
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id)
@@ -178,7 +176,6 @@ onMounted(async () => {
       || constituencies.value[0];
   }
 
-  chartOptions.value = setChartOptions()
   chartData.value = setChartData()
 })
 
@@ -288,12 +285,7 @@ watch(selectedYear, async () => {
               </h3>
               <span class="text-xs text-white/60">Stemmen</span>
             </div>
-            <div class="p-3 h-[360px] sm:h-[420px] md:h-[460px] lg:h-[520px]">
-              <Chart v-if="chartData" type="bar" :data="chartData" :options="chartOptions" class="w-full h-full" />
-              <div v-else class="flex items-center justify-center w-full h-full">
-                <p class="text-center text-white/80">Couldn't load data</p>
-              </div>
-            </div>
+            <ChartComponent :chartData="chartData" :chartOptions="chartOptions" />
           </div>
         </div>
       </div>
