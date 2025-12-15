@@ -6,10 +6,11 @@ import { type ChartData, type ChartOptions } from 'chart.js'
 import Select from 'primevue/select'
 import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 import ChartComponent from '@/components/ChartComponent.vue'
+import VoteDropdown from '@/components/VoteDropdown.vue'
+import { ChevronDown, Plus, Minus, ArrowRightLeft, Map as MapIcon, Layers } from 'lucide-vue-next';
 
-const constituencies = ref<Constituency[]>([])
 const years = ref<number[]>([])
-const selectedYear = ref<number>(2025)
+const selectedYear = ref<string>("2025")
 const yearOptions = computed(() =>
   [...years.value]
     .map((y) => ({
@@ -17,6 +18,30 @@ const yearOptions = computed(() =>
       value: y,
     }))
 )
+
+const constituencies = ref<Constituency[]>([])
+const municipalities = ref<Municipality[]>([])
+
+const levels: string[] = ["Gemeente", "Kieskring"]
+const selectedLevel = ref<string>("Kieskring");
+
+const selectedDropdownValue = computed({
+  get() {
+    if (selectedLevel.value === "Kieskring") {
+      return selectedConstituency.value?.name ?? "Amsterdam";
+    } else if (selectedLevel.value === "Gemeente") {
+      return selectedMunicipality.value?.name ?? "Amsterdam";
+    }
+    return "Amsterdam";
+  },
+  set(val: string) {
+    if (selectedLevel.value === "Kieskring") {
+      selectedConstituency.value = getConstituencyByName(val);
+    } else if (selectedLevel.value === "Gemeente") {
+      onMapSelect(val)
+    }
+  }
+});
 
 const constituencyOptions = computed(() =>
   [...constituencies.value]
@@ -26,6 +51,15 @@ const constituencyOptions = computed(() =>
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 )
+
+const dropdownOptions = computed(() => {
+  if (selectedLevel.value === "Kieskring") {
+    return constituencies.value.map(c => c.name)
+  } else if (selectedLevel.value === "Gemeente") {
+    return constituencies.value.map(c => ({ label: c.name, value: c.name }));
+  }
+  return [];
+});
 
 const chartData = ref<ChartData<'bar'> | null>(null)
 
@@ -44,7 +78,7 @@ const palette: string[] = [
 
 const selectedMunicipality = ref<Municipality | null>(null);
 const selectedConstituencyId = ref<string | null>(null)
-const selectedConstituency = ref<Constituency | null>(null);
+const selectedConstituency = ref<Constituency | null>(getConstituencyByName("Amsterdam"));
 
 async function onMapSelect(municipalityName: string) {
   try {
@@ -52,8 +86,10 @@ async function onMapSelect(municipalityName: string) {
 
     if (!data) return;
 
-    if (selectedConstituencyId.value !== data.constituencyId) {
-      selectedConstituencyId.value = data.constituencyId;
+    if (!selectedConstituency.value) return;
+
+    if (selectedConstituency.value.constituencyId !== data.constituencyId) {
+      selectedConstituency.value.constituencyId = data.constituencyId;
     }
 
     selectedMunicipality.value = data;
@@ -64,8 +100,8 @@ async function onMapSelect(municipalityName: string) {
 
 // Constituency
 const setChartData = () => {
-  selectedConstituency.value = getConstituencyById(
-    selectedConstituencyId.value ?? '9',
+  selectedConstituency.value = getConstituencyByName(
+    selectedConstituency.value?.name ?? 'Amsterdam',
   )!
 
   let sorted: Party[] | PartyResult[];
@@ -151,17 +187,18 @@ function scrollToSection(id: string) {
   }
 }
 
-function getConstituencyById(id: string): Constituency | null {
+function getConstituencyByName(name: string): Constituency | null {
   for (const constituency of constituencies.value) {
-    if (constituency.constituencyId === id) return constituency
+    if (constituency.name === name) return constituency
   }
   return null
 }
 
 // fetch constituencies
-const fetchConstituencies = async () => {
+const fetchData = async () => {
   try {
     constituencies.value = await getConstituencies(selectedYear.value)
+
   } catch (e) {
     console.error('Failed to fetch constituencies', e)
   }
@@ -171,16 +208,11 @@ onMounted(async () => {
   years.value = await getElectionYears();
   await fetchConstituencies()
 
-  if (!selectedConstituency.value && constituencies.value.length) {
-    selectedConstituency.value = constituencies.value.find(c => c.name === "Amsterdam")
-      || constituencies.value[0];
-  }
-
   chartData.value = setChartData()
 })
 
 // Update chart when user changes selection
-watch([selectedConstituencyId, selectedMunicipality], () => {
+watch([selectedConstituency, selectedMunicipality], () => {
   if (!constituencies.value.length) return
   chartData.value = setChartData()
 })
@@ -267,6 +299,21 @@ watch(selectedYear, async () => {
           optionLabel="label" optionValue="value" />
         <Select v-model="selectedConstituencyId" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
           optionValue="value" placeholder="Selecteer een kieskring" class="sm:max-w-md" />
+        <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
+          <template #icon>
+            <span class="font-bold text-xs">JR</span>
+          </template>
+        </VoteDropdown>
+        <VoteDropdown v-model="selectedLevel" :options="levels" label="Niveau">
+          <template #icon>
+            <Layers :size="14" />
+          </template>
+        </VoteDropdown>
+        <VoteDropdown v-model="selectedDropdownValue" :options="dropdownOptions" :label="selectedLevel">
+          <template #icon>
+            <MapIcon :size="14" />
+          </template>
+        </VoteDropdown>
       </div>
 
       <!-- Content grid -->
