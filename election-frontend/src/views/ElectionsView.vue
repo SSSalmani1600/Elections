@@ -20,7 +20,7 @@ const yearOptions = computed(() =>
 )
 
 const constituencies = ref<Constituency[]>([])
-const municipalities = ref<Municipality[]>([])
+let municipalities: string[] = [];
 
 const levels: string[] = ["Gemeente", "Kieskring"]
 const selectedLevel = ref<string>("Kieskring");
@@ -56,7 +56,7 @@ const dropdownOptions = computed(() => {
   if (selectedLevel.value === "Kieskring") {
     return constituencies.value.map(c => c.name)
   } else if (selectedLevel.value === "Gemeente") {
-    return constituencies.value.map(c => ({ label: c.name, value: c.name }));
+    return [...municipalities].sort((a, b) => a.localeCompare(b));
   }
   return [];
 });
@@ -198,7 +198,7 @@ function getConstituencyByName(name: string): Constituency | null {
 const fetchData = async () => {
   try {
     constituencies.value = await getConstituencies(selectedYear.value)
-    municipalities.value = await getMunicipalities(selectedYear.value)
+    municipalities = await getMunicipalities(selectedYear.value)
   } catch (e) {
     console.error('Failed to fetch constituencies', e)
   }
