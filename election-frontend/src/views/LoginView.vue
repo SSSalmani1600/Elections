@@ -2,12 +2,17 @@
 import { useAuth } from '@/store/authStore'
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { saveResults } from '@/services/VotingGuideResultsService.ts'
+import { useToast } from 'primevue'
+import { saveAnswers } from '@/services/VotingGuideAnswersService.ts'
+import type { VotingGuideAnswer, VotingGuideResult } from '@/types/api.ts'
 
 const router = useRouter()
 const agree = ref(false)
 const email = ref('')
 const password = ref('')
-const { user, login, initialized } = useAuth();
+const { user, login, initialized } = useAuth()
+const toast = useToast()
 
 const error = reactive({
   email: '',
@@ -41,7 +46,42 @@ async function loginHandler(): Promise<void> {
   try {
     await login(email.value, password.value)
 
-    router.replace('/')
+    await router.replace('/')
+
+    // Saving existing voting guide localstorage data into db
+    const resultsRaw = localStorage.getItem('voting_guide_results')
+    const results = resultsRaw ? JSON.parse(resultsRaw) : null
+    const answers: VotingGuideAnswer[] = JSON.parse(
+      localStorage.getItem('voting_guide_answers') || '[]',
+    )
+    const answerPayload = {
+      votingGuideAnswers: answers,
+    }
+
+    if (results !== null && answers.length === 30) {
+      try {
+        await saveAnswers(answerPayload)
+      } catch (err: any) {
+        toast.add({
+          severity: 'error',
+          summary: 'Fout bij opslaan',
+          detail: 'Er ging iets mis met het opslaan van de stemwijzer antwoorden',
+          life: 2000,
+        })
+        console.error(err.message)
+      }
+      try {
+        await saveResults(results)
+      } catch (err: any) {
+        toast.add({
+          severity: 'error',
+          summary: 'Fout bij opslaan',
+          detail: 'Er ging iets mis met het opslaan van de stemwijzer resultaten',
+          life: 2000,
+        })
+        console.log(err.message)
+      }
+    }
   } catch (err: unknown) {
     console.log(err)
     error.email = 'Inloggen mislukt. Controleer je gegevens.'
@@ -51,26 +91,41 @@ async function loginHandler(): Promise<void> {
 
 <template>
   <div class="h-[calc(100vh-100px)] bg-[#1C2541] flex flex-col items-center justify-center px-4">
-    <div class="bg-[#0B132B] p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-6 text-white">
+    <div
+      class="bg-[#0B132B] p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-6 text-white"
+    >
       <h1 class="text-3xl font-bold text-center">Inloggen</h1>
 
       <form @submit.prevent="loginHandler" class="flex flex-col gap-5">
         <!-- Email -->
         <div class="flex flex-col gap-2">
           <label for="email" class="text-sm font-medium text-gray-300">E-mail</label>
-          <input v-model="email" @input="error.email = ''" type="email" id="email" name="email" autocomplete="email"
+          <input
+            v-model="email"
+            @input="error.email = ''"
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
-            placeholder="E-mail" />
+            placeholder="E-mail"
+          />
           <span v-if="error.email" class="text-[#EF3054] text-sm mt-1">{{ error.email }}</span>
         </div>
 
         <!-- Password -->
         <div class="flex flex-col gap-2">
           <label for="password" class="text-sm font-medium text-gray-300">Wachtwoord</label>
-          <input v-model="password" @input="error.password = ''" type="password" id="password" name="password"
+          <input
+            v-model="password"
+            @input="error.password = ''"
+            type="password"
+            id="password"
+            name="password"
             autocomplete="current-password"
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
-            placeholder="Wachtwoord" />
+            placeholder="Wachtwoord"
+          />
           <span v-if="error.password" class="text-[#EF3054] text-sm mt-1">
             {{ error.password }}
           </span>
@@ -88,8 +143,10 @@ async function loginHandler(): Promise<void> {
         </div>
 
         <!-- Submit -->
-        <button type="submit"
-          class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300">
+        <button
+          type="submit"
+          class="bg-[#EF3054] hover:bg-[#D9294B] text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#EF3054]/40 transition-all duration-300"
+        >
           Log in
         </button>
       </form>
@@ -97,7 +154,9 @@ async function loginHandler(): Promise<void> {
       <!-- Footer -->
       <p class="text-sm text-gray-300 text-center">
         Nog geen account?
-        <router-link to="/registreren" class="text-[#EF3054] hover:underline">Registreren</router-link>
+        <router-link to="/registreren" class="text-[#EF3054] hover:underline"
+          >Registreren</router-link
+        >
       </p>
     </div>
   </div>
