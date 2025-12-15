@@ -22,7 +22,8 @@ onMounted(async () => {
   try {
     if (user.value) {
       results.value = await getResults()
-      if (results.value.votingGuideResults !== undefined) localStorage.removeItem("voting_guide_answers")
+      if (results.value.votingGuideResults !== undefined)
+        localStorage.removeItem('voting_guide_answers')
     } else {
       const resultsRaw = localStorage.getItem('voting_guide_results')
       results.value = resultsRaw ? JSON.parse(resultsRaw) : null
@@ -38,10 +39,15 @@ onMounted(async () => {
     resultsTop3.value = results.value?.votingGuideResults.slice(0, 3)
     restOfResults.value = results.value.votingGuideResults.slice(3)
     isLoadingResults.value = false
-  } catch(err: any) {
+  } catch (err: any) {
     console.error(err.message)
   }
 })
+
+const retryVotingGuide = async () => {
+  localStorage.setItem('retry_voting_guide_answers', '[]')
+  await router.replace({ name: 'voting-guide' })
+}
 </script>
 
 <template>
@@ -68,52 +74,55 @@ onMounted(async () => {
         Er zijn geen bekende resultaten, u wordt terug gestuurd naar de stemwijzer
       </p>
     </div>
-    <div v-else class="flex flex-col gap-8 w-full items-center">
-      <div
-        class="flex flex-col gap-5 justify-between w-[90%] md:w-[70%] lg:flex-row lg:h-[290px] lg:gap-10 2xl:w-[55%]"
-      >
+    <div v-else class="w-full flex flex-col items-center gap-8">
+      <button @click="retryVotingGuide" class="btn btn-primary w-fit">Doe de stemwijzer opnieuw</button>
+      <div class="flex flex-col gap-8 w-full items-center">
         <div
-          v-for="(party, index) in resultsTop3"
-          :key="party.partyId"
-          class="flex flex-col w-full h-full bg-background rounded-lg p-3.5 justify-between shadow-lg gap-1 lg:gap-0"
+          class="flex flex-col gap-5 justify-between w-[90%] md:w-[70%] lg:flex-row lg:h-[290px] lg:gap-10 2xl:w-[55%]"
         >
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-2">
-              <i
-                class="pi pi-crown"
-                :class="{
-                  'text-yellow-400': index === 0,
-                  'text-gray-400': index === 1,
-                  'text-amber-600': index === 2,
-                }"
-              ></i>
-              <span class="font-bold text-xl">{{ index + 1 }}e plaats</span>
-            </div>
+          <div
+            v-for="(party, index) in resultsTop3"
+            :key="party.partyId"
+            class="flex flex-col w-full h-full bg-background rounded-lg p-3.5 justify-between shadow-lg gap-1 lg:gap-0"
+          >
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <i
+                  class="pi pi-crown"
+                  :class="{
+                    'text-yellow-400': index === 0,
+                    'text-gray-400': index === 1,
+                    'text-amber-600': index === 2,
+                  }"
+                ></i>
+                <span class="font-bold text-xl">{{ index + 1 }}e plaats</span>
+              </div>
 
-            <span class="font-bold text-xl mb-4 lg:mb-0">{{ party.partyName }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-xl font-bold">{{ Math.ceil(Number(party.percentage)) }}%</span>
-            <ProgressBar :percentage="Math.ceil(Number(party.percentage))"></ProgressBar>
+              <span class="font-bold text-xl mb-4 lg:mb-0">{{ party.partyName }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xl font-bold">{{ Math.ceil(Number(party.percentage)) }}%</span>
+              <ProgressBar :percentage="Math.ceil(Number(party.percentage))"></ProgressBar>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="flex flex-col gap-4 h-[400px] w-[85%] overflow-y-scroll md:w-[60%] lg:w-1/2">
-        <div
-          v-for="party in restOfResults"
-          :key="party.partyId"
-          class="flex flex-col w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center gap-3 lg:gap-0 lg:flex-row"
-        >
-          <div class="w-full flex flex-col">
-            <span class="text-xl font-bold">{{ party.partyName }}</span>
-            <span class="text-sm truncate lg:text-md">Overeenkomst met jouw antwoorden</span>
-          </div>
-          <div class="w-full flex flex-col gap-2.5 lg:w-1/3 lg:text-right">
-            <span class="font-bold text-xl">{{ Math.ceil(Number(party.percentage)) }}%</span>
-            <ProgressBar
-              class="!h-1.5"
-              :percentage="Math.ceil(Number(party.percentage))"
-            ></ProgressBar>
+        <div class="flex flex-col gap-4 h-[400px] w-[85%] overflow-y-scroll md:w-[60%] lg:w-1/2">
+          <div
+            v-for="party in restOfResults"
+            :key="party.partyId"
+            class="flex flex-col w-full justify-between shadow-lg bg-background p-3 rounded-lg items-center gap-3 lg:gap-0 lg:flex-row"
+          >
+            <div class="w-full flex flex-col">
+              <span class="text-xl font-bold">{{ party.partyName }}</span>
+              <span class="text-sm truncate lg:text-md">Overeenkomst met jouw antwoorden</span>
+            </div>
+            <div class="w-full flex flex-col gap-2.5 lg:w-1/3 lg:text-right">
+              <span class="font-bold text-xl">{{ Math.ceil(Number(party.percentage)) }}%</span>
+              <ProgressBar
+                class="!h-1.5"
+                :percentage="Math.ceil(Number(party.percentage))"
+              ></ProgressBar>
+            </div>
           </div>
         </div>
       </div>
