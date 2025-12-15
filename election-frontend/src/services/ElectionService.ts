@@ -46,7 +46,7 @@ export async function getConstituencies(electionId: string): Promise<Constituenc
   return (await res.json()) as Constituency[]
 }
 
-export async function getMunicipalities(electionId: string): Promise<Municipality[]> {
+export async function getMunicipalities(electionId: string): Promise<string[]> {
   const res = await apiFetch(
     `http://localhost:8080/api/electionresults/${electionId}/municipalities`,
     {
@@ -62,7 +62,7 @@ export async function getMunicipalities(electionId: string): Promise<Municipalit
     throw new Error('Failed to fetch municipality')
   }
 
-  return (await res.json()) as Municipality[]
+  return (await res.json()) as string[]
 }
 
 export async function getMunicipalityData(electionId: string, name: string): Promise<Municipality> {
