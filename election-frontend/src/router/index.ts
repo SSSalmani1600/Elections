@@ -1,3 +1,10 @@
+/**
+ * router/index.ts - Vue Router configuratie
+ *
+ * Definieert alle routes (URL paden) van de applicatie.
+ * Bevat ook route guards voor authenticatie checks.
+ */
+
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
@@ -10,7 +17,7 @@ import DiscussionDetailView from '@/views/DiscussionDetailView.vue'
 import ElectionCalendarView from '@/views/ElectionCalenderView.vue'
 import VotingGuideView from '@/views/VotingGuideView.vue'
 import { authStore } from '@/store/authStore'
-import AccountView from '@/views/AccountView.vue'
+import AccountView from '@/views/AccountView.vue'  // Account overzicht pagina
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
 
@@ -77,6 +84,7 @@ const router = createRouter({
       name: 'voting-guide-results',
       component: VotingGuideResultsView,
     },
+    // Account route: toont gebruikersgegevens en activiteit
     {
       path: '/account',
       name: 'account',
@@ -118,20 +126,24 @@ const router = createRouter({
   ],
 })
 
+// Route guard: wordt uitgevoerd voor elke navigatie
 router.beforeEach(async (to, from, next) => {
+  // Initialiseer auth als dat nog niet is gebeurd
   if (!authStore.state.initialized && !authStore.state.loading) {
     await authStore.initAuth()
   }
 
+  // Als route auth vereist maar user niet ingelogd -> redirect naar login
   if (to.meta.requiresAuth && !authStore.state.user) {
     return next({ name: 'login' })
   }
 
+  // Als user al ingelogd is en naar login gaat -> redirect naar home
   if (to.name === 'login' && authStore.state.user) {
     return next({ name: 'home' })
   }
 
-  next()
+  next()  // Sta navigatie toe
 })
 
 export default router
