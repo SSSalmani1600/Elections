@@ -3,21 +3,13 @@ import { getConstituencies, getElectionYears, getMunicipalities, getMunicipality
 import { type Municipality, type Constituency, type Party, type PartyResult } from '@/types/api'
 import { ref, onMounted, watch, computed } from 'vue'
 import { type ChartData, type ChartOptions } from 'chart.js'
-import Select from 'primevue/select'
 import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 import ChartComponent from '@/components/ChartComponent.vue'
 import VoteDropdown from '@/components/VoteDropdown.vue'
-import { ChevronDown, Plus, Minus, ArrowRightLeft, Map as MapIcon, Layers } from 'lucide-vue-next';
+import { Map as MapIcon, Layers } from 'lucide-vue-next';
 
 const years = ref<number[]>([])
 const selectedYear = ref<string>("2025")
-const yearOptions = computed(() =>
-  [...years.value]
-    .map((y) => ({
-      label: y,
-      value: y,
-    }))
-)
 
 const constituencies = ref<Constituency[]>([])
 let municipalities: string[] = [];
@@ -42,15 +34,6 @@ const selectedDropdownValue = computed({
     }
   }
 });
-
-const constituencyOptions = computed(() =>
-  [...constituencies.value]
-    .map((c) => ({
-      label: c.name,
-      value: c.constituencyId,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label))
-)
 
 const dropdownOptions = computed(() => {
   if (selectedLevel.value === "Kieskring") {
@@ -77,7 +60,6 @@ const palette: string[] = [
 ]
 
 const selectedMunicipality = ref<Municipality | null>(null);
-const selectedConstituencyId = ref<string | null>(null)
 const selectedConstituency = ref<Constituency | null>(getConstituencyByName("Amsterdam"));
 
 async function onMapSelect(municipalityName: string) {
@@ -300,10 +282,6 @@ watch(selectedYear, async () => {
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Filter row -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <Select v-model="selectedYear" name="Jaren" placeholder="Selecteer een jaar" :options="yearOptions"
-          optionLabel="label" optionValue="value" />
-        <Select v-model="selectedConstituencyId" name="Kieskringen" :options="constituencyOptions" optionLabel="label"
-          optionValue="value" placeholder="Selecteer een kieskring" class="sm:max-w-md" />
         <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
           <template #icon>
             <span class="font-bold text-xs">JR</span>
