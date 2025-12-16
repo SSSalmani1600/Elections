@@ -1,19 +1,20 @@
 package nl.hva.election_backend.dto;
 
+import java.util.List;
 import java.util.Set;
 
 public class VotingGuideResponseDto {
-   private Set<VotingGuideResultDto> votingGuideResults;
+   private List<VotingGuideResultDto> votingGuideResults;
 
-    public VotingGuideResponseDto(Set<VotingGuideResultDto> votingGuideResults) {
+    public VotingGuideResponseDto(List<VotingGuideResultDto> votingGuideResults) {
         this.votingGuideResults = votingGuideResults;
     }
 
-    public Set<VotingGuideResultDto> getVotingGuideResults() {
+    public List<VotingGuideResultDto> getVotingGuideResults() {
         return votingGuideResults;
     }
 
-    public void setVotingGuideResults(Set<VotingGuideResultDto> votingGuideResults) {
+    public void setVotingGuideResults(List<VotingGuideResultDto> votingGuideResults) {
         this.votingGuideResults = votingGuideResults;
     }
 }

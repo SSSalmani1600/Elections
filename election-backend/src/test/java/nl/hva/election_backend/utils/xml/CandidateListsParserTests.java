@@ -19,7 +19,7 @@ class CandidateListsParserTests extends AbstractParserTests {
         createExpectedDataList(expectedDataList, "Kandidatenlijsten_TK2023_Haarlem-Partial-Copy.eml.xml");
         createExpectedDataList(expectedDataList, "Kandidatenlijsten_TK2023_Haarlem-Partial.eml.xml");
 
-        electionProcessor.parseResults("TK2023", nl.hva.ict.sm3.backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/CandidateLists")));
+        electionProcessor.parseResults("TK2023", nl.hva.election_backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/CandidateLists")));
 
         compareMaps(expectedDataList, transformer.data);
         Set<Integer> usedResults = new HashSet<>();

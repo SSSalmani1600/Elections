@@ -44,10 +44,17 @@ export interface PartyDetail {
   candidates: Candidate[]
 }
 
-export interface Party2 {
-  year: number
-  party_id: string
+export interface PartyResult {
+  partyId: string
   name: string
+  votes: number
+}
+
+export interface Municipality {
+  municipalityId: string
+  name: string
+  constituencyId: string
+  parties: PartyResult[]
 }
 
 export interface Constituency {
@@ -61,7 +68,7 @@ export interface User {
   email: string
   username: string
   isAdmin?: boolean
-  token: string;
+  token: string
 }
 
 export interface Statement {
@@ -72,9 +79,9 @@ export interface Statement {
   answer: string | null
 }
 export interface AdminStats {
-  totalUsers: number;
-  reportedPosts: number;
-  pendingReviews: number;
+  totalUsers: number
+  reportedPosts: number
+  pendingReviews: number
 }
 export interface LoginResponse {
   id: number
