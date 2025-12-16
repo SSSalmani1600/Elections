@@ -15,6 +15,6 @@ services:
       context: ./election-frontend
     container_name: election-frontend
     ports:
-      - "3000:80"
+      - "9696:80"
     depends_on:
       - backend
