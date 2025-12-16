@@ -113,3 +113,8 @@ export interface VotingGuideResult {
   partyName: string
   percentage: string
 }
+export interface Reaction {
+  id: number;
+  message: string;
+  flaggedReason?: string;
+}
