@@ -12,10 +12,10 @@ import 'swiper/css/autoplay';
 import {Autoplay, Grid, Navigation, Pagination} from "swiper/modules";
 import {getParties} from "@/services/PartyService.ts";
 import type {SwiperEvents} from "swiper/types";
-import type {Party} from '@/types/api.ts'
+import type {BasicPartyInfo} from '@/types/api.ts'
 import {getWikipediaPartyData} from '@/services/WikipediaService.ts'
 
-const data = ref<Party[]>([]);
+const data = ref<BasicPartyInfo[]>([]);
 const partyWithImg = ref<{ name: string; img: string; }[]>([])
 const loading = ref(false);
 const error = ref<string>("");

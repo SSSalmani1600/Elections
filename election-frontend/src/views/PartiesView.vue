@@ -3,11 +3,11 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { getParties } from '@/services/PartyService.ts'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
-import type { Party } from '@/types/api.ts'
+import type { BasicPartyInfo } from '@/types/api.ts'
 import { getWikipediaPartyData } from '@/services/WikipediaService.ts'
 import { useFuse } from '@vueuse/integrations/useFuse'
 
-const data = ref<Party[]>([])
+const data = ref<BasicPartyInfo[]>([])
 const partyWithInfo = ref<{ name: string; img: string; summary: string }[]>([])
 const loading = ref(false)
 const hasError = ref<boolean>(false)

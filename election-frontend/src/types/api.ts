@@ -43,6 +43,13 @@ export interface Candidate {
 }
 
 export interface Party {
+  name: string
+  id: string
+  votes: number
+  candidates: Candidate[]
+}
+
+export interface BasicPartyInfo {
   year: number;
   party_id: string;
   name: string;
