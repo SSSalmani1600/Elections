@@ -88,4 +88,26 @@ public class VotingGuideResultsServiceTest {
         VotingGuideResultDto result = response.getVotingGuideResults().getFirst();
         assertEquals(60.0, result.getPercentage());
     }
+
+    @Test
+    public void givenTwoPartiesWithDifferentScores_whenCalculate_thenSortByPercentage() {
+//        GIVEN
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+        userAnswers.getVotingGuideAnswers().add(new VotingGuideAnswerDto(1L, "EENS"));
+
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+        partyViewpoints.add(new PartyViewpointEntity(1L, 1L, 1L, "NEUTRAAL"));
+        partyViewpoints.add(new PartyViewpointEntity(2L, 2L, 1L, "EENS"));
+
+//        WHEN
+        VotingGuideResponseDto response = service.calculate(userAnswers, partyViewpoints);
+
+//        THEN
+        List<VotingGuideResultDto> result = response.getVotingGuideResults();
+        assertEquals(2L, result.getFirst().getPartyId());
+        assertEquals(100.0, result.getFirst().getPercentage());
+
+        assertEquals(1L, result.get(1).getPartyId());
+        assertEquals(0.0, result.get(1).getPercentage());
+    }
 }
