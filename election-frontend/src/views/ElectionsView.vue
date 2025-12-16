@@ -129,6 +129,43 @@ const setChartData = () => {
   // color per bar
   const colors = labels.map((_, i) => palette[i % palette.length])
 
+  if (compareMode.value) {
+    compareConstituency.value = getConstituencyByName(
+      compareConstituency.value?.name ?? 'Amsterdam',
+    )!
+    if (compareMunicipality.value == null) {
+      sorted = [...compareConstituency.value.parties].sort((a, b) => b.votes - a.votes)
+    } else {
+      sorted = [...compareMunicipality.value.parties].sort((a, b) => b.votes - a.votes)
+    }
+
+    const values2 = sorted.map((p) => p.votes)
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Stemmen',
+          data: values,
+          backgroundColor: colors,
+          hoverBackgroundColor: colors,
+          borderRadius: 8,
+          borderSkipped: false,
+          minBarLength: 2,
+        },
+        {
+          label: 'Stemmen',
+          data: values2,
+          backgroundColor: colors,
+          hoverBackgroundColor: colors,
+          borderRadius: 8,
+          borderSkipped: false,
+          minBarLength: 2,
+        }
+      ],
+    }
+  }
+
   return {
     labels,
     datasets: [
