@@ -110,4 +110,27 @@ public class VotingGuideResultsServiceTest {
         assertEquals(1L, result.get(1).getPartyId());
         assertEquals(0.0, result.get(1).getPercentage());
     }
+
+    @Test
+    public void givenTwoPartiesWithSameScore_whenCalculate_thenSortByPartyId() {
+//        GIVEN
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+        userAnswers.getVotingGuideAnswers().add(new VotingGuideAnswerDto(1L, "EENS"));
+
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+        partyViewpoints.add(new PartyViewpointEntity(1L, 1L, 1L, "NEUTRAAL"));
+        partyViewpoints.add(new PartyViewpointEntity(2L, 2L, 1L, "EENS"));
+        partyViewpoints.add(new PartyViewpointEntity(3L, 3L, 1L, "EENS"));
+
+//        WHEN
+        VotingGuideResponseDto response = service.calculate(userAnswers, partyViewpoints);
+
+//        THEN
+        List<VotingGuideResultDto> result = response.getVotingGuideResults();
+        assertEquals(2L, result.getFirst().getPartyId());
+        assertEquals(100.0, result.getFirst().getPercentage());
+
+        assertEquals(3L, result.get(1).getPartyId());
+        assertEquals(100.0, result.get(1).getPercentage());
+    }
 }
