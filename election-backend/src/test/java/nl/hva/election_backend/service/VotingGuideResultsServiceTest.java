@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 public class VotingGuideResultsServiceTest {
@@ -132,5 +133,19 @@ public class VotingGuideResultsServiceTest {
 
         assertEquals(3L, result.get(1).getPartyId());
         assertEquals(100.0, result.get(1).getPercentage());
+    }
+
+    @Test
+    public void givenEmptyAnswers_whenCalculate_thenReturnIllegalArgumentException() {
+//        GIVEN
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+        partyViewpoints.add(new PartyViewpointEntity(1L, 1L, 1L, "NEUTRAAL"));
+
+//        WHEN + THEN
+        assertThrows(IllegalArgumentException.class, () ->
+                service.calculate(userAnswers, partyViewpoints)
+        );
     }
 }
