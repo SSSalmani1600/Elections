@@ -43,4 +43,21 @@ public class VotingGuideResultsServiceTest {
         assertEquals(100.0, result.getPercentage());
     }
 
+    @Test
+    public void givenNoMatchingAnswers_whenCalculate_thenReturnZeroPercent() {
+//        GIVEN
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+        userAnswers.getVotingGuideAnswers().add(new VotingGuideAnswerDto(1L, "ONEENS"));
+
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+        partyViewpoints.add(new PartyViewpointEntity(1L, 1L, 1L, "EENS"));
+
+//        WHEN
+        VotingGuideResponseDto response = service.calculate(userAnswers, partyViewpoints);
+
+//        THEN
+        VotingGuideResultDto result = response.getVotingGuideResults().getFirst();
+        assertEquals(0.0, result.getPercentage());
+    }
+
 }
