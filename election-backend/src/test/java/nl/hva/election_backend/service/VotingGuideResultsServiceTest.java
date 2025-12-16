@@ -5,6 +5,7 @@ import nl.hva.election_backend.dto.VotingGuideRequestDto;
 import nl.hva.election_backend.dto.VotingGuideResponseDto;
 import nl.hva.election_backend.dto.VotingGuideResultDto;
 import nl.hva.election_backend.entity.PartyViewpointEntity;
+import nl.hva.election_backend.entity.VotingGuidePartyEntity;
 import nl.hva.election_backend.repository.UserRepository;
 import nl.hva.election_backend.repository.VotingGuidePartyRepository;
 import nl.hva.election_backend.repository.VotingGuideResultsRepository;
@@ -60,4 +61,31 @@ public class VotingGuideResultsServiceTest {
         assertEquals(0.0, result.getPercentage());
     }
 
+    @Test
+    public void givenMultipleMatchingAnswers_whenCalculate_thenReturnSixtyPercent() {
+//        GIVEN
+        String[] answerArray = {"EENS", "ONEENS", "NEUTRAAL", "ONEENS", "NEUTRAAL"};
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+        long statementId = 1L;
+        for (String answer : answerArray) {
+            userAnswers.getVotingGuideAnswers()
+                    .add(new VotingGuideAnswerDto(statementId, answer));
+            statementId++;
+        }
+
+        String[] partyAnswerArray = {"EENS", "EENS", "NEUTRAAL", "ONEENS", "ONEENS"};
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+        long statementId2 = 1L;
+        for (String partyAnswer : partyAnswerArray) {
+            partyViewpoints.add(new PartyViewpointEntity(1L, 1L, statementId2, partyAnswer));
+            statementId2++;
+        }
+
+//        WHEN
+        VotingGuideResponseDto response = service.calculate(userAnswers, partyViewpoints);
+
+//        THEN
+        VotingGuideResultDto result = response.getVotingGuideResults().getFirst();
+        assertEquals(60.0, result.getPercentage());
+    }
 }
