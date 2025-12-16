@@ -49,6 +49,13 @@ export interface Party {
   candidates: Candidate[]
 }
 
+export interface BasicPartyInfo {
+  year: number;
+  party_id: string;
+  name: string;
+}
+
+
 export interface PartyResult {
   partyId: string
   name: string
