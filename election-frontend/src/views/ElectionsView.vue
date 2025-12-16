@@ -7,6 +7,7 @@ import MunicipalitiesMap from '@/components/maps/MunicipalitiesMap.vue'
 import ChartComponent from '@/components/ChartComponent.vue'
 import VoteDropdown from '@/components/VoteDropdown.vue'
 import { Map as MapIcon, Layers } from 'lucide-vue-next';
+import { ArrowRightLeft } from 'lucide-vue-next'
 
 const years = ref<number[]>([])
 const selectedYear = ref<string>("2025")
@@ -16,6 +17,8 @@ let municipalities: string[] = [];
 
 const levels: string[] = ["Gemeente", "Kieskring"]
 const selectedLevel = ref<string>("Kieskring");
+
+const compareMode = ref<boolean>(false);
 
 const selectedDropdownValue = computed({
   get() {
@@ -281,22 +284,56 @@ watch(selectedYear, async () => {
   <section class="px-6 py-12 text-white bg-[#0B132B]">
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Filter row -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
-          <template #icon>
-            <span class="font-bold text-xs">JR</span>
-          </template>
-        </VoteDropdown>
-        <VoteDropdown v-model="selectedLevel" :options="levels" label="Niveau">
-          <template #icon>
-            <Layers :size="14" />
-          </template>
-        </VoteDropdown>
-        <VoteDropdown v-model="selectedDropdownValue" :options="dropdownOptions" :label="selectedLevel">
-          <template #icon>
-            <MapIcon :size="14" />
-          </template>
-        </VoteDropdown>
+      <div class="flex flex-col sm:items-stretch sm:items-center gap-4">
+        <div class="flex gap-4 relative flex-wrap">
+          <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
+            <template #icon>
+              <span class="font-bold text-xs">JR</span>
+            </template>
+          </VoteDropdown>
+          <VoteDropdown v-model="selectedLevel" :options="levels" label="Niveau">
+            <template #icon>
+              <Layers :size="14" />
+            </template>
+          </VoteDropdown>
+          <VoteDropdown v-model="selectedDropdownValue" :options="dropdownOptions" :label="selectedLevel">
+            <template #icon>
+              <MapIcon :size="14" />
+            </template>
+          </VoteDropdown>
+          <button @click="compareMode = !compareMode" :class="[
+            'flex cursor-pointer items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-300 w-full md:w-auto justify-center',
+            compareMode
+              ? 'bg-blue-600/20 border-blue-500/50 text-blue-200'
+              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
+          ]">
+            <ArrowRightLeft :size="16" />
+            <span class="text-sm font-medium">Vergelijken</span>
+            <span v-if="compareMode" class="ml-1 w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          </button>
+        </div>
+        <div v-if="compareMode"
+          class="
+          mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4">
+          <span className="text-xs font-bold text-slate-400 uppercase">Vergelijk met:</span>
+          <div className="flex gap-3 flex-wrap">
+            <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
+              <template #icon>
+                <span class="font-bold text-xs">JR</span>
+              </template>
+            </VoteDropdown>
+            <VoteDropdown v-model="selectedLevel" :options="levels" label="Niveau">
+              <template #icon>
+                <Layers :size="14" />
+              </template>
+            </VoteDropdown>
+            <VoteDropdown v-model="selectedDropdownValue" :options="dropdownOptions" :label="selectedLevel">
+              <template #icon>
+                <MapIcon :size="14" />
+              </template>
+            </VoteDropdown>
+          </div>
+        </div>
       </div>
 
       <!-- Content grid -->
