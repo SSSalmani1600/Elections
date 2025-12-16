@@ -43,11 +43,11 @@ export interface Candidate {
 }
 
 export interface Party {
-  name: string
-  id: string
-  votes: number
-  candidates: Candidate[]
+  year: number;
+  party_id: string;
+  name: string;
 }
+
 
 export interface PartyResult {
   partyId: string
