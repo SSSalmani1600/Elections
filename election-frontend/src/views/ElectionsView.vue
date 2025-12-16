@@ -12,6 +12,8 @@ import { ArrowRightLeft } from 'lucide-vue-next'
 const years = ref<number[]>([])
 const selectedYear = ref<string>("2025")
 
+const compareYear = ref<string>("2025")
+
 const constituencies = ref<Constituency[]>([])
 let municipalities: string[] = [];
 
@@ -19,6 +21,29 @@ const levels: string[] = ["Gemeente", "Kieskring"]
 const selectedLevel = ref<string>("Kieskring");
 
 const compareMode = ref<boolean>(false);
+
+const selectedMunicipality = ref<Municipality | null>(null);
+const selectedConstituency = ref<Constituency | null>(getConstituencyByName("Amsterdam"));
+const compareMunicipality = ref<Municipality | null>(null);
+const compareConstituency = ref<Constituency | null>(getConstituencyByName("Amsterdam"))
+
+const compareDropdownValue = computed({
+  get() {
+    if (selectedLevel.value === "Kieskring") {
+      return compareConstituency.value?.name ?? "Amsterdam";
+    } else if (selectedLevel.value === "Gemeente") {
+      return compareMunicipality.value?.name ?? "Amsterdam";
+    }
+    return "Amsterdam";
+  },
+  async set(val: string) {
+    if (selectedLevel.value === "Kieskring") {
+      compareConstituency.value = getConstituencyByName(val);
+    } else if (selectedLevel.value === "Gemeente") {
+      compareMunicipality.value = await getMunicipalityData(selectedYear.value, val)
+    }
+  }
+})
 
 const selectedDropdownValue = computed({
   get() {
@@ -61,9 +86,6 @@ const palette: string[] = [
   '#C084FC', // violet-300
   '#F87171', // red-400
 ]
-
-const selectedMunicipality = ref<Municipality | null>(null);
-const selectedConstituency = ref<Constituency | null>(getConstituencyByName("Amsterdam"));
 
 async function onMapSelect(municipalityName: string) {
   try {
@@ -314,12 +336,13 @@ watch(selectedYear, async () => {
             <span v-if="compareMode" class="ml-1 w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
           </button>
         </div>
+        <!-- Comparison Section -->
         <div v-if="compareMode"
           class="
           mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4">
           <span className="text-xs font-bold text-slate-400 uppercase">Vergelijk met:</span>
           <div className="flex gap-3 flex-wrap">
-            <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
+            <VoteDropdown v-model="compareYear" :options="years" label="Jaar">
               <template #icon>
                 <span class="font-bold text-xs">JR</span>
               </template>
@@ -329,7 +352,7 @@ watch(selectedYear, async () => {
                 <Layers :size="14" />
               </template>
             </VoteDropdown>
-            <VoteDropdown v-model="selectedDropdownValue" :options="dropdownOptions" :label="selectedLevel">
+            <VoteDropdown v-model="compareDropdownValue" :options="dropdownOptions" :label="selectedLevel">
               <template #icon>
                 <MapIcon :size="14" />
               </template>
