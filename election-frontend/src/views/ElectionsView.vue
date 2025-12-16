@@ -260,7 +260,7 @@ onMounted(async () => {
 })
 
 // Update chart when user changes selection
-watch([selectedConstituency, selectedMunicipality, selectedLevel, compareMode], async () => {
+watch([selectedConstituency, selectedMunicipality, selectedLevel, compareMode, compareConstituency, compareMunicipality], async () => {
   if (!constituencies.value.length) return
   if (selectedLevel.value === "Gemeente" && selectedMunicipality.value === null) {
     selectedMunicipality.value = await getMunicipalityData(selectedYear.value, "Amsterdam")
