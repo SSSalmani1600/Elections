@@ -148,4 +148,19 @@ public class VotingGuideResultsServiceTest {
                 service.calculate(userAnswers, partyViewpoints)
         );
     }
+
+    @Test
+    public void givenEmptyParties_whenCalculate_thenReturnIllegalArgumentException() {
+//        GIVEN
+        VotingGuideRequestDto userAnswers = new VotingGuideRequestDto(new HashSet<>());
+        userAnswers.getVotingGuideAnswers().add(new VotingGuideAnswerDto(1L, "EENS"));
+
+
+        List<PartyViewpointEntity> partyViewpoints = new ArrayList<>();
+
+//        WHEN + THEN
+        assertThrows(IllegalArgumentException.class, () ->
+                service.calculate(userAnswers, partyViewpoints)
+        );
+    }
 }
