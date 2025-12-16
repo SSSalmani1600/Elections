@@ -77,6 +77,8 @@ async function onMapSelect(municipalityName: string) {
       selectedConstituency.value.constituencyId = data.constituencyId;
     }
 
+    selectedLevel.value = "Gemeente"
+
     selectedMunicipality.value = data;
   } catch (error) {
     console.error("Error in map selection:", error);
