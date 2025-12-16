@@ -19,7 +19,7 @@ class MunicipalityVotesParserTests extends AbstractParserTests {
         createExpectedDataList(expectedDataList, "Telling_TK2023_gemeente_Velsen-Partial-Copy.eml.xml");
         createExpectedDataList(expectedDataList, "Telling_TK2023_gemeente_Velsen-Partial.eml.xml");
 
-        electionProcessor.parseResults("TK2023", nl.hva.ict.sm3.backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/Municipality")));
+        electionProcessor.parseResults("TK2023", nl.hva.election_backend.utils.PathUtils.getResourcePath("/%s".formatted("TK2023-Partial/Municipality")));
 
         compareMaps(expectedDataList, transformer.data);
         Set<Integer> usedResults = new HashSet<>();

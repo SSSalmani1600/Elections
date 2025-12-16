@@ -30,6 +30,7 @@ public class VotingGuideResultsService {
         this.votingGuideResultsRepository = votingGuideResultsRepository;
     }
 
+//    Compares answers of the user to the viewpoints per party, and gives back a dto with a List of parties with the corresponding percentage
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
 
         Set<VotingGuideResultDto> sortedSet = new TreeSet<>(Comparator.comparing(VotingGuideResultDto::getPercentage).reversed().thenComparing(VotingGuideResultDto::getPartyId));
