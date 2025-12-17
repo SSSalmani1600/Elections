@@ -51,3 +51,18 @@ export async function getPollResults(pollId: string): Promise<PollResult> {
 
   return await res.json()
 }
+
+export async function createPoll(question: string) {
+  const res = await apiFetch("/api/admin/polls", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question }),
+  });
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || "Poll aanmaken mislukt");
+  }
+
+  return await res.json();
+}
