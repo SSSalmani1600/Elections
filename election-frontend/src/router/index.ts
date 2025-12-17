@@ -119,6 +119,11 @@ const router = createRouter({
       component: () => import('@/views/admin/AdminPositionsView.vue'),
     },
     {
+      path: '/admin/polls',
+      name: 'admin-polls',
+      component: () => import('@/views/admin/AdminPollsView.vue'),
+    },
+    {
       path: '/account',
       name: 'account',
       component: AccountView,
