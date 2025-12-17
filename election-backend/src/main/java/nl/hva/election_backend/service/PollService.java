@@ -26,6 +26,11 @@ public class PollService {
                 .orElseThrow(() -> new RuntimeException("Geen poll gevonden"));
     }
 
+    public Poll createPoll(String question) {
+        Poll poll = new Poll(question.trim());
+        return pollRepository.save(poll);
+    }
+
     public PollResult vote(UUID pollId, Long userId, String choice) {
         if (!pollRepository.existsById(pollId)) {
             throw new RuntimeException("Stelling bestaat niet.");
