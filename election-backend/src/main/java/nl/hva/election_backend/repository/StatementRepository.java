@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 public interface StatementRepository extends JpaRepository<StatementEntity, Long> {
-    public LinkedHashSet<StatementEntity> findAllByOrderByIdAsc();
+    List<StatementEntity> findAllByOrderByIdAsc();
 
     @Query("select distinct s.category from StatementEntity s")
     List<String> findAllCategories();

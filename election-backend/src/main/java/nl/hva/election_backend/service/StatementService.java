@@ -16,7 +16,7 @@ public class StatementService {
     }
 
     public LinkedHashSet<StatementEntity> getAllStatements() {
-        return this.statementRepository.findAllByOrderByIdAsc();
+        return new LinkedHashSet<>(this.statementRepository.findAllByOrderByIdAsc());
     }
 
     public List<String> getAllCategories() {
