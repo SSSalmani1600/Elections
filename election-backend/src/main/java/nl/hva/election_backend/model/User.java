@@ -2,23 +2,30 @@ package nl.hva.election_backend.model;
 
 import jakarta.persistence.*;
 
+// Model class: representeert een gebruiker in de applicatie
+// Dit is zowel een database entiteit als een model class
 @Entity
 @Table(name = "users")
 public class User {
 
+    // Primaire sleutel: automatisch gegenereerd door de database
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Gebruikersnaam (uniek en verplicht)
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    // E-mailadres (uniek en verplicht)
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    // Wachtwoord hash: nooit plain text opslaan
     @Column(name = "password_hash")
     private String passwordHash;
 
+    // Of deze gebruiker admin rechten heeft
     @Column(name = "is_admin")
     private boolean isAdmin;
 
@@ -30,14 +37,16 @@ public class User {
         this.isAdmin = isAdmin;
     }
 
+    // Lege constructor: vereist door JPA
     public User() {
     }
 
+    // Constructor voor nieuwe gebruikers: standaard geen admin rechten
     public User(String email, String passwordHash, String username) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.username = username;
-        this.isAdmin = false; // ⭐ default blijft consistent
+        this.isAdmin = false; // Nieuwe gebruikers zijn standaard geen admin
     }
 
     // ⭐ GETTERS & SETTERS
