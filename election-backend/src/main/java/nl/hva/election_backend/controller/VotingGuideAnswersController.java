@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.Set;
 
-@Controller
+@RestController
 @RequestMapping("/api/voting-guide/answers")
 public class VotingGuideAnswersController {
     private final JwtService jwtService;

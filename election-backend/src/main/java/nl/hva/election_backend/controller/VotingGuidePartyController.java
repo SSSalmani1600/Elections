@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/voting-guide-parties")
+@RestController
+@RequestMapping("/api/voting-guide/parties")
 public class VotingGuidePartyController {
     VotingGuidePartyService votingGuidePartyService;
 
