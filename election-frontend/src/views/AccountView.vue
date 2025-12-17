@@ -1,7 +1,16 @@
+<!--
+  AccountView.vue - Account Overzicht Pagina
+
+  Deze pagina toont:
+  - Gebruikersgegevens (username, email, account type)
+  - Mogelijkheid om gegevens te bewerken (met wachtwoord verificatie)
+  - Activiteit overzicht: geplaatste topics en reacties
+-->
 <template>
+  <!-- Hoofdcontainer met achtergrond en padding -->
   <div class="min-h-screen bg-[--color-background] text-white">
     <div class="max-w-6xl mx-auto py-16 px-4">
-      <!-- Header -->
+      <!-- Pagina Header met icoon en titel -->
       <div class="text-center mb-10">
         <div
           class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#ef3054] to-[#d82f4c] mb-6 shadow-lg shadow-[#ef3054]/20"
@@ -19,7 +28,7 @@
         <p class="text-gray-400 text-lg">Beheer je gegevens en bekijk je activiteit</p>
       </div>
 
-      <!-- Loading state -->
+      <!-- Loading state: toont spinner terwijl data wordt opgehaald -->
       <div v-if="loading && !user" class="flex justify-center">
         <div class="bg-[#111830]/80 border border-white/10 rounded-2xl p-10 text-center">
           <div
@@ -29,7 +38,7 @@
         </div>
       </div>
 
-      <!-- Error state -->
+      <!-- Error state: toont foutmelding als iets misgaat -->
       <div v-else-if="!user && error" class="flex justify-center">
         <div class="bg-red-900/20 border border-red-500/30 rounded-2xl p-8 text-center max-w-xl">
           <svg
@@ -49,13 +58,14 @@
         </div>
       </div>
 
-      <!-- Main Content: Two Column Layout -->
+      <!-- Hoofdinhoud: 2-kolom layout (links: account info, rechts: activiteit) -->
       <div v-else-if="user" class="grid lg:grid-cols-2 gap-8 items-start">
-        <!-- Left Column: Account Info (Sticky) -->
+
+        <!-- LINKER KOLOM: Account Informatie kaart (sticky = blijft zichtbaar bij scrollen) -->
         <div
           class="bg-[#111830]/80 border border-white/10 rounded-2xl shadow-xl overflow-hidden lg:sticky lg:top-8"
         >
-          <!-- View Mode -->
+          <!-- View Mode: normale weergave van account gegevens -->
           <div v-if="!editMode">
             <!-- User header -->
             <div
@@ -181,9 +191,10 @@
             </div>
           </div>
 
-          <!-- Edit Mode -->
+          <!-- Edit Mode: formulier om gegevens te wijzigen -->
           <div v-else class="p-6">
             <div class="flex items-center gap-3 mb-6">
+              <!-- Terug knop -->
               <button
                 @click="cancelEdit"
                 class="p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -203,8 +214,9 @@
               </div>
             </div>
 
+            <!-- Formulier voor het wijzigen van gegevens, @submit.prevent voorkomt pagina refresh -->
             <form @submit.prevent="saveChanges" class="space-y-4">
-              <!-- Current password -->
+              <!-- Huidig wachtwoord veld: vereist voor beveiliging -->
               <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
                 <div class="flex items-center gap-2 mb-3">
                   <svg
@@ -298,9 +310,9 @@
           </div>
         </div>
 
-        <!-- Right Column: Activity -->
+        <!-- RECHTER KOLOM: Activiteit overzicht -->
         <div class="space-y-6">
-          <!-- Topics -->
+          <!-- Topics sectie: toont alle discussies die de gebruiker heeft aangemaakt -->
           <div class="bg-[#111830]/80 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
             <div class="p-5 border-b border-white/5 flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -351,7 +363,7 @@
             </div>
           </div>
 
-          <!-- Reactions -->
+          <!-- Reacties sectie: toont alle reacties die de gebruiker heeft geplaatst -->
           <div class="bg-[#111830]/80 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
             <div class="p-5 border-b border-white/5 flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center">
@@ -407,27 +419,36 @@
 </template>
 
 <script setup lang="ts">
+// AccountView component: pagina waar gebruikers hun accountgegevens kunnen bekijken en bewerken
+// Toont gebruikersinfo, activiteit (topics en reacties), en mogelijkheid om gegevens te wijzigen
+
 import { ref, onMounted } from 'vue'
 import { getCurrentUser, updateUser, type UpdateUserRequest } from '@/services/UserService'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/store/authStore'
 
 const router = useRouter()
-const editMode = ref(false)
-const loading = ref(false)
-const activityLoading = ref(false)
-const error = ref('')
-const success = ref('')
+
+// State variabelen voor de component
+const editMode = ref(false)        // Of de gebruiker in bewerkmodus is
+const loading = ref(false)          // Of data wordt geladen
+const activityLoading = ref(false)  // Of activiteit wordt geladen
+const error = ref('')               // Foutmeldingen
+const success = ref('')             // Succesmeldingen
 
 const { user, logout, initialized } = useAuth()
 
+// Huidig wachtwoord (vereist voor wijzigingen)
 const currentPassword = ref('')
+
+// Tijdelijke edit data (wordt gebruikt tijdens bewerken)
 const editUser = ref({
   username: '',
   email: '',
   newPassword: '',
 })
 
+// Interface voor een topic (discussie)
 interface Topic {
   id: number
   title: string
@@ -435,6 +456,7 @@ interface Topic {
   reactionsCount: number
 }
 
+// Interface voor een reactie
 interface Reaction {
   id: number
   message: string
@@ -443,11 +465,13 @@ interface Reaction {
   discussionTitle: string
 }
 
+// Activiteit data: topics en reacties van de gebruiker
 const activity = ref<{ topics: Topic[]; reactions: Reaction[] }>({
   topics: [],
   reactions: [],
 })
 
+// Formatteert een datum string naar Nederlandse notatie (bijv. "15 jan 2024")
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('nl-NL', {
     day: 'numeric',
@@ -456,12 +480,19 @@ function formatDate(dateStr: string) {
   })
 }
 
+// Haalt alle activiteit op van een gebruiker (topics en reacties)
 async function fetchActivity(userId: number) {
   activityLoading.value = true
+  console.log('Fetching activity for userId:', userId)
   try {
     const res = await fetch(`http://localhost:8080/api/users/${userId}/activity`)
+    console.log('Activity response status:', res.status)
     if (res.ok) {
-      activity.value = await res.json()
+      const data = await res.json()
+      console.log('Activity data received:', data)
+      activity.value = data
+    } else {
+      console.error('Activity fetch failed with status:', res.status, await res.text())
     }
   } catch (err) {
     console.error('Error fetching activity:', err)
@@ -470,7 +501,9 @@ async function fetchActivity(userId: number) {
   }
 }
 
+// Wordt uitgevoerd wanneer de component wordt geladen
 onMounted(async () => {
+  // Als gebruiker niet ingelogd is, stuur door naar login pagina
   if (initialized.value && !user.value) {
     router.push('/inloggen')
     return
@@ -478,8 +511,22 @@ onMounted(async () => {
 
   try {
     loading.value = true
-    const userData = await getCurrentUser()
-    user.value = userData
+
+    // Probeer huidige gebruiker op te halen via JWT cookie
+    let userData = user.value
+    try {
+      userData = await getCurrentUser()
+      user.value = userData
+    } catch (authErr) {
+      console.log('getCurrentUser failed, using authStore user:', authErr)
+      // Gebruik de user uit de authStore als fallback
+      if (!user.value) {
+        throw authErr // Geen fallback beschikbaar
+      }
+      userData = user.value
+    }
+
+    // Vul edit formulier met huidige gegevens
     editUser.value = {
       username: userData.username,
       email: userData.email,
@@ -487,12 +534,14 @@ onMounted(async () => {
     }
     localStorage.setItem('userId', String(userData.id))
 
-    // Fetch activity
+    // Haal activiteit op (topics en reacties)
+    console.log('Calling fetchActivity with userId:', userData.id)
     await fetchActivity(userData.id)
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Onbekende fout'
     console.error('Error fetching user:', err)
 
+    // Toon specifieke foutmeldingen afhankelijk van het type fout
     if (
       errorMsg.includes('401') ||
       errorMsg.includes('Unauthorized') ||
@@ -511,6 +560,7 @@ onMounted(async () => {
   }
 })
 
+// Start bewerkmodus: zet editMode aan en reset velden
 function startEdit() {
   editMode.value = true
   currentPassword.value = ''
@@ -518,8 +568,11 @@ function startEdit() {
   success.value = ''
 }
 
+// Slaat gewijzigde gebruikersgegevens op
 async function saveChanges() {
   if (!user.value) return
+
+  // Valideer dat huidig wachtwoord is ingevuld
   if (!currentPassword.value) {
     error.value = 'Voer je huidige wachtwoord in.'
     return
@@ -530,13 +583,16 @@ async function saveChanges() {
   loading.value = true
 
   try {
+    // Maak update request object
     const updates: UpdateUserRequest = {
       username: editUser.value.username,
       email: editUser.value.email,
-      currentPassword: currentPassword.value,
+      currentPassword: currentPassword.value, // Vereist voor verificatie
     }
 
+    // Als nieuw wachtwoord is ingevuld, voeg toe aan updates
     if (editUser.value.newPassword && editUser.value.newPassword.length > 0) {
+      // Valideer minimale lengte
       if (editUser.value.newPassword.length < 8) {
         error.value = 'Nieuw wachtwoord moet minimaal 8 karakters zijn'
         loading.value = false
@@ -545,14 +601,11 @@ async function saveChanges() {
       updates.password = editUser.value.newPassword
     }
 
+    // Stuur update request naar backend
     const updatedUser = await updateUser(user.value.id, updates)
     user.value = updatedUser
 
-    // if (updatedUser.username !== user.username) {
-    //   login(updatedUser.username, localStorage.getItem('JWT') || '')
-    //   localStorage.setItem('username', updatedUser.username)
-    // }
-
+    // Toon succesmelding en sluit bewerkmodus
     success.value = 'Gegevens opgeslagen!'
     editMode.value = false
     currentPassword.value = ''
@@ -566,8 +619,10 @@ async function saveChanges() {
   }
 }
 
+// Annuleert bewerkmodus: reset alle velden en ga terug naar view modus
 function cancelEdit() {
   if (user.value) {
+    // Reset edit velden naar originele waarden
     editUser.value = {
       username: user.value.username,
       email: user.value.email,

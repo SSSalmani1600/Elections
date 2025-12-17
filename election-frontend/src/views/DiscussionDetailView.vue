@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 type Reaction = {
   id: number
+  userId: number
   author: string
   message: string
   createdAt: string
@@ -12,6 +13,7 @@ type Reaction = {
 
 type DiscussionDetail = {
   id: string
+  userId: number
   title: string
   author: string
   body: string
@@ -61,10 +63,208 @@ function backToList() {
 const newReaction = ref('')
 const submitting = ref(false)
 const errorReaction = ref('')
+const deletingId = ref<number | null>(null)
+
+// Edit state for reactions
+const editingId = ref<number | null>(null)
+const editMessage = ref('')
+const savingEdit = ref(false)
+const editError = ref('')
+
+// Edit state for discussion topic
+const editingTopic = ref(false)
+const editTitle = ref('')
+const editBody = ref('')
+const savingTopic = ref(false)
+const topicError = ref('')
+const deletingTopic = ref(false) // Loading state voor verwijderen
+
+function startEditTopic() {
+  if (!discussion.value) return
+  editTitle.value = discussion.value.title
+  editBody.value = discussion.value.body
+  editingTopic.value = true
+  topicError.value = ''
+}
+
+function cancelEditTopic() {
+  editingTopic.value = false
+  editTitle.value = ''
+  editBody.value = ''
+  topicError.value = ''
+}
+
+async function saveEditTopic() {
+  if (!user.value || !discussion.value) return
+  if (!editTitle.value.trim() || !editBody.value.trim()) {
+    topicError.value = 'Titel en bericht mogen niet leeg zijn.'
+    return
+  }
+
+  savingTopic.value = true
+  topicError.value = ''
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.value.id,
+        title: editTitle.value,
+        body: editBody.value,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij bewerken discussie')
+    }
+
+    const updated = await res.json()
+    discussion.value = updated
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    cancelEditTopic()
+  } catch (e) {
+    console.error(e)
+    topicError.value = 'Er ging iets mis bij het bewerken van de discussie.'
+  } finally {
+    savingTopic.value = false
+  }
+}
+
+// Verwijdert de discussie (alleen voor eigenaar)
+async function deleteTopic() {
+  if (!user.value || !discussion.value) return
+
+  // Bevestiging vragen
+  if (!confirm('Weet je zeker dat je deze discussie wilt verwijderen? Alle reacties worden ook verwijderd.')) return
+
+  deletingTopic.value = true
+
+  try {
+    // API call naar backend
+    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.value.id }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij verwijderen discussie')
+    }
+
+    // Terug naar forum lijst
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    router.push({ name: 'forum' })
+  } catch (e) {
+    console.error(e)
+    alert('Er ging iets mis bij het verwijderen van de discussie.')
+  } finally {
+    deletingTopic.value = false
+  }
+}
+
+function startEdit(reaction: Reaction) {
+  editingId.value = reaction.id
+  editMessage.value = reaction.message
+  editError.value = ''
+}
+
+function cancelEdit() {
+  editingId.value = null
+  editMessage.value = ''
+  editError.value = ''
+}
+
+async function saveEdit(reactionId: number) {
+  if (!user.value) return
+  if (!editMessage.value.trim()) {
+    editError.value = 'Reactie mag niet leeg zijn.'
+    return
+  }
+
+  savingEdit.value = true
+  editError.value = ''
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.value.id,
+        message: editMessage.value,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij bewerken reactie')
+    }
+
+    const updated = await res.json()
+
+    // Update de reactie in de lijst
+    if (discussion.value) {
+      const index = discussion.value.reactions.findIndex(r => r.id === reactionId)
+      if (index !== -1) {
+        discussion.value.reactions[index] = updated
+      }
+    }
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+    cancelEdit()
+  } catch (e) {
+    console.error(e)
+    editError.value = 'Er ging iets mis bij het bewerken van de reactie.'
+  } finally {
+    savingEdit.value = false
+  }
+}
+
+async function deleteReaction(reactionId: number) {
+  if (!user.value) return
+
+  if (!confirm('Weet je zeker dat je deze reactie wilt verwijderen?')) return
+
+  deletingId.value = reactionId
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.value.id }),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText || 'Fout bij verwijderen reactie')
+    }
+
+    // Verwijder de reactie uit de lijst
+    if (discussion.value) {
+      discussion.value.reactions = discussion.value.reactions.filter(r => r.id !== reactionId)
+      discussion.value.reactionsCount--
+    }
+
+    localStorage.setItem('forumRefresh', Date.now().toString())
+  } catch (e) {
+    console.error(e)
+    alert('Er ging iets mis bij het verwijderen van de reactie.')
+  } finally {
+    deletingId.value = null
+  }
+}
 
 async function postReaction() {
   if (!newReaction.value.trim()) {
     errorReaction.value = 'Reactie mag niet leeg zijn.'
+    return
+  }
+
+  if (!user.value) {
+    errorReaction.value = 'Je moet ingelogd zijn om te reageren.'
     return
   }
 
@@ -78,7 +278,7 @@ async function postReaction() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: newReaction.value,
-        userId: user.value?.id ?? 1,
+        userId: user.value.id,
       }),
     })
 
@@ -116,20 +316,123 @@ async function postReaction() {
       <div v-else-if="discussion" class="rounded-2xl p-10 border border-[rgba(255,255,255,0.08)]
                bg-gradient-to-br from-[#0B132B]/90 to-[#111830]/90
                shadow-[0_0_25px_rgba(0,0,0,0.3)] backdrop-blur-md">
-        <h1 class="text-4xl font-bold mb-4 tracking-tight text-white">{{ discussion.title }}</h1>
 
-        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8">
-          <span class="text-[--color-primary] font-medium">{{ discussion.author }}</span>
-          <span>•</span>
-          <span>{{ new Date(discussion.lastActivityAt).toLocaleString() }}</span>
-          <span>•</span>
-          <span>{{ discussion.reactionsCount }} reacties</span>
+        <!-- Edit mode voor topic -->
+        <div v-if="editingTopic" class="space-y-4 mb-10">
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Titel</label>
+            <input
+              v-model="editTitle"
+              class="w-full p-4 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                     focus:outline-none focus:border-[#ef3054] text-xl font-bold"
+              placeholder="Titel van je discussie..."
+            />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Bericht</label>
+            <textarea
+              v-model="editBody"
+              class="w-full p-4 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                     resize-none min-h-[150px] focus:outline-none focus:border-[#ef3054]"
+              placeholder="Schrijf je bericht..."
+            ></textarea>
+          </div>
+          <p v-if="topicError" class="text-red-400 text-sm">{{ topicError }}</p>
+          <div class="flex gap-3">
+            <button
+              @click="saveEditTopic"
+              :disabled="savingTopic"
+              class="px-5 py-3 rounded-xl font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
+                     text-white hover:scale-[1.02] transition-all
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ savingTopic ? 'Opslaan...' : 'Opslaan' }}
+            </button>
+            <button
+              @click="cancelEditTopic"
+              :disabled="savingTopic"
+              class="px-5 py-3 rounded-xl font-medium bg-gray-700 text-white
+                     hover:bg-gray-600 transition-all
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Annuleren
+            </button>
+          </div>
         </div>
 
-        <article class="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]
-                 p-6 rounded-xl text-[--color-text-base] leading-relaxed mb-10">
-          <p class="whitespace-pre-line text-lg">{{ discussion.body }}</p>
-        </article>
+        <!-- Normal view voor topic -->
+        <div v-else>
+          <div class="flex justify-between items-start mb-4">
+            <h1 class="text-4xl font-bold tracking-tight text-white">{{ discussion.title }}</h1>
+            <!-- Bewerk en verwijder knoppen (alleen zichtbaar voor eigenaar) -->
+            <div v-if="user && user.id === discussion.userId" class="flex items-center gap-2">
+              <button
+                @click="startEditTopic"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+                       border border-[#ef3054] text-[#ef3054]
+                       hover:bg-[#ef3054] hover:text-white transition-all"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Bewerken
+              </button>
+              <button
+                @click="deleteTopic"
+                :disabled="deletingTopic"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+                       border border-red-500 text-red-500
+                       hover:bg-red-500 hover:text-white transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg v-if="!deletingTopic" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ deletingTopic ? 'Verwijderen...' : 'Verwijderen' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 text-sm mb-8">
+            <!-- Author badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef3054]/10 border border-[#ef3054]/20">
+              <svg class="w-4 h-4 text-[#ef3054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span class="text-[#ef3054] font-medium">{{ discussion.author }}</span>
+            </div>
+
+            <!-- Date badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-gray-300">{{ new Date(discussion.lastActivityAt).toLocaleString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
+            </div>
+
+            <!-- Reactions badge -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span class="text-gray-300">{{ discussion.reactionsCount }} reacties</span>
+            </div>
+          </div>
+
+          <article class="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]
+                   p-6 rounded-xl text-[--color-text-base] leading-relaxed mb-10">
+            <p class="whitespace-pre-line text-lg">{{ discussion.body }}</p>
+          </article>
+        </div>
 
         <div>
           <h2 class="text-2xl font-semibold mb-4 text-white">Reacties</h2>
@@ -184,11 +487,81 @@ async function postReaction() {
                    bg-[rgba(255,255,255,0.02)] max-h-[400px] overflow-y-auto
                    scrollbar-thin scrollbar-thumb-[#ef3054]/60 scrollbar-track-transparent">
             <div v-for="r in discussion.reactions" :key="r.id" class="bg-[#0B132B]/80 border border-gray-700 rounded-xl p-5
-                     text-white transition hover:border-[#ef3054]">
-              <p class="text-sm text-gray-400 mb-1">
-                {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
-              </p>
-              <p class="text-base leading-relaxed">{{ r.message }}</p>
+                     text-white transition hover:border-[#ef3054] relative group">
+              <!-- Edit mode -->
+              <div v-if="editingId === r.id" class="space-y-3">
+                <p class="text-sm text-gray-400 mb-1">
+                  {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
+                </p>
+                <textarea
+                  v-model="editMessage"
+                  class="w-full p-3 rounded-xl bg-[#0B132B] text-white border border-gray-600
+                         resize-none min-h-[80px] focus:outline-none focus:border-[#ef3054]"
+                  placeholder="Bewerk je reactie..."
+                ></textarea>
+                <p v-if="editError" class="text-red-400 text-sm">{{ editError }}</p>
+                <div class="flex gap-2">
+                  <button
+                    @click="saveEdit(r.id)"
+                    :disabled="savingEdit"
+                    class="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-[#ef3054] to-[#d82f4c]
+                           text-white hover:scale-[1.02] transition-all text-sm
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {{ savingEdit ? 'Opslaan...' : 'Opslaan' }}
+                  </button>
+                  <button
+                    @click="cancelEdit"
+                    :disabled="savingEdit"
+                    class="px-4 py-2 rounded-lg font-medium bg-gray-700 text-white
+                           hover:bg-gray-600 transition-all text-sm
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+
+              <!-- Normal view -->
+              <div v-else class="flex justify-between items-start">
+                <div class="flex-1">
+                  <p class="text-sm text-gray-400 mb-1">
+                    {{ r.author }} · {{ new Date(r.createdAt).toLocaleString() }}
+                  </p>
+                  <p class="text-base leading-relaxed">{{ r.message }}</p>
+                </div>
+                <!-- Bewerk en verwijder knoppen (alleen zichtbaar voor eigen reacties) -->
+                <div v-if="user && user.id === r.userId" class="flex gap-3 ml-3">
+                  <!-- Bewerk knop -->
+                  <button
+                    @click="startEdit(r)"
+                    class="text-[#ef3054] hover:text-[#ff4d6d] hover:scale-110 transition-all"
+                    title="Reactie bewerken"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <!-- Verwijder knop -->
+                  <button
+                    @click="deleteReaction(r.id)"
+                    :disabled="deletingId === r.id"
+                    class="text-[#ef3054] hover:text-[#ff4d6d] hover:scale-110 transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                    :title="deletingId === r.id ? 'Verwijderen...' : 'Reactie verwijderen'"
+                  >
+                    <svg v-if="deletingId !== r.id" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

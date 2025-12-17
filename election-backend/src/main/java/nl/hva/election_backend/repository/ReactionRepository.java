@@ -20,4 +20,7 @@ public interface ReactionRepository extends JpaRepository<ReactionEntity, Long> 
     long countByDiscussion_Id(Long discussionId);
 
     List<ReactionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    // Verwijdert alle reacties van een discussie
+    void deleteAllByDiscussion_Id(Long discussionId);
 }
