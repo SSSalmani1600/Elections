@@ -27,4 +27,13 @@ public class StatementController {
         }
     }
 
+    @GetMapping("/categories")
+    public ResponseEntity<?> getAllCategories() {
+        try {
+            return ResponseEntity.ok(statementService.getAllCategories());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Something went wrong with fetching categories");
+        }
+    }
+
 }
