@@ -14,3 +14,22 @@ export async function getAllStatements(): Promise<Set<Statement>> {
     throw new Error("Cannot get a connection with the server")
   }
 }
+
+export async function getAllCategories(): Promise<string[]> {
+  try {
+    const res = await fetch("http://localhost:8080/api/statements/categories", {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!res.ok) {
+      throw new Error(`Fetching categories from statements failed ${res.status}`);
+    }
+
+    return await res.json()
+  } catch (err: any) {
+    throw new Error(`Fetching categories error: ${err}`)
+  }
+}
