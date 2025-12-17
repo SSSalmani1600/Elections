@@ -103,6 +103,11 @@ export interface LoginResponse {
   isAdmin: boolean
 }
 
+export interface VotingGuideParty {
+  id: number,
+  name: string
+}
+
 export interface VotingGuideResultRequest {
   votingGuideAnswers: VotingGuideAnswer[]
 }
