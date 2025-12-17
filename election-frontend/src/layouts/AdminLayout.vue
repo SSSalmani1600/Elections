@@ -9,6 +9,7 @@
         <RouterLink to="/admin/users" class="hover:text-[#EF3054]">Gebruikersbeheer</RouterLink>
         <RouterLink to="/admin/moderation" class="hover:text-[#EF3054]">Moderatie</RouterLink>
         <RouterLink to="/admin/positions" class="hover:text-[#EF3054]">Standpunten</RouterLink>
+        <RouterLink to="/admin/polls" class="hover:text-[#EF3054]">Stellingen</RouterLink>
       </nav>
     </aside>
 
