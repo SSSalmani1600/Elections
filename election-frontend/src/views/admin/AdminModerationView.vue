@@ -1,4 +1,6 @@
+
 <template>
+
   <AdminLayout>
     <h1 class="text-3xl font-bold mb-6">Moderatie</h1>
 
@@ -82,7 +84,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import AdminLayout from "@/layouts/AdminLayout.vue";
-
 import {
   getPendingReactions,
   getFlaggedReactions,
@@ -90,9 +91,11 @@ import {
   rejectReaction,
   flagReaction
 } from "@/services/ModerationService";
+import type { Reaction } from "@/types/api";
 
-const pending = ref([]);
-const flagged = ref([]);
+const pending = ref<Reaction[]>([]);
+const flagged = ref<Reaction[]>([]);
+
 
 async function load() {
   pending.value = await getPendingReactions();

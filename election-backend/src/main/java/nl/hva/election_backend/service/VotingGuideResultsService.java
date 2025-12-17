@@ -30,7 +30,17 @@ public class VotingGuideResultsService {
         this.votingGuideResultsRepository = votingGuideResultsRepository;
     }
 
+//    Compares answers of the user to the viewpoints per party, and gives back a dto with a List of parties with the corresponding percentage
     public VotingGuideResponseDto calculate(VotingGuideRequestDto votingGuideAnswers, List<PartyViewpointEntity> partyViewpoints) {
+        if (votingGuideAnswers == null ||
+                votingGuideAnswers.getVotingGuideAnswers() == null ||
+                votingGuideAnswers.getVotingGuideAnswers().isEmpty()) {
+            throw new IllegalArgumentException("Voting guide answers are required");
+        }
+
+        if (partyViewpoints == null || partyViewpoints.isEmpty()) {
+            throw new IllegalArgumentException("Party viewpoints are required");
+        }
 
         Set<VotingGuideResultDto> sortedSet = new TreeSet<>(Comparator.comparing(VotingGuideResultDto::getPercentage).reversed().thenComparing(VotingGuideResultDto::getPartyId));
         double totalAnswers = votingGuideAnswers.getVotingGuideAnswers().size();
