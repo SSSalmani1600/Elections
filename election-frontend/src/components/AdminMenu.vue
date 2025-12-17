@@ -76,6 +76,13 @@ onMounted(async () => {
           Standpunten beheren
         </router-link>
 
+        <router-link
+          to="/admin/polls"
+          class="bg-[#EF3054] text-white text-center py-4 rounded-xl font-semibold"
+        >
+          Stellingen beheren
+        </router-link>
+
       </div>
 
     </div>
