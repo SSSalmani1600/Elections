@@ -64,19 +64,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center m-10 gap-10">
+  <div class="flex flex-col items-center m-4 md:m-10 gap-10">
     <div class="flex flex-col items-center gap-2">
       <h1 class="font-bold text-3xl">Stemwijzer 2025</h1>
-      <p class="w-[80%] text-center text-text-muted">
+      <p class="w-[80%] text-center text-text-muted text-sm lg:text-md">
         Ontdek welke partij of kandidaat het beste aansluit bij jouw mening. Beantwoord stellingen,
         kies wat jij belangrijk vindt en vergelijk jouw resultaat.
       </p>
     </div>
     <router-link to="/stemwijzer/invullen" class="btn btn-primary">Doe de stemwijzer</router-link>
 
-    <div class="flex flex-col w-[80%] gap-3 items-center">
+    <div class="flex flex-col gap-3 items-center lg:w-[80%]">
       <h4 class="font-bold text-2xl">Hoe werkt het?</h4>
-      <div class="grid grid-cols-3 gap-10">
+      <div class="flex flex-col gap-6 lg:grid grid-cols-3 lg:gap-10">
         <div
           class="col-span-1 flex flex-col gap-2 p-4 bg-background h-full rounded-lg shadow-lg text-center"
           v-for="(item, index) in array"
@@ -90,8 +90,8 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="flex flex-col items-center gap-3 w-[70%]">
-      <div class="flex items-center gap-2 font-bold text-2xl">
+    <div class="flex flex-col items-center gap-3 lg:w-[70%]">
+      <div class="flex items-center gap-2 font-bold text-xl md:text-2xl">
         <h4>De categorieen</h4>
         <span v-if="categories && categories.length > 0">- {{ categories?.length }}</span>
       </div>
@@ -102,7 +102,7 @@ onMounted(async () => {
         </div>
 
         <!-- Content -->
-        <div v-else class="flex flex-wrap gap-2 justify-center">
+        <div v-else class="flex flex-wrap gap-2 text-sm justify-center md:text-base">
           <span
             v-for="category in categories"
             :key="category"
@@ -119,7 +119,7 @@ onMounted(async () => {
     </div>
 
     <div class="w-[80%] flex flex-col items-center gap-3">
-      <div class="flex items-center gap-2 font-bold text-2xl">
+      <div class="flex items-center gap-2 font-bold text-xl md:text-2xl ">
         <h4>Deelnemende partijen</h4>
         <span v-if="parties && parties.length > 0">- {{ parties?.length }}</span>
       </div>
@@ -130,7 +130,7 @@ onMounted(async () => {
         </div>
 
         <!-- Content -->
-        <div v-else class="flex flex-wrap gap-2 justify-center">
+        <div v-else class="flex flex-wrap gap-2 justify-center text-sm md:text-base">
           <span v-for="party in parties" :key="party.id" class="bg-background p-2 px-4 rounded-lg">
             {{ party.name }}
           </span>
