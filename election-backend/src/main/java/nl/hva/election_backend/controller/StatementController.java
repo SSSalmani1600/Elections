@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/statements")
@@ -19,12 +20,13 @@ public class StatementController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllStatements() {
-        try {
-            return ResponseEntity.ok(statementService.getAllStatements());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something went wrong with fetching all statements");
-        }
+    public LinkedHashSet<StatementEntity> getAllStatements() {
+            return statementService.getAllStatements();
+    }
+
+    @GetMapping("/categories")
+    public List<String> getAllCategories() {
+        return statementService.getAllCategories();
     }
 
 }
