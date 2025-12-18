@@ -66,3 +66,22 @@ export async function createPoll(question: string) {
 
   return await res.json();
 }
+
+export interface AdminPoll {
+  id: string
+  question: string
+  createdAt: string
+  eensPercentage: number
+  oneensPercentage: number
+  total: number
+}
+
+export async function getAllAdminPolls(): Promise<AdminPoll[]> {
+  const res = await apiFetch("/api/admin/polls");
+
+  if (!res.ok) {
+    throw new Error("Kon stellingen niet ophalen");
+  }
+
+  return await res.json();
+}
