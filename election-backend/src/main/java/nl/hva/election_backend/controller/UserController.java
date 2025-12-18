@@ -16,100 +16,74 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+// Controller voor account/gebruikersbeheer
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://localhost:3000"})
 public class UserController {
 
-    @Autowired
-    private TestRepository userRepository;
+    @Autowired private TestRepository userRepository;
+    @Autowired private DiscussionRepository discussionRepository;
+    @Autowired private ReactionRepository reactionRepository;
+    @Autowired private BCryptPasswordHasher passwordHasher;
+    @Autowired private JwtService jwtService;
 
-    @Autowired
-    private DiscussionRepository discussionRepository;
-
-    @Autowired
-    private ReactionRepository reactionRepository;
-
-    @Autowired
-    private BCryptPasswordHasher passwordHasher;
-
-    @Autowired
-    private JwtService jwtService;
-
-    // 🔹 GET /api/users/me — huidig user ophalen via Bearer token
+    // Haalt ingelogde gebruiker op via JWT cookie
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@CookieValue(value = "jwt", required = false) String accessToken) {
         try {
-            String userIdStr = jwtService.extractUserId(accessToken); // Subject bevat user ID
+            String userIdStr = jwtService.extractUserId(accessToken);
             Long userId = Long.parseLong(userIdStr);
-
             Optional<User> user = userRepository.findById(userId);
-
-            return user.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-
+            return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid token: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token: " + e.getMessage());
         }
     }
 
-    // 🔹 GET /api/users/{id}
+    // Haalt gebruiker op via ID
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 🔹 PUT /api/users/{id} — user bewerken met wachtwoordverificatie
+    // Update gebruikersgegevens (vereist huidig wachtwoord)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
-
         Optional<User> optionalUser = userRepository.findById(id);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (optionalUser.isEmpty()) return ResponseEntity.notFound().build();
 
         User user = optionalUser.get();
 
-        // Verplicht huidig wachtwoord
+        // Check huidig wachtwoord
         if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Huidig wachtwoord is verplicht");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Huidig wachtwoord is verplicht");
         }
-
         if (!passwordHasher.matches(request.getCurrentPassword(), user.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Huidig wachtwoord is onjuist");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Huidig wachtwoord is onjuist");
         }
 
-        // Username wijzigen
+        // Update username
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             user.setUsername(request.getUsername().trim());
         }
 
-        // E-mail wijzigen
+        // Update email (check of niet al in gebruik)
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             String normalizedEmail = request.getEmail().trim().toLowerCase();
-
             Optional<User> existing = userRepository.findByEmail(normalizedEmail);
             if (existing.isPresent() && !existing.get().getId().equals(id)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("E-mail is al in gebruik");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail is al in gebruik");
             }
-
             user.setEmail(normalizedEmail);
         }
 
-        // Wachtwoord wijzigen
+        // Update wachtwoord (hash opslaan, nooit plain text)
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             if (request.getPassword().length() < 8) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Nieuw wachtwoord moet minimaal 8 karakters zijn");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nieuw wachtwoord moet minimaal 8 karakters zijn");
             }
-
             user.setPasswordHash(passwordHasher.hash(request.getPassword()));
         }
 
@@ -117,18 +91,14 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-    // 🔹 GET /api/users/{id}/activity — topics + reacties
+    // Haalt activiteit op (topics + reacties van gebruiker)
     @GetMapping("/{id}/activity")
     public ResponseEntity<?> getUserActivity(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) return ResponseEntity.notFound().build();
 
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Topics
+        // Haal topics op
         List<DiscussionEntity> discussions = discussionRepository.findByUserIdOrderByCreatedAtDesc(id);
         List<Map<String, Object>> topicsList = new ArrayList<>();
-
         for (DiscussionEntity d : discussions) {
             Map<String, Object> topic = new HashMap<>();
             topic.put("id", d.getId());
@@ -138,10 +108,9 @@ public class UserController {
             topicsList.add(topic);
         }
 
-        // Reacties
+        // Haal reacties op
         List<ReactionEntity> reactions = reactionRepository.findByUserIdOrderByCreatedAtDesc(id);
         List<Map<String, Object>> reactionsList = new ArrayList<>();
-
         for (ReactionEntity r : reactions) {
             Map<String, Object> reaction = new HashMap<>();
             reaction.put("id", r.getId());
@@ -152,11 +121,9 @@ public class UserController {
             reactionsList.add(reaction);
         }
 
-        // Response
         Map<String, Object> activity = new HashMap<>();
         activity.put("topics", topicsList);
         activity.put("reactions", reactionsList);
-
         return ResponseEntity.ok(activity);
     }
 }

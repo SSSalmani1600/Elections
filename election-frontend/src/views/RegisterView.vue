@@ -14,6 +14,7 @@ const { user, login, initialized } = useAuth()
 const displayName = ref('')
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const agree = ref(false)
 const error = ref('')
 const success = ref('')
@@ -34,6 +35,14 @@ async function onSubmit() {
   try {
     if (!agree.value) {
       throw new Error('Je moet akkoord gaan met de voorwaarden.')
+    }
+
+    if (password.value !== confirmPassword.value) {
+      throw new Error('Wachtwoorden komen niet overeen.')
+    }
+
+    if (password.value.length < 8) {
+      throw new Error('Wachtwoord moet minimaal 8 karakters zijn.')
     }
 
     const res: RegisterResponse = await register(email.value, password.value, displayName.value)
@@ -80,7 +89,11 @@ async function onSubmit() {
     }
   } catch (err) {
     console.error(err)
-    error.value = 'Registratie mislukt. Controleer je gegevens.'
+    if (err instanceof Error) {
+      error.value = err.message
+    } else {
+      error.value = 'Registratie mislukt. Controleer je gegevens.'
+    }
   } finally {
     loading.value = false
   }
@@ -133,8 +146,26 @@ async function onSubmit() {
             required
             minlength="8"
             class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
-            placeholder="Wachtwoord"
+            placeholder="Wachtwoord (min. 8 karakters)"
           />
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="flex flex-col gap-2">
+          <label for="confirmPassword" class="text-sm font-medium text-gray-300">Bevestig wachtwoord</label>
+          <input
+            v-model="confirmPassword"
+            type="password"
+            id="confirmPassword"
+            required
+            minlength="8"
+            class="bg-[#0c0f2a] border border-[#30335a] rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-[#EF3054]"
+            :class="{ 'border-red-500': confirmPassword && password !== confirmPassword }"
+            placeholder="Herhaal wachtwoord"
+          />
+          <span v-if="confirmPassword && password !== confirmPassword" class="text-red-400 text-sm">
+            Wachtwoorden komen niet overeen
+          </span>
         </div>
 
         <!-- Checkbox -->

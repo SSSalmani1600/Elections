@@ -2,19 +2,32 @@ package nl.hva.election_backend.dto;
 
 import java.time.Instant;
 
+// DTO voor een reactie: wordt naar de frontend gestuurd
+// Bevat alleen de data die nodig is voor weergave
 public class ReactionDto {
-    private Long id;
-    private String username;
-    private String message;
-    private Instant createdAt;
+    private Long id;                    // Unieke ID van de reactie
+    private Long userId;                // ID van de auteur (voor eigenaar check)
+    private String username;            // Username van de auteur
+    private String message;             // Inhoud van de reactie
+    private Instant createdAt;          // Wanneer de reactie is aangemaakt
 
     public ReactionDto() {}
 
-    public ReactionDto(Long id, String username, String message, Instant createdAt) {
+    // Constructor: maakt een nieuwe ReactionDto aan
+    public ReactionDto(Long id, Long userId, String username, String message, Instant createdAt) {
         this.id = id;
+        this.userId = userId;
         this.username = username;
         this.message = message;
         this.createdAt = createdAt;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getId() {
@@ -33,7 +46,7 @@ public class ReactionDto {
         this.username = username;
     }
 
-    // For backwards compatibility with frontend expecting "author"
+    // Voor backwards compatibility: frontend verwacht soms "author" in plaats van "username"
     public String getAuthor() {
         return username;
     }

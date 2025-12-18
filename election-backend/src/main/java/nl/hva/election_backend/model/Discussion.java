@@ -2,6 +2,8 @@ package nl.hva.election_backend.model;
 
 import java.time.Instant;
 
+// Model class: representeert een discussie in de applicatie
+// Dit is een gewone Java class (geen database entiteit)
 public class Discussion {
 
     private String id;
@@ -16,20 +18,22 @@ public class Discussion {
 
     public Discussion() {}
 
-    /** Nieuwe discussie aanmaken vanuit controller */
+    // Factory method: maakt een nieuwe discussie aan vanuit de controller
+    // Gebruikt wanneer een gebruiker een nieuwe discussie aanmaakt
     public static Discussion create(String title, String body, String category, Long userId) {
         Discussion d = new Discussion();
         d.title = title;
         d.body = body;
-        d.category = category != null ? category : "algemeen";
+        d.category = category != null ? category : "algemeen"; // Default categorie
         d.userId = userId;
         d.createdAt = Instant.now();
         d.lastActivityAt = Instant.now();
-        d.reactionsCount = 0;
+        d.reactionsCount = 0; // Nieuwe discussie heeft nog geen reacties
         return d;
     }
 
-    /** Mapping vanuit Entity */
+    // Factory method: zet een database entiteit om naar een Discussion model
+    // Gebruikt wanneer je data uit de database haalt en omzet naar een model
     public static Discussion fromEntity(
             String id,
             String title,

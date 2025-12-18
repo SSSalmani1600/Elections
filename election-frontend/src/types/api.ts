@@ -19,15 +19,27 @@ export type ParserResponse = {
 
 export interface Candidate {
   firstName: string
-  namePrefix?: string
   lastName: string
-  initials?: string
+  initials: string
   gender: string
   localityName: string
-  electionName?: string
-  partiesId?: string
+  electionName: string
+  partiesId: string
   candidateId: string
-  votes?: string | number
+  votes: string
+}
+
+export interface Candidate {
+  firstName: string
+  namePrefix?: string
+  lastName: string
+  initials: string
+  gender: string
+  localityName: string
+  electionName: string
+  partiesId: string
+  candidateId: string
+  votes: string
 }
 
 export interface Party {
@@ -37,12 +49,12 @@ export interface Party {
   candidates: Candidate[]
 }
 
-export interface PartyDetail {
-  partyId: string
-  name: string
-  year: number
-  candidates: Candidate[]
+export interface BasicPartyInfo {
+  year: number;
+  party_id: string;
+  name: string;
 }
+
 
 export interface PartyResult {
   partyId: string
@@ -63,12 +75,13 @@ export interface Constituency {
   parties: Party[]
 }
 
+// User interface - wordt gebruikt in AccountView en authStore
 export interface User {
-  id: number
-  email: string
-  username: string
-  isAdmin?: boolean
-  token: string
+  id: number           // Unieke gebruikers-ID uit database
+  email: string        // Email adres van gebruiker
+  username: string     // Weergavenaam
+  isAdmin?: boolean    // Of gebruiker admin rechten heeft
+  token: string        // JWT token voor authenticatie
 }
 
 export interface Statement {
@@ -90,6 +103,11 @@ export interface LoginResponse {
   isAdmin: boolean
 }
 
+export interface VotingGuideParty {
+  id: number,
+  name: string
+}
+
 export interface VotingGuideResultRequest {
   votingGuideAnswers: VotingGuideAnswer[]
 }
@@ -107,4 +125,9 @@ export interface VotingGuideResult {
   partyId: number
   partyName: string
   percentage: string
+}
+export interface Reaction {
+  id: number;
+  message: string;
+  flaggedReason?: string;
 }
