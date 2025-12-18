@@ -1,5 +1,6 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.dto.PollOverviewDto;
 import nl.hva.election_backend.dto.PollResult;
 import nl.hva.election_backend.model.Poll;
 import nl.hva.election_backend.model.PollVote;
@@ -62,4 +63,33 @@ public class PollService {
 
         return dto;
     }
+
+    public List<PollOverviewDto> getAllPollsWithResults() {
+        List<Poll> polls = pollRepository.findAllByOrderByCreatedAtDesc();
+
+        return polls.stream().map(poll -> {
+            PollResult result = getResults(poll.getId());
+
+            int total = result.total;
+
+            int eensPercentage = total == 0
+                    ? 0
+                    : (int) Math.round((result.eens * 100.0) / total);
+
+            int oneensPercentage = total == 0
+                    ? 0
+                    : 100 - eensPercentage;
+
+            return new PollOverviewDto(
+                    poll.getId(),
+                    poll.getQuestion(),
+                    poll.getCreatedAt(),
+                    eensPercentage,
+                    oneensPercentage,
+                    total
+            );
+        }).toList();
+    }
+
+
 }
