@@ -4,6 +4,8 @@ import nl.hva.election_backend.dto.PollResult;
 import nl.hva.election_backend.model.Poll;
 import nl.hva.election_backend.service.JwtService;
 import nl.hva.election_backend.service.PollService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -28,25 +30,26 @@ public class PollController {
     }
 
     @PostMapping("/{id}/vote")
-    public PollResult vote(
+    public ResponseEntity<PollResult> vote(
             @PathVariable UUID id,
             @CookieValue(value = "jwt", required = false) String jwt,
             @RequestBody VoteRequest req
     ) {
         if (jwt == null || jwt.isBlank()) {
-            throw new RuntimeException("Niet ingelogd");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         String userIdStr;
         try {
             userIdStr = jwtService.extractUserId(jwt);
         } catch (Exception e) {
-            throw new RuntimeException("Niet ingelogd");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = Long.parseLong(userIdStr);
 
-        return pollService.vote(id, userId, req.choice());
+        var result =  pollService.vote(id, userId, req.choice());
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/{id}/results")
