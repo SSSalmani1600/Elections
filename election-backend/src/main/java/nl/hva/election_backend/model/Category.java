@@ -1,4 +1,8 @@
 package nl.hva.election_backend.model;
 
-public enum cCategory {
+public enum Category {
+    VOTES,
+    NATURE,
+    SPORTS,
+    IMMIGRANTS
 }
