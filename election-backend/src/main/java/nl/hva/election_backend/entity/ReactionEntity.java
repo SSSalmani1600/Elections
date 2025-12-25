@@ -21,19 +21,9 @@ public class ReactionEntity {
     @JoinColumn(name = "discussion_id", nullable = false)
     private DiscussionEntity discussion;
 
-    // ID van de gebruiker die de reactie heeft geschreven
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    // Relatie naar UserEntity: LAZY betekent pas ophalen als nodig
-    @JsonIgnore
+    // Relatie naar de gebruiker die de reactie heeft geschreven
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id",
-            referencedColumnName = "id",
-            insertable = false,
-            updatable = false
-    )
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     // De inhoud van de reactie (TEXT type voor lange teksten)
@@ -54,9 +44,9 @@ public class ReactionEntity {
 
     public ReactionEntity() {}
 
-    public ReactionEntity(DiscussionEntity discussion, Long userId, String message) {
+    public ReactionEntity(DiscussionEntity discussion, UserEntity user, String message) {
         this.discussion = discussion;
-        this.userId = userId;
+        this.user = user;
         this.message = message;
         this.createdAt = Instant.now();
     }
@@ -66,9 +56,6 @@ public class ReactionEntity {
 
     public DiscussionEntity getDiscussion() { return discussion; }
     public void setDiscussion(DiscussionEntity discussion) { this.discussion = discussion; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 
     public UserEntity getUser() { return user; }
     public void setUser(UserEntity user) { this.user = user; }
@@ -84,7 +71,4 @@ public class ReactionEntity {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public void setDiscussionId(int i) {
-    }
 }
