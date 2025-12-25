@@ -27,18 +27,9 @@ public class DiscussionEntity {
     @Column
     private String category;
 
-    // ID van de gebruiker die de discussie heeft aangemaakt
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    // Relatie naar UserEntity: LAZY betekent dat user data pas wordt opgehaald als je het nodig hebt
+    // Relatie naar de gebruiker die de discussie heeft aangemaakt
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id",
-            referencedColumnName = "id",
-            insertable = false,
-            updatable = false
-    )
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     // Wanneer de discussie is aangemaakt
@@ -62,7 +53,6 @@ public class DiscussionEntity {
     public String getTitle() { return title; }
     public String getBody() { return body; }
     public String getCategory() { return category; }
-    public Long getUserId() { return userId; }
     public UserEntity getUser() { return user; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastActivityAt() { return lastActivityAt; }
@@ -72,7 +62,7 @@ public class DiscussionEntity {
     public void setTitle(String title) { this.title = title; }
     public void setBody(String body) { this.body = body; }
     public void setCategory(String category) { this.category = category; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public void setUser(UserEntity user) { this.user = user; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public void setLastActivityAt(Instant lastActivityAt) { this.lastActivityAt = lastActivityAt; }
     public void setReactionsCount(int reactionsCount) { this.reactionsCount = reactionsCount; }
