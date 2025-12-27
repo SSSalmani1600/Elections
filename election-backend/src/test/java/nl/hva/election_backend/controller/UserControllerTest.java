@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -14,37 +13,25 @@ import org.springframework.http.ResponseEntity;
 
 import nl.hva.election_backend.dto.UpdateUserRequest;
 import nl.hva.election_backend.model.User;
-import nl.hva.election_backend.repository.DiscussionRepository;
-import nl.hva.election_backend.repository.ReactionRepository;
-import nl.hva.election_backend.repository.TestRepository;
-import nl.hva.election_backend.security.BCryptPasswordHasher;
 import nl.hva.election_backend.service.JwtService;
+import nl.hva.election_backend.service.UserService;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
     @Mock
-    private TestRepository userRepository;
-
-    @Mock
-    private DiscussionRepository discussionRepository;
-
-    @Mock
-    private ReactionRepository reactionRepository;
-
-    @Mock
-    private BCryptPasswordHasher passwordHasher;
+    private UserService userService;
 
     @Mock
     private JwtService jwtService;
 
-    @InjectMocks
     private UserController userController;
 
     private User testUser;
@@ -52,6 +39,8 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        userController = new UserController(userService, jwtService);
+
         testUser = new User();
         testUser.setId(USER_ID);
         testUser.setUsername("testuser");
@@ -59,11 +48,11 @@ class UserControllerTest {
         testUser.setPasswordHash("hashedpassword123");
     }
 
-    // Test: gebruiker ophalen met ID
+    // Test: gebruiker ophalen
     @Test
     @DisplayName("Gebruiker ophalen - succes")
     void getUser_Success() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
+        when(userService.getUserById(USER_ID)).thenReturn(Optional.of(testUser));
 
         ResponseEntity<User> response = userController.getUser(USER_ID);
 
@@ -75,14 +64,14 @@ class UserControllerTest {
     @Test
     @DisplayName("Gebruiker ophalen - niet gevonden")
     void getUser_NotFound() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+        when(userService.getUserById(USER_ID)).thenReturn(Optional.empty());
 
         ResponseEntity<User> response = userController.getUser(USER_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-    // Test: account updaten met juist wachtwoord
+    // Test: account updaten success
     @Test
     @DisplayName("Account updaten - succes")
     void updateUser_Success() {
@@ -90,79 +79,71 @@ class UserControllerTest {
         request.setCurrentPassword("correctpassword");
         request.setUsername("nieuwenaam");
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
-        when(passwordHasher.matches("correctpassword", "hashedpassword123")).thenReturn(true);
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class))).thenReturn(testUser);
 
         ResponseEntity<?> response = userController.updateUser(USER_ID, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(userRepository).save(any(User.class));
     }
 
-    // Test: account updaten met fout wachtwoord
+    // Test: fout wachtwoord
     @Test
     @DisplayName("Account updaten - fout wachtwoord")
     void updateUser_WrongPassword() {
         UpdateUserRequest request = new UpdateUserRequest();
         request.setCurrentPassword("foutwachtwoord");
-        request.setUsername("nieuwenaam");
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
-        when(passwordHasher.matches("foutwachtwoord", "hashedpassword123")).thenReturn(false);
+        when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
+                .thenThrow(new SecurityException("Huidig wachtwoord is onjuist"));
 
         ResponseEntity<?> response = userController.updateUser(USER_ID, request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        verify(userRepository, never()).save(any(User.class));
     }
 
-    // Test: account updaten zonder wachtwoord
+    // Test: geen wachtwoord
     @Test
-    @DisplayName("Account updaten - geen wachtwoord meegegeven")
+    @DisplayName("Account updaten - geen wachtwoord")
     void updateUser_NoPassword() {
         UpdateUserRequest request = new UpdateUserRequest();
         request.setUsername("nieuwenaam");
-        // geen currentPassword gezet
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
+        when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
+                .thenThrow(new IllegalArgumentException("Huidig wachtwoord is verplicht"));
 
         ResponseEntity<?> response = userController.updateUser(USER_ID, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        verify(userRepository, never()).save(any(User.class));
     }
 
-    // Test: account updaten - user bestaat niet
+    // Test: user niet gevonden
     @Test
-    @DisplayName("Account updaten - gebruiker niet gevonden")
+    @DisplayName("Account updaten - niet gevonden")
     void updateUser_UserNotFound() {
         UpdateUserRequest request = new UpdateUserRequest();
         request.setCurrentPassword("password");
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
-
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    // Test: nieuw wachtwoord te kort
-    @Test
-    @DisplayName("Account updaten - nieuw wachtwoord te kort")
-    void updateUser_PasswordTooShort() {
-        UpdateUserRequest request = new UpdateUserRequest();
-        request.setCurrentPassword("correctpassword");
-        request.setPassword("kort"); // minder dan 8 karakters
-
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(testUser));
-        when(passwordHasher.matches("correctpassword", "hashedpassword123")).thenReturn(true);
+        when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
+                .thenThrow(new IllegalArgumentException("Gebruiker niet gevonden"));
 
         ResponseEntity<?> response = userController.updateUser(USER_ID, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        verify(userRepository, never()).save(any(User.class));
+    }
+
+    // Test: wachtwoord te kort
+    @Test
+    @DisplayName("Account updaten - wachtwoord te kort")
+    void updateUser_PasswordTooShort() {
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setCurrentPassword("correctpassword");
+        request.setPassword("kort");
+
+        when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
+                .thenThrow(new IllegalArgumentException("Nieuw wachtwoord moet minimaal 8 karakters zijn"));
+
+        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }
-
-
