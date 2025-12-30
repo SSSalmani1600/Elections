@@ -30,13 +30,8 @@ public class AuthController {
     }
 
     @GetMapping("/session")
-    public ResponseEntity<?> fetchUser(@CookieValue(value = "jwt", required = false) String accessToken) {
-        User user;
-        try {
-            user = authService.getUser(accessToken);
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(401).build();
-        }
+    public ResponseEntity<LoginResponse> fetchUser(@CookieValue(value = "jwt", required = false) String accessToken) {
+        User user = authService.getUser(accessToken);
 
         return ResponseEntity.ok(
                 new LoginResponse(
@@ -49,19 +44,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid email or password");
+            throw new IllegalArgumentException("Invalid email or password");
         }
 
         AuthenticationResponse authResponse = authService.authenticate(req.getEmail(), req.getPassword());
         User user = authResponse.getUser();
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.getRefreshToken())
@@ -86,31 +79,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        try {
-            User user = authService.register(req.getEmail(), req.getPassword(), req.getUsername());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUsername()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registratie mislukt");
-        }
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest req) {
+        User user = authService.register(req.getEmail(), req.getPassword(), req.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUsername()));
     }
+
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@CookieValue(value = "refresh_token", required = false) String refreshTokenHash) {
-        if (refreshTokenHash == null || refreshTokenHash.isEmpty()) return ResponseEntity
-                .status(401).body("Empty refresh token");
-
-        TokenRefreshResponse tokenPair;
-
-        try {
-            tokenPair = authService.refreshTokens(refreshTokenHash);
-        } catch(InvalidRefreshTokenException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
+    public ResponseEntity<Void> refreshToken(@CookieValue(value = "refresh_token", required = false) String refreshTokenHash) {
+        if (refreshTokenHash == null || refreshTokenHash.isEmpty()) {
+            throw new UnauthorizedException("Empty refresh token");
         }
+
+        TokenRefreshResponse tokenPair = authService.refreshTokens(refreshTokenHash);
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenPair.getRefreshTokenHash())
                 .httpOnly(true)
