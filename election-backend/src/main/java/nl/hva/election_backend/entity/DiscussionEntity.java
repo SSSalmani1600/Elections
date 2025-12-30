@@ -1,6 +1,9 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import nl.hva.election_backend.model.User;
 import java.time.Instant;
 import java.util.List;
 
@@ -17,10 +20,14 @@ public class DiscussionEntity {
 
     // Titel van de discussie (verplicht veld)
     @Column(nullable = false)
+    @NotBlank(message = "Titel is verplicht")
+    @Size(min = 5, max = 255, message = "Titel moet tussen de 5 en 255 karakters zijn")
     private String title;
 
     // Inhoud/body van de discussie (TEXT type voor lange teksten)
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotBlank(message = "Inhoud is verplicht")
+    @Size(min = 10, message = "Inhoud moet minimaal 10 karakters bevatten")
     private String body;
 
     // Categorie van de discussie (optioneel)
@@ -30,7 +37,7 @@ public class DiscussionEntity {
     // Relatie naar de gebruiker die de discussie heeft aangemaakt
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
     // Wanneer de discussie is aangemaakt
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
@@ -53,7 +60,7 @@ public class DiscussionEntity {
     public String getTitle() { return title; }
     public String getBody() { return body; }
     public String getCategory() { return category; }
-    public UserEntity getUser() { return user; }
+    public User getUser() { return user; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastActivityAt() { return lastActivityAt; }
     public int getReactionsCount() { return reactionsCount; }
@@ -62,7 +69,7 @@ public class DiscussionEntity {
     public void setTitle(String title) { this.title = title; }
     public void setBody(String body) { this.body = body; }
     public void setCategory(String category) { this.category = category; }
-    public void setUser(UserEntity user) { this.user = user; }
+    public void setUser(User user) { this.user = user; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public void setLastActivityAt(Instant lastActivityAt) { this.lastActivityAt = lastActivityAt; }
     public void setReactionsCount(int reactionsCount) { this.reactionsCount = reactionsCount; }

@@ -5,10 +5,11 @@ package nl.hva.election_backend.service;
 import nl.hva.election_backend.dto.UpdateUserRequest;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.exception.ResourceNotFoundException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
-import nl.hva.election_backend.repository.TestRepository;
+import nl.hva.election_backend.repository.UserRepository;
 import nl.hva.election_backend.security.BCryptPasswordHasher;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,13 @@ import java.util.*;
 @Service
 public class UserService {
 
-    private final TestRepository userRepository;
+    private final UserRepository userRepository;
     private final DiscussionRepository discussionRepository;
     private final ReactionRepository reactionRepository;
     private final BCryptPasswordHasher passwordHasher;
 
     // constructor injection
-    public UserService(TestRepository userRepository,
+    public UserService(UserRepository userRepository,
                        DiscussionRepository discussionRepository,
                        ReactionRepository reactionRepository,
                        BCryptPasswordHasher passwordHasher) {
@@ -46,7 +47,7 @@ public class UserService {
     // update user gegevens
     public User updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden"));
+                .orElseThrow(() -> new ResourceNotFoundException("Gebruiker niet gevonden"));
 
         // check huidig wachtwoord
         if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
@@ -85,7 +86,7 @@ public class UserService {
     // haal activiteit op (topics + reacties)
     public Map<String, Object> getUserActivity(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("Gebruiker niet gevonden");
+            throw new ResourceNotFoundException("Gebruiker niet gevonden");
         }
 
         // topics

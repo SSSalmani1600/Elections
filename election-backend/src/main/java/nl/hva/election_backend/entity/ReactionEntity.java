@@ -2,6 +2,7 @@ package nl.hva.election_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import nl.hva.election_backend.model.User;
 import java.time.Instant;
 
 // Database entiteit: representeert een reactie op een discussie
@@ -24,7 +25,7 @@ public class ReactionEntity {
     // Relatie naar de gebruiker die de reactie heeft geschreven
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
     // De inhoud van de reactie (TEXT type voor lange teksten)
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
@@ -44,7 +45,7 @@ public class ReactionEntity {
 
     public ReactionEntity() {}
 
-    public ReactionEntity(DiscussionEntity discussion, UserEntity user, String message) {
+    public ReactionEntity(DiscussionEntity discussion, User user, String message) {
         this.discussion = discussion;
         this.user = user;
         this.message = message;
@@ -57,8 +58,8 @@ public class ReactionEntity {
     public DiscussionEntity getDiscussion() { return discussion; }
     public void setDiscussion(DiscussionEntity discussion) { this.discussion = discussion; }
 
-    public UserEntity getUser() { return user; }
-    public void setUser(UserEntity user) { this.user = user; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }

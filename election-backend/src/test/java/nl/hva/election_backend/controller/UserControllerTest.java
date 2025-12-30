@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import nl.hva.election_backend.dto.UpdateUserRequest;
+import nl.hva.election_backend.exception.ResourceNotFoundException;
+import nl.hva.election_backend.exception.UnauthorizedException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.JwtService;
 import nl.hva.election_backend.service.UserService;
@@ -66,9 +68,7 @@ class UserControllerTest {
     void getUser_NotFound() {
         when(userService.getUserById(USER_ID)).thenReturn(Optional.empty());
 
-        ResponseEntity<User> response = userController.getUser(USER_ID);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(ResourceNotFoundException.class, () -> userController.getUser(USER_ID));
     }
 
     // Test: account updaten success
@@ -81,7 +81,7 @@ class UserControllerTest {
 
         when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class))).thenReturn(testUser);
 
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
+        ResponseEntity<User> response = userController.updateUser(USER_ID, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -96,9 +96,7 @@ class UserControllerTest {
         when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
                 .thenThrow(new SecurityException("Huidig wachtwoord is onjuist"));
 
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertThrows(SecurityException.class, () -> userController.updateUser(USER_ID, request));
     }
 
     // Test: geen wachtwoord
@@ -111,9 +109,7 @@ class UserControllerTest {
         when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
                 .thenThrow(new IllegalArgumentException("Huidig wachtwoord is verplicht"));
 
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertThrows(IllegalArgumentException.class, () -> userController.updateUser(USER_ID, request));
     }
 
     // Test: user niet gevonden
@@ -124,11 +120,9 @@ class UserControllerTest {
         request.setCurrentPassword("password");
 
         when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
-                .thenThrow(new IllegalArgumentException("Gebruiker niet gevonden"));
+                .thenThrow(new ResourceNotFoundException("Gebruiker niet gevonden"));
 
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertThrows(ResourceNotFoundException.class, () -> userController.updateUser(USER_ID, request));
     }
 
     // Test: wachtwoord te kort
@@ -142,8 +136,6 @@ class UserControllerTest {
         when(userService.updateUser(eq(USER_ID), any(UpdateUserRequest.class)))
                 .thenThrow(new IllegalArgumentException("Nieuw wachtwoord moet minimaal 8 karakters zijn"));
 
-        ResponseEntity<?> response = userController.updateUser(USER_ID, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertThrows(IllegalArgumentException.class, () -> userController.updateUser(USER_ID, request));
     }
 }

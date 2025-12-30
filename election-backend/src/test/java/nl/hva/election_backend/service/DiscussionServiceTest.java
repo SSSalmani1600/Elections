@@ -11,10 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.entity.DiscussionEntity;
+import nl.hva.election_backend.exception.ResourceNotFoundException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
-import nl.hva.election_backend.repository.TestRepository;
+import nl.hva.election_backend.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -34,7 +35,7 @@ class DiscussionServiceTest {
     private ReactionRepository reactionRepository;
 
     @Mock
-    private TestRepository userRepository;
+    private UserRepository userRepository;
 
     private DiscussionService discussionService;
 
@@ -61,7 +62,7 @@ class DiscussionServiceTest {
         testDiscussion.setId(DISCUSSION_ID);
         testDiscussion.setTitle("Originele Titel");
         testDiscussion.setBody("Originele inhoud");
-        testDiscussion.setUserId(OWNER_USER_ID);
+        testDiscussion.setUser(testUser);
         testDiscussion.setCreatedAt(Instant.now());
         testDiscussion.setLastActivityAt(Instant.now());
         testDiscussion.setReactionsCount(0);
@@ -115,13 +116,13 @@ class DiscussionServiceTest {
     // Test: topic bestaat niet
     @Test
     @DisplayName("Topic niet gevonden - 404 scenario")
-    void updateDiscussion_NotFound_ThrowsIllegalArgumentException() {
+    void updateDiscussion_NotFound_ThrowsResourceNotFoundException() {
         Long nonExistentId = 999L;
         when(discussionRepository.findById(nonExistentId))
                 .thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
                 () -> discussionService.updateDiscussion(
                         nonExistentId,
                         OWNER_USER_ID,
@@ -158,5 +159,69 @@ class DiscussionServiceTest {
         );
 
         assertTrue(testDiscussion.getLastActivityAt().isAfter(oldTime));
+    }
+
+    // Test: Discussie aanmaken
+    @Test
+    @DisplayName("Nieuwe discussie aanmaken - Happy Path")
+    void createDiscussion_Success() {
+        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
+        when(discussionRepository.save(any(DiscussionEntity.class))).thenAnswer(invocation -> {
+            DiscussionEntity saved = invocation.getArgument(0);
+            saved.setId(123L);
+            return saved;
+        });
+
+        Long newId = discussionService.createDiscussion("Nieuwe Titel", "Nieuwe inhoud", "politiek", OWNER_USER_ID);
+
+        assertEquals(123L, newId);
+        verify(discussionRepository, times(1)).save(any(DiscussionEntity.class));
+    }
+
+    // Test: Reactie toevoegen
+    @Test
+    @DisplayName("Reactie toevoegen - Happy Path")
+    void addReaction_Success() {
+        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
+        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
+        when(reactionRepository.save(any(nl.hva.election_backend.entity.ReactionEntity.class))).thenAnswer(i -> {
+            nl.hva.election_backend.entity.ReactionEntity r = i.getArgument(0);
+            r.setId(500L);
+            return r;
+        });
+
+        nl.hva.election_backend.dto.ReactionDto result = discussionService.addReaction(DISCUSSION_ID, OWNER_USER_ID, "Dit is een nette reactie");
+
+        assertNotNull(result);
+        assertEquals(500L, result.id());
+        assertEquals(1, testDiscussion.getReactionsCount());
+    }
+
+    // Test: Reactie met scheldwoord
+    @Test
+    @DisplayName("Reactie met scheldwoord wordt geblokkeerd")
+    void addReaction_BannedWord_ThrowsException() {
+        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
+        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> discussionService.addReaction(DISCUSSION_ID, OWNER_USER_ID, "Dit is een kut reactie")
+        );
+
+        assertEquals("Reactie afgekeurd vanwege ongepast taalgebruik.", exception.getMessage());
+        assertEquals(0, testDiscussion.getReactionsCount());
+    }
+
+    // Test: Discussie verwijderen als eigenaar
+    @Test
+    @DisplayName("Discussie verwijderen als eigenaar")
+    void deleteDiscussion_AsOwner_Success() {
+        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
+
+        discussionService.deleteDiscussion(DISCUSSION_ID, OWNER_USER_ID);
+
+        verify(reactionRepository, times(1)).deleteAllByDiscussion_Id(DISCUSSION_ID);
+        verify(discussionRepository, times(1)).delete(testDiscussion);
     }
 }
