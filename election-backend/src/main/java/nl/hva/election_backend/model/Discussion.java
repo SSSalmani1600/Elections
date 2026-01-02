@@ -2,8 +2,7 @@ package nl.hva.election_backend.model;
 
 import java.time.Instant;
 
-// Model class: representeert een discussie in de applicatie
-// Dit is een gewone Java class (geen database entiteit)
+// Model class voor discussie (geen database entiteit - die is DiscussionEntity)
 public class Discussion {
 
     private String id;
@@ -18,22 +17,20 @@ public class Discussion {
 
     public Discussion() {}
 
-    // Factory method: maakt een nieuwe discussie aan vanuit de controller
-    // Gebruikt wanneer een gebruiker een nieuwe discussie aanmaakt
+    // maak nieuwe discussie
     public static Discussion create(String title, String body, String category, Long userId) {
         Discussion d = new Discussion();
         d.title = title;
         d.body = body;
-        d.category = category != null ? category : "algemeen"; // Default categorie
+        d.category = category != null ? category : "algemeen";
         d.userId = userId;
         d.createdAt = Instant.now();
         d.lastActivityAt = Instant.now();
-        d.reactionsCount = 0; // Nieuwe discussie heeft nog geen reacties
+        d.reactionsCount = 0;
         return d;
     }
 
-    // Factory method: zet een database entiteit om naar een Discussion model
-    // Gebruikt wanneer je data uit de database haalt en omzet naar een model
+    // maak van entity
     public static Discussion fromEntity(
             String id,
             String title,
@@ -56,6 +53,7 @@ public class Discussion {
         return d;
     }
 
+    // getters
     public String getId() { return id; }
     public String getTitle() { return title; }
     public String getBody() { return body; }
@@ -66,6 +64,7 @@ public class Discussion {
     public Instant getLastActivityAt() { return lastActivityAt; }
     public int getReactionsCount() { return reactionsCount; }
 
+    // setters
     public void setId(String id) { this.id = id; }
     public void setUserId(Long userId) { this.userId = userId; }
     public void setLastActivityAt(Instant lastActivityAt) { this.lastActivityAt = lastActivityAt; }
