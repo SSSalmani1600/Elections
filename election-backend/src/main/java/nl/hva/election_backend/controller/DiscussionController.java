@@ -53,8 +53,8 @@ public class DiscussionController {
     @PostMapping
     public ResponseEntity<DiscussionDetailDto> create(@RequestBody @Valid CreateDiscussionRequest request) {
         // moderatie
-        ModerationResult modTitle = moderationService.moderateText(request.title());
-        ModerationResult modBody = moderationService.moderateText(request.body());
+        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
+        ModerationResult modBody = moderationService.moderateText(request.getBody());
 
         if (modTitle.isBlocked() || modBody.isBlocked()) {
             throw new ForbiddenException("Bericht bevat verboden inhoud.");
@@ -63,8 +63,8 @@ public class DiscussionController {
         Long newId = discussionService.createDiscussion(
                 modTitle.getModeratedText(),
                 modBody.getModeratedText(),
-                request.category() != null ? request.category() : "algemeen",
-                request.userId()
+                request.getCategory() != null ? request.getCategory() : "algemeen",
+                request.getUserId()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(discussionService.getDetailById(newId));
@@ -73,11 +73,11 @@ public class DiscussionController {
     // PUT /{id} - discussie bewerken
     @PutMapping("/{id}")
     public ResponseEntity<DiscussionDetailDto> update(@PathVariable Long id, @RequestBody @Valid UpdateDiscussionRequest request) {
-        Long userId = Long.parseLong(request.userId());
+        Long userId = request.getUserId();
 
         // moderatie
-        ModerationResult modTitle = moderationService.moderateText(request.title());
-        ModerationResult modBody = moderationService.moderateText(request.body());
+        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
+        ModerationResult modBody = moderationService.moderateText(request.getBody());
 
         if (modTitle.isBlocked() || modBody.isBlocked()) {
             throw new ForbiddenException("Bericht bevat verboden inhoud.");
@@ -91,68 +91,38 @@ public class DiscussionController {
 
     // DELETE /{id} - discussie verwijderen
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        Object userIdObj = body.get("userId");
-        if (userIdObj == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "userId is verplicht"));
-        }
-
-        Long userId = Long.parseLong(userIdObj.toString());
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestParam Long userId) {
         discussionService.deleteDiscussion(id, userId);
         return ResponseEntity.ok(Map.of("message", "Discussie verwijderd"));
     }
 
     // POST /{id}/reactions - reactie toevoegen
     @PostMapping("/{id}/reactions")
-    public ResponseEntity<ReactionEntity> addReaction(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        String message = (String) body.get("message");
-        Object userIdObj = body.get("userId");
-
-        if (message == null || userIdObj == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Long userId = Long.parseLong(userIdObj.toString());
-
-        ModerationResult mod = moderationService.moderateText(message);
+    public ResponseEntity<ReactionEntity> addReaction(@PathVariable Long id, @RequestBody @Valid CreateReactionRequest request) {
+        ModerationResult mod = moderationService.moderateText(request.getMessage());
         if (mod.isBlocked()) {
             throw new ForbiddenException("Reactie bevat verboden inhoud.");
         }
 
-        ReactionEntity saved = reactionService.addReaction(id, userId, mod.getModeratedText());
+        ReactionEntity saved = reactionService.addReaction(id, request.getUserId(), mod.getModeratedText());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // PUT /reactions/{id} - reactie bewerken
     @PutMapping("/reactions/{reactionId}")
-    public ResponseEntity<ReactionEntity> updateReaction(@PathVariable Long reactionId, @RequestBody Map<String, Object> body) {
-        Object userIdObj = body.get("userId");
-        String message = (String) body.get("message");
-
-        if (userIdObj == null || message == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Long userId = Long.parseLong(userIdObj.toString());
-
-        ModerationResult mod = moderationService.moderateText(message);
+    public ResponseEntity<ReactionEntity> updateReaction(@PathVariable Long reactionId, @RequestBody @Valid UpdateReactionRequest request) {
+        ModerationResult mod = moderationService.moderateText(request.getMessage());
         if (mod.isBlocked()) {
             throw new ForbiddenException("Reactie bevat verboden inhoud.");
         }
 
-        ReactionEntity updated = reactionService.updateReaction(reactionId, userId, mod.getModeratedText());
+        ReactionEntity updated = reactionService.updateReaction(reactionId, request.getUserId(), mod.getModeratedText());
         return ResponseEntity.ok(updated);
     }
 
     // DELETE /reactions/{id} - reactie verwijderen
     @DeleteMapping("/reactions/{reactionId}")
-    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestBody Map<String, Object> body) {
-        Object userIdObj = body.get("userId");
-        if (userIdObj == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Long userId = Long.parseLong(userIdObj.toString());
+    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestParam Long userId) {
         reactionService.deleteReaction(reactionId, userId);
         return ResponseEntity.ok(Map.of("message", "Reactie verwijderd"));
     }
