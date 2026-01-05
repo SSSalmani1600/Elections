@@ -1,6 +1,7 @@
 package nl.hva.election_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import nl.hva.election_backend.model.User;
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.time.Instant;
 // Database entiteit: representeert een reactie op een discussie
 @Entity
 @Table(name = "reactions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ReactionEntity {
 
     // Primaire sleutel: automatisch gegenereerd door de database

@@ -1,5 +1,6 @@
 package nl.hva.election_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,6 +12,7 @@ import java.util.List;
 // Deze class wordt door JPA gebruikt om data op te slaan en op te halen
 @Entity
 @Table(name = "discussions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DiscussionEntity {
 
     // Primaire sleutel: automatisch gegenereerd door de database
