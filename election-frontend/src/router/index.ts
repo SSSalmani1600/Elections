@@ -20,6 +20,7 @@ import { authStore } from '@/store/authStore'
 import AccountView from '@/views/AccountView.vue'  // Account overzicht pagina
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 import VotingGuideResultsView from '@/views/VotingGuideResultsView.vue'
+import VotingGuideHomeView from '@/views/VotingGuideHomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -76,6 +77,11 @@ const router = createRouter({
     },
     {
       path: '/stemwijzer',
+      name: 'voting-guide-home',
+      component: VotingGuideHomeView,
+    },
+    {
+      path: '/stemwijzer/invullen',
       name: 'voting-guide',
       component: VotingGuideView,
     },
@@ -102,21 +108,14 @@ const router = createRouter({
     },
 
     {
-      path: '/admin/users',
-      name: 'admin-users',
-      component: () => import('@/views/admin/AdminUsersView.vue'),
-    },
-
-    {
       path: '/admin/moderation',
       name: 'admin-moderation',
       component: () => import('@/views/admin/AdminModerationView.vue'),
     },
-
     {
-      path: '/admin/positions',
-      name: 'admin-positions',
-      component: () => import('@/views/admin/AdminPositionsView.vue'),
+      path: '/admin/polls',
+      name: 'admin-polls',
+      component: () => import('@/views/admin/AdminPollsView.vue'),
     },
     {
       path: '/account',

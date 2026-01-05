@@ -5,6 +5,7 @@ import nl.hva.election_backend.repository.StatementRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
 @Service
 public class StatementService {
@@ -15,6 +16,10 @@ public class StatementService {
     }
 
     public LinkedHashSet<StatementEntity> getAllStatements() {
-        return this.statementRepository.findAllByOrderByIdAsc();
+        return new LinkedHashSet<>(this.statementRepository.findAllByOrderByIdAsc());
+    }
+
+    public List<String> getAllCategories() {
+        return this.statementRepository.findAllCategories();
     }
 }

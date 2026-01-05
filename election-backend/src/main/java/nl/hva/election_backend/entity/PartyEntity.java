@@ -30,6 +30,10 @@ public class PartyEntity {
         return partyId;
     }
 
+    public void setPartyId(String partyId) {
+        this.partyId = partyId;
+    }
+
     public String getName() {
         return name;
     }

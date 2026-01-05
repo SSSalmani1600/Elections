@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,15 +55,15 @@ class ReactionServiceTest {
     @Test
     @DisplayName("Reactie toevoegen - succes")
     void addReaction_Success() {
-        when(discussionRepository.findById(1L)).thenReturn(Optional.of(testDiscussion));
+        when(discussionRepository.findById(1L)).thenReturn(Optional.of(Objects.requireNonNull(testDiscussion)));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(moderationService.moderateText(anyString())).thenAnswer(i -> {
-            ModerationResult res = new ModerationResult((String) i.getArgument(0));
+            ModerationResult res = new ModerationResult(i.getArgument(0, String.class));
             res.setModerationStatus("APPROVED");
             return res;
         });
         when(reactionRepository.save(any(ReactionEntity.class))).thenAnswer(i -> {
-            ReactionEntity r = i.getArgument(0);
+            ReactionEntity r = Objects.requireNonNull(i.getArgument(0, ReactionEntity.class));
             r.setId(100L);
             return r;
         });
@@ -96,4 +97,3 @@ class ReactionServiceTest {
         assertThrows(SecurityException.class, () -> reactionService.deleteReaction(100L, 2L));
     }
 }
-
