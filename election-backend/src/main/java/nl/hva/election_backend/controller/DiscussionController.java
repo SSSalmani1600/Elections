@@ -4,7 +4,6 @@ package nl.hva.election_backend.controller;
 
 import jakarta.validation.Valid;
 import nl.hva.election_backend.dto.*;
-import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.exception.ForbiddenException;
 import nl.hva.election_backend.service.DiscussionService;
 import nl.hva.election_backend.service.ModerationService;
@@ -91,39 +90,39 @@ public class DiscussionController {
 
     // DELETE /{id} - discussie verwijderen
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestParam Long userId) {
-        discussionService.deleteDiscussion(id, userId);
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestBody @Valid UserIdRequest request) {
+        discussionService.deleteDiscussion(id, request.getUserId());
         return ResponseEntity.ok(Map.of("message", "Discussie verwijderd"));
     }
 
     // POST /{id}/reactions - reactie toevoegen
     @PostMapping("/{id}/reactions")
-    public ResponseEntity<ReactionEntity> addReaction(@PathVariable Long id, @RequestBody @Valid CreateReactionRequest request) {
+    public ResponseEntity<ReactionDto> addReaction(@PathVariable Long id, @RequestBody @Valid CreateReactionRequest request) {
         ModerationResult mod = moderationService.moderateText(request.getMessage());
         if (mod.isBlocked()) {
             throw new ForbiddenException("Reactie bevat verboden inhoud.");
         }
 
-        ReactionEntity saved = reactionService.addReaction(id, request.getUserId(), mod.getModeratedText());
+        ReactionDto saved = reactionService.addReaction(id, request.getUserId(), mod.getModeratedText());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // PUT /reactions/{id} - reactie bewerken
     @PutMapping("/reactions/{reactionId}")
-    public ResponseEntity<ReactionEntity> updateReaction(@PathVariable Long reactionId, @RequestBody @Valid UpdateReactionRequest request) {
+    public ResponseEntity<ReactionDto> updateReaction(@PathVariable Long reactionId, @RequestBody @Valid UpdateReactionRequest request) {
         ModerationResult mod = moderationService.moderateText(request.getMessage());
         if (mod.isBlocked()) {
             throw new ForbiddenException("Reactie bevat verboden inhoud.");
         }
 
-        ReactionEntity updated = reactionService.updateReaction(reactionId, request.getUserId(), mod.getModeratedText());
+        ReactionDto updated = reactionService.updateReaction(reactionId, request.getUserId(), mod.getModeratedText());
         return ResponseEntity.ok(updated);
     }
 
     // DELETE /reactions/{id} - reactie verwijderen
     @DeleteMapping("/reactions/{reactionId}")
-    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestParam Long userId) {
-        reactionService.deleteReaction(reactionId, userId);
+    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestBody @Valid UserIdRequest request) {
+        reactionService.deleteReaction(reactionId, request.getUserId());
         return ResponseEntity.ok(Map.of("message", "Reactie verwijderd"));
     }
 }
