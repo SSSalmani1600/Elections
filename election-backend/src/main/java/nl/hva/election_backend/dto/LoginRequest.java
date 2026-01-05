@@ -1,7 +1,14 @@
 package nl.hva.election_backend.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequest {
+    @NotBlank(message = "Email is verplicht")
+    @Email(message = "Ongeldig e-mailadres")
     private String email;
+
+    @NotBlank(message = "Wachtwoord is verplicht")
     private String password;
 
     public LoginRequest() {}
