@@ -485,7 +485,7 @@ async function fetchActivity(userId: number) {
   activityLoading.value = true
   console.log('Fetching activity for userId:', userId)
   try {
-    const res = await fetch(`http://localhost:8080/api/users/${userId}/activity`)
+    const res = await fetch(`/api/users/${userId}/activity`)
     console.log('Activity response status:', res.status)
     if (res.ok) {
       const data = await res.json()

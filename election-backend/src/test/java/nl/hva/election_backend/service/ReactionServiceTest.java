@@ -1,6 +1,7 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.ModerationResult;
+import nl.hva.election_backend.dto.ReactionDto;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.exception.ResourceNotFoundException;
@@ -43,6 +44,7 @@ class ReactionServiceTest {
         
         testUser = new User();
         testUser.setId(1L);
+        testUser.setUsername("testuser");
         
         testDiscussion = new DiscussionEntity();
         testDiscussion.setId(1L);
@@ -59,9 +61,13 @@ class ReactionServiceTest {
             res.setModerationStatus("APPROVED");
             return res;
         });
-        when(reactionRepository.save(any(ReactionEntity.class))).thenAnswer(i -> i.getArgument(0));
+        when(reactionRepository.save(any(ReactionEntity.class))).thenAnswer(i -> {
+            ReactionEntity r = i.getArgument(0);
+            r.setId(100L);
+            return r;
+        });
 
-        ReactionEntity result = reactionService.addReaction(1L, 1L, "Goeie post!");
+        ReactionDto result = reactionService.addReaction(1L, 1L, "Goeie post!");
 
         assertNotNull(result);
         assertEquals("Goeie post!", result.getMessage());

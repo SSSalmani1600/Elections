@@ -40,7 +40,7 @@ const sortedDiscussions = computed(() => {
 ------------------------------------------------*/
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:8080/api/discussions')
+    const res = await fetch('/api/discussions')
     if (!res.ok) throw new Error('Kon discussies niet laden')
     discussions.value = await res.json()
   } catch (e: any) {
@@ -159,7 +159,7 @@ async function createDiscussion() {
     }
 
     // API CALL
-    const res = await fetch('http://localhost:8080/api/discussions', {
+    const res = await fetch('/api/discussions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

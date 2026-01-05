@@ -90,8 +90,8 @@ public class DiscussionController {
 
     // DELETE /{id} - discussie verwijderen
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestBody @Valid UserIdRequest request) {
-        discussionService.deleteDiscussion(id, request.getUserId());
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestParam Long userId) {
+        discussionService.deleteDiscussion(id, userId);
         return ResponseEntity.ok(Map.of("message", "Discussie verwijderd"));
     }
 
@@ -121,8 +121,8 @@ public class DiscussionController {
 
     // DELETE /reactions/{id} - reactie verwijderen
     @DeleteMapping("/reactions/{reactionId}")
-    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestBody @Valid UserIdRequest request) {
-        reactionService.deleteReaction(reactionId, request.getUserId());
+    public ResponseEntity<Map<String, String>> deleteReaction(@PathVariable Long reactionId, @RequestParam Long userId) {
+        reactionService.deleteReaction(reactionId, userId);
         return ResponseEntity.ok(Map.of("message", "Reactie verwijderd"));
     }
 }
