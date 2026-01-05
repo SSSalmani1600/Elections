@@ -193,7 +193,7 @@ class DiscussionServiceTest {
         nl.hva.election_backend.dto.ReactionDto result = discussionService.addReaction(DISCUSSION_ID, OWNER_USER_ID, "Dit is een nette reactie");
 
         assertNotNull(result);
-        assertEquals(500L, result.id());
+        assertEquals(500L, result.getId());
         assertEquals(1, testDiscussion.getReactionsCount());
     }
 
