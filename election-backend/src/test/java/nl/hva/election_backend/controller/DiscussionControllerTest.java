@@ -55,6 +55,7 @@ class DiscussionControllerTest {
     @Test
     @DisplayName("Nieuwe discussie aanmaken - succes")
     void create_Success() {
+<<<<<<< HEAD
         CreateDiscussionRequest request = new CreateDiscussionRequest();
         request.setTitle("Geldige Titel");
         request.setBody("Geldige inhoud voor de discussie");
@@ -66,6 +67,11 @@ class DiscussionControllerTest {
             res.setModerationStatus("PENDING");
             return res;
         });
+=======
+        CreateDiscussionRequest request = new CreateDiscussionRequest("Geldige Titel", "Geldige inhoud voor de discussie", "politiek", 1L);
+        
+        when(moderationService.moderateText(anyString())).thenAnswer(i -> new ModerationResult(i.getArgument(0), "PENDING", Collections.emptyList()));
+>>>>>>> 0896198cbe36a71fcdb10e5205bd00ac344da846
         when(discussionService.createDiscussion(anyString(), anyString(), anyString(), anyLong())).thenReturn(100L);
         
         DiscussionDetailDto detail = new DiscussionDetailDto("100", 1L, "Geldige Titel", "testuser", "Geldige inhoud", Instant.now(), Instant.now(), 0, Collections.emptyList());
@@ -80,6 +86,7 @@ class DiscussionControllerTest {
     @Test
     @DisplayName("Nieuwe discussie aanmaken - geblokkeerde inhoud")
     void create_BlockedContent_ThrowsForbiddenException() {
+<<<<<<< HEAD
         CreateDiscussionRequest request = new CreateDiscussionRequest();
         request.setTitle("Slechte Titel");
         request.setBody("Slechte inhoud");
@@ -125,5 +132,13 @@ class DiscussionControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Reactie verwijderd", response.getBody().get("message"));
     }
+=======
+        CreateDiscussionRequest request = new CreateDiscussionRequest("Slechte Titel", "Slechte inhoud", "politiek", 1L);
+        
+        when(moderationService.moderateText(anyString())).thenReturn(new ModerationResult("Slechte Titel", "BLOCKED", List.of("ongepast")));
+
+        assertThrows(ForbiddenException.class, () -> discussionController.create(request));
+    }
+>>>>>>> 0896198cbe36a71fcdb10e5205bd00ac344da846
 }
 
