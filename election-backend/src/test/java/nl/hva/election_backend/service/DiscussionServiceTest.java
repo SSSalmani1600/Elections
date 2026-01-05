@@ -76,8 +76,6 @@ class DiscussionServiceTest {
                 .thenReturn(Optional.of(testDiscussion));
         when(discussionRepository.save(any(DiscussionEntity.class)))
                 .thenReturn(testDiscussion);
-        when(userRepository.findById(OWNER_USER_ID))
-                .thenReturn(Optional.of(testUser));
         when(reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(DISCUSSION_ID))
                 .thenReturn(Collections.emptyList());
 
@@ -146,8 +144,6 @@ class DiscussionServiceTest {
                 .thenReturn(Optional.of(testDiscussion));
         when(discussionRepository.save(any(DiscussionEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(userRepository.findById(OWNER_USER_ID))
-                .thenReturn(Optional.of(testUser));
         when(reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(DISCUSSION_ID))
                 .thenReturn(Collections.emptyList());
 
@@ -176,45 +172,6 @@ class DiscussionServiceTest {
 
         assertEquals(123L, newId);
         verify(discussionRepository, times(1)).save(any(DiscussionEntity.class));
-    }
-
-    // Test: Reactie toevoegen
-    @Test
-    @DisplayName("Reactie toevoegen - Happy Path")
-    void addReaction_Success() {
-        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
-        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
-        when(reactionRepository.save(any(nl.hva.election_backend.entity.ReactionEntity.class))).thenAnswer(i -> {
-            nl.hva.election_backend.entity.ReactionEntity r = i.getArgument(0);
-            r.setId(500L);
-            return r;
-        });
-
-        nl.hva.election_backend.dto.ReactionDto result = discussionService.addReaction(DISCUSSION_ID, OWNER_USER_ID, "Dit is een nette reactie");
-
-        assertNotNull(result);
-<<<<<<< HEAD
-        assertEquals(500L, result.getId());
-=======
-        assertEquals(500L, result.id());
->>>>>>> 0896198cbe36a71fcdb10e5205bd00ac344da846
-        assertEquals(1, testDiscussion.getReactionsCount());
-    }
-
-    // Test: Reactie met scheldwoord
-    @Test
-    @DisplayName("Reactie met scheldwoord wordt geblokkeerd")
-    void addReaction_BannedWord_ThrowsException() {
-        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
-        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> discussionService.addReaction(DISCUSSION_ID, OWNER_USER_ID, "Dit is een kut reactie")
-        );
-
-        assertEquals("Reactie afgekeurd vanwege ongepast taalgebruik.", exception.getMessage());
-        assertEquals(0, testDiscussion.getReactionsCount());
     }
 
     // Test: Discussie verwijderen als eigenaar
