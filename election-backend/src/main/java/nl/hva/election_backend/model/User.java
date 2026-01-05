@@ -1,5 +1,6 @@
 package nl.hva.election_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import java.util.List;
 // Dit is zowel een database entiteit als een model class
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     // Primaire sleutel: automatisch gegenereerd door de database

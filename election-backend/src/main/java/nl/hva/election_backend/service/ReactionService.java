@@ -1,6 +1,7 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.ModerationResult;
+import nl.hva.election_backend.dto.ReactionDto;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.exception.ResourceNotFoundException;
@@ -36,7 +37,7 @@ public class ReactionService {
      *  - FLAGGED → verdacht, admin moet beoordelen
      *  - PENDING → geen problemen, admin moet nog steeds keuren
      */
-    public ReactionEntity addReaction(Long discussionId, Long userId, String message) {
+    public ReactionDto addReaction(Long discussionId, Long userId, String message) {
 
         DiscussionEntity discussion = discussionRepository.findById(discussionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Discussion not found"));
@@ -67,13 +68,19 @@ public class ReactionService {
         discussion.setLastActivityAt(Instant.now());
         discussionRepository.save(discussion);
 
-        return saved;
+        return new ReactionDto(
+                saved.getId(),
+                saved.getUser().getId(),
+                saved.getUser().getUsername(),
+                saved.getMessage(),
+                saved.getCreatedAt()
+        );
     }
 
     /**
      * Bewerkt een reactie als de gebruiker de eigenaar is
      */
-    public ReactionEntity updateReaction(Long reactionId, Long userId, String newMessage) {
+    public ReactionDto updateReaction(Long reactionId, Long userId, String newMessage) {
         // Zoek de reactie in de database
         ReactionEntity reaction = reactionRepository.findById(reactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactie niet gevonden"));
@@ -86,7 +93,15 @@ public class ReactionService {
         // Update de reactie met de gemodereerde tekst
         reaction.setMessage(newMessage);
         
-        return reactionRepository.save(reaction);
+        ReactionEntity saved = reactionRepository.save(reaction);
+
+        return new ReactionDto(
+                saved.getId(),
+                saved.getUser().getId(),
+                saved.getUser().getUsername(),
+                saved.getMessage(),
+                saved.getCreatedAt()
+        );
     }
 
     /**

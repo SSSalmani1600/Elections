@@ -109,11 +109,10 @@ class DiscussionControllerTest {
             return res;
         });
         
-        ReactionEntity saved = new ReactionEntity();
-        saved.setId(500L);
+        ReactionDto saved = new ReactionDto(500L, 1L, "testuser", "Leuke reactie", Instant.now());
         when(reactionService.addReaction(anyLong(), anyLong(), anyString())).thenReturn(saved);
 
-        ResponseEntity<ReactionEntity> response = discussionController.addReaction(1L, request);
+        ResponseEntity<ReactionDto> response = discussionController.addReaction(1L, request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(500L, response.getBody().getId());
@@ -122,7 +121,9 @@ class DiscussionControllerTest {
     @Test
     @DisplayName("Reactie verwijderen - succes")
     void deleteReaction_Success() {
-        ResponseEntity<Map<String, String>> response = discussionController.deleteReaction(500L, 1L);
+        UserIdRequest request = new UserIdRequest();
+        request.setUserId(1L);
+        ResponseEntity<Map<String, String>> response = discussionController.deleteReaction(500L, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Reactie verwijderd", response.getBody().get("message"));
