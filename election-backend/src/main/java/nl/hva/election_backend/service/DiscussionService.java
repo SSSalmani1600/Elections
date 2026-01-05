@@ -1,12 +1,15 @@
 package nl.hva.election_backend.service;
 
+import nl.hva.election_backend.dto.CreateDiscussionRequest;
 import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
 import nl.hva.election_backend.dto.ReactionDto;
-
+import nl.hva.election_backend.dto.UpdateDiscussionRequest;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.exception.ForbiddenException;
 import nl.hva.election_backend.exception.ResourceNotFoundException;
+import nl.hva.election_backend.dto.ModerationResult;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 // Service laag: bevat de business logica voor discussies
@@ -26,28 +30,35 @@ import java.util.stream.Collectors;
 @Service
 public class DiscussionService {
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final DiscussionRepository discussionRepository;
     private final ReactionRepository reactionRepository;
     private final UserRepository userRepository;
+    private final ModerationService moderationService;
 
     // Constructor: Spring injecteert automatisch de repositories
     public DiscussionService(
             DiscussionRepository discussionRepository,
             ReactionRepository reactionRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ModerationService moderationService
     ) {
         this.discussionRepository = discussionRepository;
         this.reactionRepository = reactionRepository;
         this.userRepository = userRepository;
+        this.moderationService = moderationService;
     }
 
     // Haalt alle discussies op en zet ze om naar DTO's voor de lijstweergave
     public List<DiscussionListItemDto> list() {
-        return list(0, Integer.MAX_VALUE);
+        return list(0, DEFAULT_PAGE_SIZE);
     }
 
     public List<DiscussionListItemDto> list(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("lastActivityAt").descending());
+        int safeSize = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
+        Pageable pageable = PageRequest.of(page, safeSize, Sort.by("lastActivityAt").descending());
         return discussionRepository.findAllWithUser(pageable)
                 .stream()
                 .map(entity -> new DiscussionListItemDto(
@@ -62,13 +73,14 @@ public class DiscussionService {
 
     // Haalt 1 specifieke discussie op met alle details en reacties
     public DiscussionDetailDto getDetailById(Long id) {
+        Long requiredId = Objects.requireNonNull(id, "id is verplicht");
         // Zoek de discussie in de database
-        DiscussionEntity d = discussionRepository.findById(id)
+        DiscussionEntity d = discussionRepository.findById(requiredId)
                 .orElseThrow(() -> new ResourceNotFoundException("Discussion not found"));
 
         // Haal alle reacties op voor deze discussie
         List<ReactionEntity> reactions =
-                reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(id)
+                reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(requiredId)
                         .stream()
                         // Filter: toon alleen goedgekeurde of pending reacties
                         .filter(r ->
@@ -101,62 +113,76 @@ public class DiscussionService {
         );
     }
 
-    // Maakt een nieuwe discussie aan in de database
-    public Long createDiscussion(String title, String content, String category, Long userId) {
-        // Zoek de gebruiker op
+    // Maakt een nieuwe discussie aan in de database (incl. moderatie)
+    public DiscussionDetailDto createDiscussion(CreateDiscussionRequest request) {
+        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
+        ModerationResult modBody = moderationService.moderateText(request.getBody());
+
+        if (modTitle.isBlocked() || modBody.isBlocked()) {
+            throw new ForbiddenException("Bericht bevat verboden inhoud.");
+        }
+
+        Long userId = Objects.requireNonNull(request.getUserId(), "userId is verplicht");
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Maak een nieuwe database entiteit aan
         DiscussionEntity entity = new DiscussionEntity();
-        entity.setTitle(title);
-        entity.setBody(content);
-        entity.setCategory(category);
+        entity.setTitle(modTitle.getModeratedText());
+        entity.setBody(modBody.getModeratedText());
+        entity.setCategory(request.getCategory() != null ? request.getCategory() : "algemeen");
         entity.setUser(user);
         entity.setCreatedAt(Instant.now());
         entity.setLastActivityAt(Instant.now());
         entity.setReactionsCount(0); // Nieuwe discussie heeft nog geen reacties
 
-        // Sla op in database en geef het nieuwe ID terug
         DiscussionEntity saved = discussionRepository.save(entity);
-        return saved.getId();
+        return getDetailById(saved.getId());
     }
 
-    // Bewerkt een discussie als de gebruiker de eigenaar is
-    public DiscussionDetailDto updateDiscussion(Long discussionId, Long userId, String newTitle, String newBody) {
-        // Zoek de discussie in de database
-        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+    // Bewerkt een discussie als de gebruiker de eigenaar is (incl. moderatie)
+    public DiscussionDetailDto updateDiscussion(Long discussionId, UpdateDiscussionRequest request) {
+        Long requiredDiscussionId = Objects.requireNonNull(discussionId, "discussionId is verplicht");
+
+        DiscussionEntity discussion = discussionRepository.findById(requiredDiscussionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Discussie niet gevonden"));
 
-        // Check of de gebruiker de eigenaar is van de discussie
+        Long userId = Objects.requireNonNull(request.getUserId(), "userId is verplicht");
+
         if (discussion.getUser() == null || !discussion.getUser().getId().equals(userId)) {
             throw new SecurityException("Je kunt alleen je eigen discussies bewerken");
         }
 
-        // Update de discussie
-        discussion.setTitle(newTitle);
-        discussion.setBody(newBody);
+        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
+        ModerationResult modBody = moderationService.moderateText(request.getBody());
+        if (modTitle.isBlocked() || modBody.isBlocked()) {
+            throw new ForbiddenException("Bericht bevat verboden inhoud.");
+        }
+
+        discussion.setTitle(modTitle.getModeratedText());
+        discussion.setBody(modBody.getModeratedText());
         discussion.setLastActivityAt(Instant.now());
         discussionRepository.save(discussion);
 
-        // Geef de bijgewerkte discussie terug
-        return getDetailById(discussionId);
+        return getDetailById(requiredDiscussionId);
     }
 
     // Verwijdert een discussie als de gebruiker de eigenaar is
     @Transactional
     public void deleteDiscussion(Long discussionId, Long userId) {
+        Long requiredDiscussionId = Objects.requireNonNull(discussionId, "discussionId is verplicht");
         // Zoek de discussie in de database
-        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+        DiscussionEntity discussion = discussionRepository.findById(requiredDiscussionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Discussie niet gevonden"));
 
-        // Check of de gebruiker de eigenaar is van de discussie
-        if (discussion.getUser() == null || !discussion.getUser().getId().equals(userId)) {
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
+
+        if (discussion.getUser() == null || !discussion.getUser().getId().equals(requiredUserId)) {
             throw new SecurityException("Je kunt alleen je eigen discussies verwijderen");
         }
 
         // Verwijder eerst alle reacties van deze discussie
-        reactionRepository.deleteAllByDiscussion_Id(discussionId);
+        reactionRepository.deleteAllByDiscussion_Id(requiredDiscussionId);
 
         // Verwijder de discussie zelf
         discussionRepository.delete(discussion);

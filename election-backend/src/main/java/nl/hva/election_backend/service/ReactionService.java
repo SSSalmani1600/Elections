@@ -4,6 +4,7 @@ import nl.hva.election_backend.dto.ModerationResult;
 import nl.hva.election_backend.dto.ReactionDto;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.exception.ForbiddenException;
 import nl.hva.election_backend.exception.ResourceNotFoundException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.DiscussionRepository;
@@ -12,6 +13,7 @@ import nl.hva.election_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 public class ReactionService {
@@ -39,14 +41,20 @@ public class ReactionService {
      */
     public ReactionDto addReaction(Long discussionId, Long userId, String message) {
 
-        DiscussionEntity discussion = discussionRepository.findById(discussionId)
+        Long requiredDiscussionId = Objects.requireNonNull(discussionId, "discussionId is verplicht");
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
+
+        DiscussionEntity discussion = discussionRepository.findById(requiredDiscussionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Discussion not found"));
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(requiredUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // 📌 AI wordt ALLEEN hier aangeroepen
         ModerationResult moderation = moderationService.moderateText(message);
+
+        if (moderation.isBlocked()) {
+            throw new ForbiddenException("Reactie bevat verboden inhoud.");
+        }
 
         ReactionEntity reaction = new ReactionEntity();
         reaction.setDiscussion(discussion);
@@ -81,17 +89,27 @@ public class ReactionService {
      * Bewerkt een reactie als de gebruiker de eigenaar is
      */
     public ReactionDto updateReaction(Long reactionId, Long userId, String newMessage) {
-        // Zoek de reactie in de database
-        ReactionEntity reaction = reactionRepository.findById(reactionId)
+        Long requiredReactionId = Objects.requireNonNull(reactionId, "reactionId is verplicht");
+
+        ReactionEntity reaction = reactionRepository.findById(requiredReactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactie niet gevonden"));
 
-        // Check of de gebruiker de eigenaar is van de reactie
-        if (reaction.getUser() == null || !reaction.getUser().getId().equals(userId)) {
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
+
+        if (reaction.getUser() == null || !reaction.getUser().getId().equals(requiredUserId)) {
             throw new SecurityException("Je kunt alleen je eigen reacties bewerken");
         }
 
-        // Update de reactie met de gemodereerde tekst
-        reaction.setMessage(newMessage);
+        ModerationResult moderation = moderationService.moderateText(newMessage);
+        if (moderation.isBlocked()) {
+            throw new ForbiddenException("Reactie bevat verboden inhoud.");
+        }
+
+        reaction.setMessage(moderation.getModeratedText());
+        reaction.setModerationStatus(moderation.getModerationStatus());
+        reaction.setFlaggedReason(moderation.isFlagged() || moderation.isBlocked()
+                ? String.join(", ", moderation.getWarnings())
+                : null);
         
         ReactionEntity saved = reactionRepository.save(reaction);
 
@@ -109,11 +127,15 @@ public class ReactionService {
      */
     public void deleteReaction(Long reactionId, Long userId) {
         // Zoek de reactie in de database
-        ReactionEntity reaction = reactionRepository.findById(reactionId)
+        Long requiredReactionId = Objects.requireNonNull(reactionId, "reactionId is verplicht");
+
+        ReactionEntity reaction = reactionRepository.findById(requiredReactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reactie niet gevonden"));
 
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
+
         // Check of de gebruiker de eigenaar is van de reactie
-        if (reaction.getUser() == null || !reaction.getUser().getId().equals(userId)) {
+        if (reaction.getUser() == null || !reaction.getUser().getId().equals(requiredUserId)) {
             throw new SecurityException("Je kunt alleen je eigen reacties verwijderen");
         }
 
