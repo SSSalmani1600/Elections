@@ -60,7 +60,14 @@ public class ReactionService {
             reaction.setFlaggedReason(String.join(", ", moderation.getWarnings()));
         }
 
-        return reactionRepository.save(reaction);
+        ReactionEntity saved = reactionRepository.save(reaction);
+
+        // Update de discussie: verhoog reactie teller en update laatste activiteit
+        discussion.setReactionsCount(discussion.getReactionsCount() + 1);
+        discussion.setLastActivityAt(Instant.now());
+        discussionRepository.save(discussion);
+
+        return saved;
     }
 
     /**
