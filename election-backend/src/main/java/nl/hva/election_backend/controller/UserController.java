@@ -2,6 +2,7 @@ package nl.hva.election_backend.controller;
 
 // Controller voor account pagina
 
+import jakarta.validation.Valid;
 import nl.hva.election_backend.dto.UpdateUserRequest;
 import nl.hva.election_backend.exception.ResourceNotFoundException;
 import nl.hva.election_backend.model.User;
@@ -45,7 +46,7 @@ public class UserController {
 
     // PUT /{id} - user updaten
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest request) {
         User updated = userService.updateUser(id, request);
         return ResponseEntity.ok(updated);
     }

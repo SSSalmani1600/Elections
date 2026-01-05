@@ -3,14 +3,27 @@ package nl.hva.election_backend.controller;
 // Controller voor discussies/forum
 
 import jakarta.validation.Valid;
-import nl.hva.election_backend.dto.*;
-import nl.hva.election_backend.exception.ForbiddenException;
+import nl.hva.election_backend.dto.CreateDiscussionRequest;
+import nl.hva.election_backend.dto.CreateReactionRequest;
+import nl.hva.election_backend.dto.DiscussionDetailDto;
+import nl.hva.election_backend.dto.DiscussionListItemDto;
+import nl.hva.election_backend.dto.ReactionDto;
+import nl.hva.election_backend.dto.UpdateDiscussionRequest;
+import nl.hva.election_backend.dto.UpdateReactionRequest;
 import nl.hva.election_backend.service.DiscussionService;
-import nl.hva.election_backend.service.ModerationService;
 import nl.hva.election_backend.service.ReactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -22,15 +35,12 @@ public class DiscussionController {
 
     private final DiscussionService discussionService;
     private final ReactionService reactionService;
-    private final ModerationService moderationService;
 
     // constructor injection
     public DiscussionController(DiscussionService discussionService,
-                                ReactionService reactionService,
-                                ModerationService moderationService) {
+                                ReactionService reactionService) {
         this.discussionService = discussionService;
         this.reactionService = reactionService;
-        this.moderationService = moderationService;
     }
 
     // GET - alle discussies (met optionele paginering)
@@ -51,40 +61,14 @@ public class DiscussionController {
     // POST - nieuwe discussie
     @PostMapping
     public ResponseEntity<DiscussionDetailDto> create(@RequestBody @Valid CreateDiscussionRequest request) {
-        // moderatie
-        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
-        ModerationResult modBody = moderationService.moderateText(request.getBody());
-
-        if (modTitle.isBlocked() || modBody.isBlocked()) {
-            throw new ForbiddenException("Bericht bevat verboden inhoud.");
-        }
-
-        Long newId = discussionService.createDiscussion(
-                modTitle.getModeratedText(),
-                modBody.getModeratedText(),
-                request.getCategory() != null ? request.getCategory() : "algemeen",
-                request.getUserId()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(discussionService.getDetailById(newId));
+        DiscussionDetailDto created = discussionService.createDiscussion(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // PUT /{id} - discussie bewerken
     @PutMapping("/{id}")
     public ResponseEntity<DiscussionDetailDto> update(@PathVariable Long id, @RequestBody @Valid UpdateDiscussionRequest request) {
-        Long userId = request.getUserId();
-
-        // moderatie
-        ModerationResult modTitle = moderationService.moderateText(request.getTitle());
-        ModerationResult modBody = moderationService.moderateText(request.getBody());
-
-        if (modTitle.isBlocked() || modBody.isBlocked()) {
-            throw new ForbiddenException("Bericht bevat verboden inhoud.");
-        }
-
-        DiscussionDetailDto updated = discussionService.updateDiscussion(
-                id, userId, modTitle.getModeratedText(), modBody.getModeratedText()
-        );
+        DiscussionDetailDto updated = discussionService.updateDiscussion(id, request);
         return ResponseEntity.ok(updated);
     }
 
@@ -98,24 +82,14 @@ public class DiscussionController {
     // POST /{id}/reactions - reactie toevoegen
     @PostMapping("/{id}/reactions")
     public ResponseEntity<ReactionDto> addReaction(@PathVariable Long id, @RequestBody @Valid CreateReactionRequest request) {
-        ModerationResult mod = moderationService.moderateText(request.getMessage());
-        if (mod.isBlocked()) {
-            throw new ForbiddenException("Reactie bevat verboden inhoud.");
-        }
-
-        ReactionDto saved = reactionService.addReaction(id, request.getUserId(), mod.getModeratedText());
+        ReactionDto saved = reactionService.addReaction(id, request.getUserId(), request.getMessage());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // PUT /reactions/{id} - reactie bewerken
     @PutMapping("/reactions/{reactionId}")
     public ResponseEntity<ReactionDto> updateReaction(@PathVariable Long reactionId, @RequestBody @Valid UpdateReactionRequest request) {
-        ModerationResult mod = moderationService.moderateText(request.getMessage());
-        if (mod.isBlocked()) {
-            throw new ForbiddenException("Reactie bevat verboden inhoud.");
-        }
-
-        ReactionDto updated = reactionService.updateReaction(reactionId, request.getUserId(), mod.getModeratedText());
+        ReactionDto updated = reactionService.updateReaction(reactionId, request.getUserId(), request.getMessage());
         return ResponseEntity.ok(updated);
     }
 

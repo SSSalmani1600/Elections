@@ -1,7 +1,7 @@
 package nl.hva.election_backend.controller;
 
+import jakarta.validation.Valid;
 import nl.hva.election_backend.dto.*;
-import nl.hva.election_backend.exception.InvalidRefreshTokenException;
 import nl.hva.election_backend.exception.UnauthorizedException;
 import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.service.AuthService;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest req) {
 
         if (req.getEmail().isEmpty() || req.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Invalid email or password");
@@ -57,7 +57,10 @@ public class AuthController {
             throw new UnauthorizedException("Invalid email or password");
         }
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", authResponse.getRefreshToken())
+        String refreshTokenValue = Objects.requireNonNull(authResponse.getRefreshToken(), "refresh token ontbreekt");
+        String accessTokenValue = Objects.requireNonNull(authResponse.getAccessToken(), "access token ontbreekt");
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshTokenValue)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -65,7 +68,7 @@ public class AuthController {
                 .maxAge(60 * 15)
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("jwt", authResponse.getAccessToken())
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", accessTokenValue)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -79,7 +82,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest req) {
         User user = authService.register(req.getEmail(), req.getPassword(), req.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new RegisterResponse(user.getEmail(), req.getPassword(), user.getUsername()));
@@ -92,8 +95,10 @@ public class AuthController {
         }
 
         TokenRefreshResponse tokenPair = authService.refreshTokens(refreshTokenHash);
+        String refreshTokenValue = Objects.requireNonNull(tokenPair.getRefreshTokenHash(), "refresh token ontbreekt");
+        String accessTokenValue = Objects.requireNonNull(tokenPair.getAccessToken(), "access token ontbreekt");
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenPair.getRefreshTokenHash())
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshTokenValue)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -101,7 +106,7 @@ public class AuthController {
                 .maxAge(60 * 15)
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("jwt", tokenPair.getAccessToken())
+        ResponseCookie accessCookie = ResponseCookie.from("jwt", accessTokenValue)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
