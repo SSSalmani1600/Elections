@@ -4,14 +4,27 @@ services:
       context: ./election-backend
       dockerfile: Dockerfile
     ports:
-      - "18080:8080"
+      - "9000:8080"
+    environment:
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+
+      # Security
+      - JWT_SECRET_B64=${JWT_SECRET_B64}
+
+      # External APIs
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
 
   frontend:
     build:
       context: ./election-frontend
       dockerfile: Dockerfile
-
     ports:
-      - "19696:80"
+      - "9042:80"
     depends_on:
       - backend
+    environment:
+      # Backend API URL (for frontend to connect to backend)
+      - VITE_API_URL=http://localhost:18080
