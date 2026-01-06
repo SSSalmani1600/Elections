@@ -10,9 +10,7 @@ services:
     build:
       context: ./election-frontend
       dockerfile: Dockerfile
-    environment:
-      - XDG_CACHE_HOME=/tmp
-      - VITE_CACHE_DIR=/tmp/vite
+
     ports:
       - "9696:80"
     depends_on:
