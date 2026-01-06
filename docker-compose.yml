@@ -4,7 +4,7 @@ services:
       context: ./election-backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "18080:8080"
 
   frontend:
     build:
@@ -12,6 +12,6 @@ services:
       dockerfile: Dockerfile
 
     ports:
-      - "9696:80"
+      - "19696:80"
     depends_on:
       - backend
