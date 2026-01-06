@@ -1,7 +1,8 @@
 import type { VotingGuideResultRequest, VotingGuideResultResponse } from '@/types/api.ts'
+import { backendAPI } from '@/apiClient';
 
 export async function calculateResults(request: VotingGuideResultRequest): Promise<VotingGuideResultResponse> {
-  const res = await fetch(`http://localhost:8080/api/voting-guide/results/calculate`, {
+  const res = await fetch(`${backendAPI}/api/voting-guide/results/calculate`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
@@ -18,7 +19,7 @@ export async function calculateResults(request: VotingGuideResultRequest): Promi
 
 export async function saveResults(request: VotingGuideResultResponse) {
   try {
-    const res = await fetch(`http://localhost:8080/api/voting-guide/results/save-results`, {
+    const res = await fetch(`${backendAPI}/api/voting-guide/results/save-results`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +39,7 @@ export async function saveResults(request: VotingGuideResultResponse) {
 
 export async function getResults(): Promise<VotingGuideResultResponse> {
   try {
-    const res = await fetch(`http://localhost:8080/api/voting-guide/results/get-results`, {
+    const res = await fetch(`${backendAPI}/api/voting-guide/results/get-results`, {
       method: "GET",
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export async function getResults(): Promise<VotingGuideResultResponse> {
 
 export async function userHasResults(): Promise<boolean> {
   try {
-    const res = await fetch("http://localhost:8080/api/voting-guide/results/exists", {
+    const res = await fetch(`${backendAPI}/api/voting-guide/results/exists`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

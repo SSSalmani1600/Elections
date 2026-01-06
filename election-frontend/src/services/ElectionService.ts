@@ -1,4 +1,4 @@
-import { apiFetch } from '@/apiClient'
+import { apiFetch, backendAPI } from '@/apiClient'
 import type { Constituency, Municipality } from '@/types/api'
 
 export interface Election {
@@ -10,7 +10,7 @@ export interface Election {
 
 export async function getUpcomingElections(): Promise<Election[]> {
   const res = await apiFetch(
-    'http://localhost:8080/api/electionresults/next-elections',
+    `${backendAPI}/api/electionresults/next-elections`,
     {
       method: 'GET',
       headers: {
@@ -29,7 +29,7 @@ export async function getUpcomingElections(): Promise<Election[]> {
 
 export async function getConstituencies(electionId: number): Promise<Constituency[]> {
   const res = await apiFetch(
-    `http://localhost:8080/api/electionresults/${electionId}/constituencies`,
+    `${backendAPI}/api/electionresults/${electionId}/constituencies`,
     {
       method: 'GET',
       headers: {
@@ -48,7 +48,7 @@ export async function getConstituencies(electionId: number): Promise<Constituenc
 
 export async function getMunicipalityData(electionId: number, name: string): Promise<Municipality> {
   const res = await apiFetch(
-    `http://localhost:8080/api/electionresults/${electionId}/municipalities/${name}`,
+    `${backendAPI}/api/electionresults/${electionId}/municipalities/${name}`,
     {
       method: 'GET',
       headers: {
@@ -67,7 +67,7 @@ export async function getMunicipalityData(electionId: number, name: string): Pro
 
 export async function getElectionYears(): Promise<number[]> {
   const res = await apiFetch(
-    'http://localhost:8080/api/electionresults',
+    `${backendAPI}/api/electionresults`,
     {
       method: 'GET',
       headers: {

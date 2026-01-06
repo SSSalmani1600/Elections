@@ -1,8 +1,9 @@
-import type {User} from "@/types/api.ts";
+import type { User } from "@/types/api.ts";
+import { backendAPI } from '@/apiClient';
 
 // Haalt alle gebruikers op (admin functie)
 export async function getAllUsers(): Promise<User[]> {
-  const res = await fetch(`http://localhost:8080/api/users/all`, {
+  const res = await fetch(`${backendAPI}/api/users/all`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -12,7 +13,7 @@ export async function getAllUsers(): Promise<User[]> {
 
 // Haalt ingelogde gebruiker op via JWT cookie
 export async function getCurrentUser(): Promise<User> {
-  const res = await fetch(`http://localhost:8080/api/users/me`, {
+  const res = await fetch(`${backendAPI}/api/users/me`, {
     method: 'GET',
     credentials: 'include', // Stuurt cookies mee
     headers: { 'Content-Type': 'application/json' },
@@ -27,7 +28,7 @@ export async function getCurrentUser(): Promise<User> {
 // Haalt gebruiker op via ID
 export async function getUserById(id: number): Promise<User> {
   const token = localStorage.getItem('JWT')
-  const res = await fetch(`http://localhost:8080/api/users/${id}`, {
+  const res = await fetch(`${backendAPI}/api/users/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export interface UpdateUserRequest {
 // Update gebruikersgegevens
 export async function updateUser(id: number, updates: UpdateUserRequest): Promise<User> {
   const token = localStorage.getItem('JWT')
-  const res = await fetch(`http://localhost:8080/api/users/${id}`, {
+  const res = await fetch(`${backendAPI}/api/users/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
