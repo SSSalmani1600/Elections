@@ -40,7 +40,9 @@ public class JwtFilter extends OncePerRequestFilter {
             Pattern.compile("^/api/voting-guide/parties.*$"),
             Pattern.compile("^/api/polls/latest$"),
             Pattern.compile("^/api/polls/[a-fA-F0-9\\-]+/results$"),
-            Pattern.compile("^/api/moderateText$")
+            Pattern.compile("^/api/moderateText$"),
+            Pattern.compile("^/swagger-ui.*$"),
+            Pattern.compile("^/v3/api-docs.*$")
     };
 
     @Override
