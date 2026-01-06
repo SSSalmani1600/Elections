@@ -1,8 +1,9 @@
 import type { VotingGuideResultRequest } from '@/types/api.ts'
+import { backendAPI } from '@/apiClient';
 
 export async function saveAnswers(request: VotingGuideResultRequest) {
   try {
-    const res = await fetch("http://localhost:8080/api/voting-guide/answers/save-answers", {
+    const res = await fetch(`${backendAPI}/api/voting-guide/answers/save-answers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
