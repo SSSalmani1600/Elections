@@ -17,7 +17,6 @@ services:
 
       # External APIs
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-    restart: always
 
   frontend:
     image: ${CI_REGISTRY_IMAGE}/frontend:latest
@@ -25,10 +24,9 @@ services:
       context: ./election-frontend
       dockerfile: Dockerfile
     ports:
-      - "9696:80"
+      - "9042:80"
     depends_on:
       - backend
     environment:
       # Backend API URL (for frontend to connect to backend)
-      - VITE_API_URL=http://oege.ie.hva.nl:9000
-    restart: always
+      - VITE_API_URL=http://localhost:18080
