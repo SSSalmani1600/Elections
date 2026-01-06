@@ -106,12 +106,12 @@ deploy-hic:
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-        # Copy docker-compose.prod.yml to server
-        scp docker-compose.prod.yml $SSH_USER@$SSH_HOST:/app/docker-compose.yml
-        # Pull images and restart containers
-        ssh $SSH_USER@$SSH_HOST "cd /app && docker compose pull && docker compose up -d"
+        # Kopieer de standaard docker-compose.yml naar de server
+        scp docker-compose.yml $SSH_USER@$SSH_HOST:/app/docker-compose.yml
+        # Log in op de registry op de server en herstart de containers
+        ssh $SSH_USER@$SSH_HOST "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY && cd /app && docker compose pull && docker compose up -d"
       else
-        echo "SSH_PRIVATE_KEY not set, skipping actual deployment commands."
+        echo "SSH_PRIVATE_KEY niet set, overslaan van feitelijke deployment."
       fi
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $DEPLOY_HIC == "true"
