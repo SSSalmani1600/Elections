@@ -8,11 +8,12 @@ interface Props {
   accentColor?: string;
 }
 
-const { modelValue, options, label, accentColor } = withDefaults(defineProps<Props>(), {
-  options: () => [],
-  label: '',
-  accentColor: 'white'
-});
+const {
+  modelValue,
+  options = [],
+  label = '',
+  accentColor = 'white'
+} = defineProps<Props>();
 
 const emit = defineEmits(['update:modelValue']);
 

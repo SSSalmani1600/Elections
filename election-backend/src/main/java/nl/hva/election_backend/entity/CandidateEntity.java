@@ -11,7 +11,10 @@ public class CandidateEntity {
     private String candidateId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "party_id", nullable = false)
+    @JoinColumns({
+        @JoinColumn(name = "party_id", referencedColumnName = "party_id", nullable = false),
+        @JoinColumn(name = "year", referencedColumnName = "year", nullable = false, insertable = false, updatable = false)
+    })
     private PartyEntity party;
 
     @Column(name = "first_name")
