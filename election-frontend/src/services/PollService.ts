@@ -6,6 +6,23 @@ export interface PollResult {
   total: number;
 }
 
+export interface AdminPoll {
+  id: string;
+  question: string;
+  createdAt: string;
+  eensPercentage: number;
+  oneensPercentage: number;
+  total: number;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  number: number; // huidige pagina (0-based)
+  size: number;
+}
+
 export async function getLatestPoll() {
   const res = await apiFetch("/api/polls/latest");
 
@@ -17,10 +34,9 @@ export async function getLatestPoll() {
 }
 
 export async function votePoll(
-  pollId: string,
-  choice: "eens" | "oneens"
+    pollId: string,
+    choice: "eens" | "oneens"
 ): Promise<PollResult> {
-
   const res = await apiFetch(`/api/polls/${pollId}/vote`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,21 +51,14 @@ export async function votePoll(
   return await res.json();
 }
 
-export async function getMyVote(pollId: string) {
-  const res = await apiFetch(`/api/polls/${pollId}/my-vote`);
-
-  if (!res.ok) return null;
-  return await res.json();
-}
-
 export async function getPollResults(pollId: string): Promise<PollResult> {
-  const res = await apiFetch(`/api/polls/${pollId}/results`)
+  const res = await apiFetch(`/api/polls/${pollId}/results`);
 
   if (!res.ok) {
-    throw new Error("Kon resultaten niet ophalen")
+    throw new Error("Kon resultaten niet ophalen");
   }
 
-  return await res.json()
+  return await res.json();
 }
 
 export async function createPoll(question: string) {
@@ -67,20 +76,25 @@ export async function createPoll(question: string) {
   return await res.json();
 }
 
-export interface AdminPoll {
-  id: string
-  question: string
-  createdAt: string
-  eensPercentage: number
-  oneensPercentage: number
-  total: number
-}
-
-export async function getAllAdminPolls(): Promise<AdminPoll[]> {
-  const res = await apiFetch("/api/admin/polls");
+export async function getAdminPolls(
+    page = 0,
+    size = 10
+): Promise<Page<AdminPoll>> {
+  const res = await apiFetch(
+      `/api/admin/polls?page=${page}&size=${size}`
+  );
 
   if (!res.ok) {
     throw new Error("Kon stellingen niet ophalen");
+  }
+
+  return await res.json();
+}
+export async function getMyVote(pollId: string) {
+  const res = await apiFetch(`/api/polls/${pollId}/my-vote`);
+
+  if (!res.ok) {
+    return null;
   }
 
   return await res.json();
