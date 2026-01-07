@@ -4,6 +4,7 @@ import nl.hva.election_backend.dto.CreateDiscussionRequest;
 import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
 import nl.hva.election_backend.dto.ReactionDto;
+import nl.hva.election_backend.dto.PageResponseDto;
 import nl.hva.election_backend.dto.UpdateDiscussionRequest;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
@@ -52,14 +53,16 @@ public class DiscussionService {
     }
 
     // Haalt alle discussies op en zet ze om naar DTO's voor de lijstweergave
-    public List<DiscussionListItemDto> list() {
+    public PageResponseDto<DiscussionListItemDto> list() {
         return list(0, DEFAULT_PAGE_SIZE);
     }
 
-    public List<DiscussionListItemDto> list(int page, int size) {
+    public PageResponseDto<DiscussionListItemDto> list(int page, int size) {
         int safeSize = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
         Pageable pageable = PageRequest.of(page, safeSize, Sort.by("lastActivityAt").descending());
-        return discussionRepository.findAllWithUser(pageable)
+        org.springframework.data.domain.Page<DiscussionEntity> entityPage = discussionRepository.findAllWithUser(pageable);
+        
+        List<DiscussionListItemDto> content = entityPage.getContent()
                 .stream()
                 .map(entity -> new DiscussionListItemDto(
                         entity.getId().toString(),
@@ -69,6 +72,15 @@ public class DiscussionService {
                         entity.getReactionsCount()
                 ))
                 .collect(Collectors.toList());
+
+        return new PageResponseDto<>(
+                content,
+                entityPage.getNumber(),
+                entityPage.getSize(),
+                entityPage.getTotalElements(),
+                entityPage.getTotalPages(),
+                entityPage.isLast()
+        );
     }
 
     // Haalt 1 specifieke discussie op met alle details en reacties
@@ -125,7 +137,7 @@ public class DiscussionService {
         Long userId = Objects.requireNonNull(request.getUserId(), "userId is verplicht");
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         DiscussionEntity entity = new DiscussionEntity();
         entity.setTitle(modTitle.getModeratedText());

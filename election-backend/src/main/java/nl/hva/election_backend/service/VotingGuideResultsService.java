@@ -9,6 +9,7 @@ import nl.hva.election_backend.entity.PartyViewpointEntity;
 import nl.hva.election_backend.entity.VotingGuideAnswerEntity;
 import nl.hva.election_backend.entity.VotingGuidePartyEntity;
 import nl.hva.election_backend.entity.VotingGuideResultEntity;
+import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.UserRepository;
 import nl.hva.election_backend.repository.VotingGuidePartyRepository;
 import nl.hva.election_backend.repository.VotingGuideResultsRepository;
@@ -48,13 +49,15 @@ public class VotingGuideResultsService {
 
 //        Converting List to nested Map
         partyViewpoints.forEach(partyViewpoint -> {
-            if (!partyViewpointsMap.containsKey(partyViewpoint.getPartyId())) {
-                partyViewpointsMap.put(partyViewpoint.getPartyId(), new HashMap<>());
-                Map<Long, String> innerMap = partyViewpointsMap.get(partyViewpoint.getPartyId());
-                innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
+            Long partyId = partyViewpoint.getParty().getId();
+            Long statementId = partyViewpoint.getStatement().getId();
+            if (!partyViewpointsMap.containsKey(partyId)) {
+                partyViewpointsMap.put(partyId, new HashMap<>());
+                Map<Long, String> innerMap = partyViewpointsMap.get(partyId);
+                innerMap.put(statementId, partyViewpoint.getPosition());
             } else {
-                Map<Long, String> innerMap = partyViewpointsMap.get(partyViewpoint.getPartyId());
-                innerMap.put(partyViewpoint.getStatementId(), partyViewpoint.getPosition());
+                Map<Long, String> innerMap = partyViewpointsMap.get(partyId);
+                innerMap.put(statementId, partyViewpoint.getPosition());
             }
         });
 
@@ -88,9 +91,8 @@ public class VotingGuideResultsService {
     @Transactional
     public void saveResults(VotingGuideResponseDto votingGuideResults, Long userId) {
 //        Check if user is valid
-
-        boolean userExists = userRepository.existsById(userId);
-        if (!userExists) throw new RuntimeException("User not found");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
 //        Check if user has results in database
         boolean userHasResults = votingGuideResultsRepository.existsByUserId(userId);
@@ -99,11 +101,15 @@ public class VotingGuideResultsService {
 //        Convert set of result dto's to list of result entities
         List<VotingGuideResultEntity> listOfResultEntities = votingGuideResults.getVotingGuideResults()
                 .stream()
-                .map(resultDto -> new VotingGuideResultEntity(
-                        userId,
-                        resultDto.getPartyId(),
+                .map(resultDto -> {
+                    VotingGuidePartyEntity party = votingGuidePartyRepository.findById(resultDto.getPartyId())
+                            .orElseThrow(() -> new RuntimeException("Party not found"));
+                    return new VotingGuideResultEntity(
+                        user,
+                        party,
                         resultDto.getPartyName(),
-                        (long) resultDto.getPercentage()))
+                        (long) resultDto.getPercentage());
+                })
                 .toList();
 //        Save all result entities
         votingGuideResultsRepository.saveAll(listOfResultEntities);
@@ -116,7 +122,7 @@ public class VotingGuideResultsService {
         return new VotingGuideResponseDto(entitySet
                 .stream()
                 .map(entity -> new VotingGuideResultDto(
-                        entity.getPartyId(),
+                        entity.getParty().getId(),
                         entity.getPartyName(),
                         entity.getPercentage()))
                 .collect(Collectors.toList()));
