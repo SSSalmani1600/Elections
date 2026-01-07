@@ -99,31 +99,31 @@ deploy-hic:
   tags:
     - hva
   before_script:
+    - export DEBIAN_FRONTEND=noninteractive
     - apt-get update -y && apt-get install -y openssh-client
   script:
     - echo "Deploying to HIC server (oege.ie.hva.nl)..."
     - |
       if [ -n "$SSH_PRIVATE_KEY" ]; then
-        eval $(ssh-agent -s)
-        
-        # Check if SSH_PRIVATE_KEY is a file path (GitLab "File" type variable)
-        if [ -f "$SSH_PRIVATE_KEY" ]; then
-          echo "Loading SSH key from file variable..."
-          # Ensure file permissions are correct even for the GitLab-managed file
-          chmod 600 "$SSH_PRIVATE_KEY"
-          ssh-add "$SSH_PRIVATE_KEY"
-        else
-          echo "Loading SSH key from string variable..."
-          # Clean string variable: remove \r, ensure exactly one trailing newline
-          # We use printf to avoid issues if the key starts with a hyphen
-          printf "%s\n" "$SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
-          ssh-add /tmp/id_rsa
-          rm /tmp/id_rsa
-        fi
-        
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
+        
+        # Write key to file and clean it aggressively
+        if [ -f "$SSH_PRIVATE_KEY" ]; then
+          cp "$SSH_PRIVATE_KEY" ~/.ssh/id_rsa
+        else
+          # Remove Windows line endings and write to file
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        fi
+        
+        # Remove any trailing whitespace from each line (common cause of libcrypto error)
+        sed -i 's/[[:space:]]*$//' ~/.ssh/id_rsa
+        # Ensure exactly one newline at the end
+        sed -i -e '$a\' ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/id_rsa
         ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
         
         # Create .env file for production on the server
