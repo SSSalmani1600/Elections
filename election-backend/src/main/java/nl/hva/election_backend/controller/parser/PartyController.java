@@ -17,8 +17,8 @@ public class PartyController {
         this.partyService = partyService;
     }
 
-    @GetMapping
-    public Set<PartyEntity> getAllParties() {
+    @GetMapping()
+    public Set<PartyEntity> readAffiliations() {
         return partyService.getParties();
     }
 
