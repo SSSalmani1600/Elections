@@ -1,11 +1,13 @@
 package nl.hva.election_backend.repository;
 
+import nl.hva.election_backend.dto.MunicipalityDto;
 import nl.hva.election_backend.entity.MunicipalityEntity;
 import nl.hva.election_backend.entity.id.MunicipalityId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface MunicipalityRepository extends JpaRepository<MunicipalityEntity, MunicipalityId> {
     boolean existsByYearAndMunicipalityId(int year, String municipalityId);
@@ -15,4 +17,6 @@ public interface MunicipalityRepository extends JpaRepository<MunicipalityEntity
             "LEFT JOIN FETCH r.party " +
             "WHERE m.year = :year AND m.name = :name")
     Optional<MunicipalityEntity> findWithResultsByYearsAndName(Integer year, String name);
+
+    Set<MunicipalityEntity> getAllByYear(Integer year);
 }

@@ -27,7 +27,7 @@ export async function getUpcomingElections(): Promise<Election[]> {
   return (await res.json()) as Election[]
 }
 
-export async function getConstituencies(electionId: number): Promise<Constituency[]> {
+export async function getConstituencies(electionId: string): Promise<Constituency[]> {
   const res = await apiFetch(
     `${backendAPI}/api/electionresults/${electionId}/constituencies`,
     {
@@ -46,7 +46,26 @@ export async function getConstituencies(electionId: number): Promise<Constituenc
   return (await res.json()) as Constituency[]
 }
 
-export async function getMunicipalityData(electionId: number, name: string): Promise<Municipality> {
+export async function getMunicipalities(electionId: string): Promise<string[]> {
+  const res = await apiFetch(
+    `http://localhost:8080/api/electionresults/${electionId}/municipalities`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+    false,
+  )
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch municipality')
+  }
+
+  return (await res.json()) as string[]
+}
+
+export async function getMunicipalityData(electionId: string, name: string): Promise<Municipality> {
   const res = await apiFetch(
     `${backendAPI}/api/electionresults/${electionId}/municipalities/${name}`,
     {

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("api/electionresults")
 public class MunicipalityController {
@@ -15,6 +17,13 @@ public class MunicipalityController {
 
     public MunicipalityController(MunicipalityService municipalityService) {
         this.municipalityService = municipalityService;
+    }
+
+    @GetMapping("/{election_id}/municipalities")
+    public ResponseEntity<Set<String>> getMunicipalities(@PathVariable("election_id") int electionId) {
+        Set<String> municipalities = municipalityService.getMunicipalities(electionId);
+
+        return ResponseEntity.ok(municipalities);
     }
 
     @GetMapping("/{election_id}/municipalities/{municipality_id}")
