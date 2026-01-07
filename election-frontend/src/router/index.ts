@@ -51,9 +51,9 @@ const router = createRouter({
       component: RegisterView,
     },
     {
-      path: '/partij/:name',
-      name: 'partyDetail',
-      component: PartyDetailView,
+      path: '/partij/:partyId',
+      name: 'party-detail',
+      component: PartyDetailView
     },
     {
       path: '/discussions',
