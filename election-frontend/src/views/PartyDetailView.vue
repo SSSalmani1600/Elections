@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPartyDetail } from '@/services/PartyService'
 import type { Candidate, PartyDetail } from '@/types/api'
 import { getWikipediaSummary, getWikipediaPerson } from '@/services/WikipediaService'
 
 const route = useRoute()
-const partyId = route.params.name as string
+
+const partyId = computed(() => route.params.partyId as string)
+
 const partyName = ref<string>('')
 const loading = ref(true)
 const errorMessage = ref('')
@@ -19,9 +21,19 @@ const leaderImage = ref<string>('')
 
 const scrollContainer = ref<HTMLElement | null>(null)
 const scrollAmount = 150
+
 onMounted(async () => {
+  loading.value = true
+  errorMessage.value = ''
+
+  if (!partyId.value) {
+    errorMessage.value = 'Geen partij-id gevonden in de URL.'
+    loading.value = false
+    return
+  }
+
   try {
-    const detail: PartyDetail = await getPartyDetail(partyId)
+    const detail: PartyDetail = await getPartyDetail(partyId.value)
 
     partyName.value = detail.name
     candidates.value = detail.candidates ?? []
