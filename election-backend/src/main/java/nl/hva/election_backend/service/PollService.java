@@ -6,9 +6,12 @@ import nl.hva.election_backend.model.Poll;
 import nl.hva.election_backend.model.PollVote;
 import nl.hva.election_backend.repository.PollRepository;
 import nl.hva.election_backend.repository.PollVoteRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,73 +26,74 @@ public class PollService {
     }
 
     public Poll getLatestPoll() {
-        return pollRepository.findTopByOrderByCreatedAtDesc()
-                .orElseThrow(() -> new RuntimeException("Geen poll gevonden"));
+        return pollRepository.findAllByOrderByCreatedAtDesc(Pageable.ofSize(1))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Geen poll gevonden"
+                ));
     }
 
     public Poll createPoll(String question) {
-        Poll poll = new Poll(question.trim());
-        return pollRepository.save(poll);
+        return pollRepository.save(new Poll(question.trim()));
     }
 
     public PollResult vote(UUID pollId, Long userId, String choice) {
-        if (!pollRepository.existsById(pollId)) {
-            throw new RuntimeException("Stelling bestaat niet.");
+        Poll poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Stelling bestaat niet"
+                ));
+
+        if (voteRepository.existsByPollAndUserId(poll, userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Je hebt al gestemd op deze stelling"
+            );
         }
 
-        if (voteRepository.existsByPollIdAndUserId(pollId, userId)) {
-            throw new RuntimeException("Je hebt al gestemd op deze stelling.");
-        }
-
-        voteRepository.save(new PollVote(pollId, userId, choice));
-
-        return getResults(pollId);
+        voteRepository.save(new PollVote(poll, userId, choice));
+        return getResults(poll);
     }
 
-    public PollResult getUserVote(UUID pollId, Long userId) {
-        if (voteRepository.existsByPollIdAndUserId(pollId, userId)) {
-            return getResults(pollId);
-        }
-        return null;
+    public PollResult getResults(Poll poll) {
+        var votes = voteRepository.findByPoll(poll);
+
+        PollResult result = new PollResult();
+        result.total = votes.size();
+        result.eens = (int) votes.stream().filter(v -> v.getChoice().equals("eens")).count();
+        result.oneens = result.total - result.eens;
+
+        return result;
     }
 
     public PollResult getResults(UUID pollId) {
-        List<PollVote> votes = voteRepository.findByPollId(pollId);
+        Poll poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Stelling bestaat niet"
+                ));
 
-        PollResult dto = new PollResult();
-        dto.total = votes.size();
-        dto.eens = (int) votes.stream().filter(v -> v.getChoice().equals("eens")).count();
-        dto.oneens = dto.total - dto.eens;
-
-        return dto;
+        return getResults(poll);
     }
 
-    public List<PollOverviewDto> getAllPollsWithResults() {
-        List<Poll> polls = pollRepository.findAllByOrderByCreatedAtDesc();
+    public Page<PollOverviewDto> getAllPollsWithResults(Pageable pageable) {
+        return pollRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(poll -> {
+                    PollResult r = getResults(poll);
+                    int total = r.total;
+                    int eens = total == 0 ? 0 : (int) Math.round((r.eens * 100.0) / total);
+                    int oneens = total == 0 ? 0 : 100 - eens;
 
-        return polls.stream().map(poll -> {
-            PollResult result = getResults(poll.getId());
-
-            int total = result.total;
-
-            int eensPercentage = total == 0
-                    ? 0
-                    : (int) Math.round((result.eens * 100.0) / total);
-
-            int oneensPercentage = total == 0
-                    ? 0
-                    : 100 - eensPercentage;
-
-            return new PollOverviewDto(
-                    poll.getId(),
-                    poll.getQuestion(),
-                    poll.getCreatedAt(),
-                    eensPercentage,
-                    oneensPercentage,
-                    total
-            );
-        }).toList();
+                    return new PollOverviewDto(
+                            poll.getId(),
+                            poll.getQuestion(),
+                            poll.getCreatedAt(),
+                            eens,
+                            oneens,
+                            total
+                    );
+                });
     }
-
-
 }
