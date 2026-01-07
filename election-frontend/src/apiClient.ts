@@ -15,12 +15,7 @@ export async function apiFetch(
   init: RequestInit = {},
   retry = true,
 ): Promise<Response> {
-  // Prepend backendAPI to relative URLs
-  const url = typeof input === 'string' && input.startsWith('/') 
-    ? `${backendAPI}${input}` 
-    : input
-  
-  const res = await fetch(url, {
+  const res = await fetch(input, {
     ...init,
     credentials: 'include',
   })

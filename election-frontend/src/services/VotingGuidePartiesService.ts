@@ -1,9 +1,8 @@
 import type { VotingGuideParty } from '@/types/api.ts'
-import { apiFetch } from '@/apiClient'
 
 export async function getAllVotingGuideParties(): Promise<VotingGuideParty[]> {
   try {
-    const res = await apiFetch("/api/voting-guide/parties/all", {
+    const res = await fetch("/api/voting-guide/parties/all", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
