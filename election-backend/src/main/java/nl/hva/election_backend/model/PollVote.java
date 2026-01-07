@@ -2,45 +2,43 @@ package nl.hva.election_backend.model;
 
 import jakarta.persistence.*;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 
 @Entity
-@Table(name = "poll_votes")
+@Table(
+        name = "poll_votes",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"poll_id", "user_id"}
+        )
+)
 public class PollVote {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID pollId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "poll_id")
+    @JsonBackReference
+    private Poll poll;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @Column(nullable = false)
     private String choice;
 
-    public PollVote() {}
+    protected PollVote() {}
 
-    public PollVote(UUID pollId, Long userId, String choice) {
-        this.pollId = pollId;
+    public PollVote(Poll poll, Long userId, String choice) {
+        this.poll = poll;
         this.userId = userId;
         this.choice = choice;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getPollId() {
-        return pollId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getChoice() {
-        return choice;
-    }
+    public UUID getId() { return id; }
+    public Poll getPoll() { return poll; }
+    public Long getUserId() { return userId; }
+    public String getChoice() { return choice; }
 }
