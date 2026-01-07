@@ -2,6 +2,7 @@
 import { useAuth } from '@/store/authStore'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { backendAPI } from '@/apiClient'
 
 type Reaction = {
   id: number
@@ -39,7 +40,7 @@ function goToLogin() {
 onMounted(async () => {
   const id = route.params.id as string
   try {
-    const res = await fetch(`http://localhost:8080/api/discussions/${id}`)
+    const res = await fetch(`${backendAPI}/api/discussions/${id}`)
     if (!res.ok) {
       if (res.status === 404) throw new Error('Discussie niet gevonden')
       throw new Error('Er ging iets mis bij het ophalen')
@@ -105,7 +106,7 @@ async function saveEditTopic() {
   topicError.value = ''
 
   try {
-    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+    const res = await fetch(`${backendAPI}/api/discussions/${discussion.value.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -144,7 +145,7 @@ async function deleteTopic() {
 
   try {
     // API call naar backend
-    const res = await fetch(`http://localhost:8080/api/discussions/${discussion.value.id}`, {
+    const res = await fetch(`${backendAPI}/api/discussions/${discussion.value.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.value.id }),
@@ -189,7 +190,7 @@ async function saveEdit(reactionId: number) {
   editError.value = ''
 
   try {
-    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
+    const res = await fetch(`${backendAPI}/api/discussions/reactions/${reactionId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -231,7 +232,7 @@ async function deleteReaction(reactionId: number) {
   deletingId.value = reactionId
 
   try {
-    const res = await fetch(`http://localhost:8080/api/discussions/reactions/${reactionId}`, {
+    const res = await fetch(`${backendAPI}/api/discussions/reactions/${reactionId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.value.id }),
@@ -273,7 +274,7 @@ async function postReaction() {
   const id = route.params.id as string
 
   try {
-    const res = await fetch(`http://localhost:8080/api/discussions/${id}/reactions`, {
+    const res = await fetch(`${backendAPI}/api/discussions/${id}/reactions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
