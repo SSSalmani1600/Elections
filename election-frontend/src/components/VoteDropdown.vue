@@ -1,31 +1,30 @@
 <script setup lang="ts">
 import { ChevronDown } from 'lucide-vue-next';
 
-const { modelValue, options, label, accentColor } = defineProps({
-  modelValue: {
-    type: String,
-    required: true
-  },
-  options: {
-    type: Array,
-    default: () => []
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  accentColor: {
-    type: String,
-    default: 'white'
-  }
+interface Props {
+  modelValue: string;
+  options: string[];
+  label?: string;
+  accentColor?: string;
+}
+
+const { modelValue, options, label, accentColor } = withDefaults(defineProps<Props>(), {
+  options: () => [],
+  label: '',
+  accentColor: 'white'
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+const handleChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  emit('update:modelValue', target.value);
+};
 </script>
 
 <template>
   <div class="relative group">
-    <select :value="modelValue" @change="emit('update:modelValue', $event.target.value)"
+    <select :value="modelValue" @change="handleChange"
       class="appearance-none bg-[#111827] text-white border border-slate-700 hover:border-slate-500 pl-10 pr-9 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer min-w-[130px] w-full"
       :style="{ color: accentColor === 'white' ? 'white' : '#94a3b8' }">
       <option v-for="opt in options" :key="opt" :value="opt">
