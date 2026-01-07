@@ -1,6 +1,7 @@
 let refreshPromise: Promise<Response> | null = null
+const envApiUrl = import.meta.env.VITE_API_URL
 
-export const backendAPI = "http://oege.ie.hva.nl:9000"
+export const backendAPI = envApiUrl || "http://oege.ie.hva.nl:9000"
 
 async function callRefresh(): Promise<Response> {
   return fetch(`${backendAPI}/api/auth/refresh`, {

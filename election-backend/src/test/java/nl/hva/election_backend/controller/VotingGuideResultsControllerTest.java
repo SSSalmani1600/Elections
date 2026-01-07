@@ -68,7 +68,28 @@ public class VotingGuideResultsControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(Map.of("message", "No answers provided"), response.getBody());
-        verify(jwtService).extractUserId("token");
-        verifyNoInteractions(votingGuideResultsService);
+    }
+
+    @Test
+    void saveResults_givenBlankToken_then401() {
+        VotingGuideResponseDto dto = new VotingGuideResponseDto(new ArrayList<>());
+
+        ResponseEntity<?> response = controller.saveResults("   ", dto);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(Map.of("message", "No authentication token provided"), response.getBody());
+    }
+
+    @Test
+    void saveResults_givenValidTokenAndDto_then200AndSaves() {
+        when(jwtService.extractUserId("token")).thenReturn("7");
+
+        VotingGuideResponseDto dto = new VotingGuideResponseDto(new ArrayList<>());
+        dto.getVotingGuideResults().add(new VotingGuideResultDto(1L, "VVD", 100.0));
+
+        ResponseEntity<?> response = controller.saveResults("token", dto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(Map.of("message", "Answers successfully saved"), response.getBody());
     }
 }

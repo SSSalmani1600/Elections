@@ -3,11 +3,13 @@ package nl.hva.election_backend.service;
 import nl.hva.election_backend.exception.InvalidRefreshTokenException;
 import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +31,12 @@ class JwtServiceTest {
     private JwtService jwtService;
 
     private final Long userId = 123L;
+
+    @BeforeEach
+    void setUp() {
+        // Set a valid base64 secret key for tests
+        ReflectionTestUtils.setField(jwtService, "SECRET_KEY", "dGhpcy1pcy1hLXZlcnktc2VjdXJlLWJhc2U2NC1lbmNvZGVkLXNlY3JldC1rZXk=");
+    }
 
     @Test
     void generateToken_CreatesValidToken() {

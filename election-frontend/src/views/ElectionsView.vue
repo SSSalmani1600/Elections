@@ -10,6 +10,7 @@ import { Map as MapIcon, Layers } from 'lucide-vue-next';
 import { ArrowRightLeft } from 'lucide-vue-next'
 
 const years = ref<number[]>([])
+const yearOptions = computed(() => years.value.map(y => y.toString()))
 const selectedYear = ref<string>("2025")
 
 const compareYear = ref<string>("2023")
@@ -273,25 +274,25 @@ const setChartOptions = (): ChartOptions<'bar'> => ({
       callbacks: {
         afterBody: function(context) {
           if (!compareMode.value || context.length < 1) return '';
-          
+
           const dataIndex = context[0].dataIndex;
           const datasetIndex = context[0].datasetIndex;
           const chart = context[0].chart;
           const datasets = chart.data.datasets;
-          
+
           if (datasets.length < 2) return '';
-          
+
           // Get the value of the hovered bar and the other bar
           const hoveredVal = Number(datasets[datasetIndex].data[dataIndex]) || 0;
           const otherVal = Number(datasets[datasetIndex === 0 ? 1 : 0].data[dataIndex]) || 0;
           const otherYear = datasetIndex === 0 ? compareYear.value : selectedYear.value;
-          
+
           const diff = hoveredVal - otherVal;
           const percentDiff = otherVal > 0 ? ((diff / otherVal) * 100).toFixed(1) : '∞';
-          
+
           const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
           const sign = diff > 0 ? '+' : '';
-          
+
           return `\nt.o.v. ${otherYear}: ${sign}${diff.toLocaleString('nl-NL')} stemmen (${sign}${percentDiff}%) ${arrow}`;
         }
       }
@@ -359,28 +360,28 @@ const fetchData = async () => {
 // fetch constituencies for compare year
 const fetchCompareData = async () => {
   if (!compareMode.value) return;
-  
+
   try {
     compareConstituencies.value = await getConstituencies(compareYear.value)
     compareMunicipalities = await getMunicipalities(compareYear.value)
     compareDataError.value = null;
-    
+
     // Set compare constituency to match selected
     const matchingConstituency = getCompareConstituencyByName(
       selectedConstituency.value?.name ?? 'Amsterdam'
     );
-    
+
     if (matchingConstituency) {
       compareConstituency.value = matchingConstituency;
     } else {
       compareDataError.value = `Kieskring "${selectedConstituency.value?.name}" niet gevonden in ${compareYear.value}`;
     }
-    
+
     // Also fetch compare municipality if needed
     if (selectedLevel.value === "Gemeente" && selectedMunicipality.value) {
       try {
         compareMunicipality.value = await getMunicipalityData(
-          compareYear.value, 
+          compareYear.value,
           selectedMunicipality.value.name
         );
       } catch (e) {
@@ -516,7 +517,7 @@ watch(compareYear, async () => {
       <!-- Filter row -->
       <div class="flex flex-col sm:items-stretch sm:items-center gap-4">
         <div class="flex gap-4 relative flex-wrap">
-          <VoteDropdown v-model="selectedYear" :options="years" label="Jaar">
+          <VoteDropdown v-model="selectedYear" :options="yearOptions" label="Jaar">
             <template #icon>
               <span class="font-bold text-xs">JR</span>
             </template>
@@ -548,7 +549,7 @@ watch(compareYear, async () => {
           mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4">
           <span className="text-xs font-bold text-slate-400 uppercase">Vergelijk met:</span>
           <div className="flex gap-3 flex-wrap">
-            <VoteDropdown v-model="compareYear" :options="years" label="Jaar">
+            <VoteDropdown v-model="compareYear" :options="yearOptions" label="Jaar">
               <template #icon>
                 <span class="font-bold text-xs">JR</span>
               </template>
