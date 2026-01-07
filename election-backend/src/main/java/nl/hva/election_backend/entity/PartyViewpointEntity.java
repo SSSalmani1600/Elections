@@ -1,27 +1,31 @@
 package nl.hva.election_backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "party_statement_positions")
 public class PartyViewpointEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "party_id")
-    private Long partyId;
-    @Column(name = "statement_id")
-    private Long statementId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "party_id", nullable = false)
+    private VotingGuidePartyEntity party;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "statement_id", nullable = false)
+    private StatementEntity statement;
+
+    @Column(name = "position", nullable = false)
     private String position;
 
     public PartyViewpointEntity(){}
 
-    public PartyViewpointEntity(Long id, Long partyId, Long statementId, String position) {
+    public PartyViewpointEntity(Long id, VotingGuidePartyEntity party, StatementEntity statement, String position) {
         this.id = id;
-        this.partyId = partyId;
-        this.statementId = statementId;
+        this.party = party;
+        this.statement = statement;
         this.position = position;
     }
 
@@ -29,12 +33,12 @@ public class PartyViewpointEntity {
         return id;
     }
 
-    public Long getPartyId() {
-        return partyId;
+    public VotingGuidePartyEntity getParty() {
+        return party;
     }
 
-    public Long getStatementId() {
-        return statementId;
+    public StatementEntity getStatement() {
+        return statement;
     }
 
     public String getPosition() {
@@ -45,31 +49,15 @@ public class PartyViewpointEntity {
         this.id = id;
     }
 
-    public void setPartyId(Long partyId) {
-        this.partyId = partyId;
+    public void setParty(VotingGuidePartyEntity party) {
+        this.party = party;
     }
 
-    public void setStatementId(Long statementId) {
-        this.statementId = statementId;
+    public void setStatement(StatementEntity statement) {
+        this.statement = statement;
     }
 
     public void setPosition(String position) {
         this.position = position;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PartyEntity that = (PartyEntity) o;
-
-        return statementId.equals(that.getPartyId());
     }
 }
