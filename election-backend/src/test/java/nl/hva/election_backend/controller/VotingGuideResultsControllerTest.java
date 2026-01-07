@@ -71,4 +71,16 @@ public class VotingGuideResultsControllerTest {
         verify(jwtService).extractUserId("token");
         verifyNoInteractions(votingGuideResultsService);
     }
+
+    @Test
+    void saveResults_givenBlankToken_then401() {
+        VotingGuideResponseDto dto = new VotingGuideResponseDto(new ArrayList<>());
+
+        ResponseEntity<?> response = controller.saveResults("   ", dto);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(Map.of("message", "No authentication token provided"), response.getBody());
+        verifyNoInteractions(jwtService);
+        verifyNoInteractions(votingGuideResultsService);
+    }
 }
