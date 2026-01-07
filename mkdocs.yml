@@ -6,7 +6,6 @@ copyright: Copyright 2025 Hogeschool van Amsterdam
 theme:
     name: material
 
-    custom_dir: mdocotion/
     hide_site_name: true
     content_margin_top: 0px
     header_color: "rgb(255, 255, 255, 0.2)"
@@ -36,7 +35,7 @@ plugins:
     - section-index
     - autolinks
     - macros:
-          modules: [mkdocs_macros_mdocotion]
+
     - git-revision-date-localized:
           enabled: true
           fallback_to_build_date: true

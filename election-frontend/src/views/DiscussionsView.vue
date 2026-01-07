@@ -3,6 +3,7 @@ import { useAuth } from '@/store/authStore'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { moderateText, ModerationBlockError } from '@/services/ModerationService.ts'
+import { backendAPI } from '@/apiClient'
 
 type DiscussionListItem = {
   id: string
@@ -40,7 +41,7 @@ const sortedDiscussions = computed(() => {
 ------------------------------------------------*/
 onMounted(async () => {
   try {
-    const res = await fetch('/api/discussions')
+    const res = await fetch(`${backendAPI}/api/discussions`)
     if (!res.ok) throw new Error('Kon discussies niet laden')
     discussions.value = await res.json()
   } catch (e: any) {
@@ -159,7 +160,7 @@ async function createDiscussion() {
     }
 
     // API CALL
-    const res = await fetch('/api/discussions', {
+    const res = await fetch(`${backendAPI}/api/discussions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

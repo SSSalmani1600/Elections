@@ -426,6 +426,7 @@ import { ref, onMounted } from 'vue'
 import { getCurrentUser, updateUser, type UpdateUserRequest } from '@/services/UserService'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/store/authStore'
+import { backendAPI } from '@/apiClient'
 
 const router = useRouter()
 
@@ -485,7 +486,7 @@ async function fetchActivity(userId: number) {
   activityLoading.value = true
   console.log('Fetching activity for userId:', userId)
   try {
-    const res = await fetch(`/api/users/${userId}/activity`)
+    const res = await fetch(`${backendAPI}/api/users/${userId}/activity`)
     console.log('Activity response status:', res.status)
     if (res.ok) {
       const data = await res.json()
