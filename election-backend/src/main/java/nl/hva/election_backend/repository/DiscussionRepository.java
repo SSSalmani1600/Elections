@@ -33,6 +33,6 @@ public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Lo
     // Haalt alle discussies op, gesorteerd op laatste activiteit (zonder user data)
     List<DiscussionEntity> findAllByOrderByLastActivityAtDesc();
 
-    // Haalt alle discussies op van een specifieke gebruiker, gesorteerd op aanmaakdatum
+    // Haalt alle discussies op van een specifieke gebruiker, gesorteerd op aanmaakdatumm
     List<DiscussionEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
