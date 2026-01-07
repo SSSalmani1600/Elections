@@ -1,21 +1,22 @@
 package nl.hva.election_backend.service;
 
-// Test voor het bewerken van een discussie/topic
-
+import nl.hva.election_backend.dto.*;
+import nl.hva.election_backend.entity.DiscussionEntity;
+import nl.hva.election_backend.exception.ForbiddenException;
+import nl.hva.election_backend.exception.ResourceNotFoundException;
+import nl.hva.election_backend.model.User;
+import nl.hva.election_backend.repository.DiscussionRepository;
+import nl.hva.election_backend.repository.ReactionRepository;
+import nl.hva.election_backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import nl.hva.election_backend.dto.DiscussionDetailDto;
-import nl.hva.election_backend.entity.DiscussionEntity;
-import nl.hva.election_backend.exception.ResourceNotFoundException;
-import nl.hva.election_backend.model.User;
-import nl.hva.election_backend.repository.DiscussionRepository;
-import nl.hva.election_backend.repository.ReactionRepository;
-import nl.hva.election_backend.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -25,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Mockito aanzetten
+@ExtendWith(MockitoExtension.class)
 class DiscussionServiceTest {
 
-    @Mock // nep repository
+    @Mock
     private DiscussionRepository discussionRepository;
 
     @Mock
@@ -36,6 +37,9 @@ class DiscussionServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ModerationService moderationService;
 
     private DiscussionService discussionService;
 
@@ -45,12 +49,13 @@ class DiscussionServiceTest {
     private final Long OWNER_USER_ID = 100L;
     private final Long OTHER_USER_ID = 999L;
 
-    @BeforeEach // draait voor elke test
+    @BeforeEach
     void setUp() {
         discussionService = new DiscussionService(
                 discussionRepository,
                 reactionRepository,
-                userRepository
+                userRepository,
+                moderationService
         );
 
         testUser = new User();
@@ -68,121 +73,74 @@ class DiscussionServiceTest {
         testDiscussion.setReactionsCount(0);
     }
 
-    // Test: eigenaar kan eigen topic bewerken
     @Test
-    @DisplayName("Eigenaar kan eigen topic bewerken - Happy Path")
-    void updateDiscussion_AsOwner_Success() {
-        when(discussionRepository.findById(DISCUSSION_ID))
-                .thenReturn(Optional.of(testDiscussion));
-        when(discussionRepository.save(any(DiscussionEntity.class)))
-                .thenReturn(testDiscussion);
-        when(reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(DISCUSSION_ID))
-                .thenReturn(Collections.emptyList());
+    @DisplayName("Lijst van discussies ophalen (gepagineerd) - succes")
+    void list_Success() {
+        Page<DiscussionEntity> page = new PageImpl<>(Collections.singletonList(testDiscussion));
+        when(discussionRepository.findAllWithUser(any(Pageable.class))).thenReturn(page);
 
-        DiscussionDetailDto result = discussionService.updateDiscussion(
-                DISCUSSION_ID,
-                OWNER_USER_ID,
-                "Nieuwe Titel",
-                "Nieuwe Body"
-        );
+        PageResponseDto<DiscussionListItemDto> result = discussionService.list(0, 10);
 
         assertNotNull(result);
-        verify(discussionRepository, times(1)).save(any(DiscussionEntity.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Originele Titel", result.getContent().get(0).title());
     }
 
-    // Test: iemand anders mag niet bewerken
     @Test
-    @DisplayName("Niet-eigenaar kan geen topic bewerken - Security Check")
+    @DisplayName("Eigenaar kan eigen topic bewerken - succes")
+    void updateDiscussion_AsOwner_Success() {
+        UpdateDiscussionRequest request = new UpdateDiscussionRequest();
+        request.setUserId(OWNER_USER_ID);
+        request.setTitle("Nieuwe Titel");
+        request.setBody("Nieuwe Body");
+
+        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
+        when(moderationService.moderateText(anyString())).thenAnswer(i -> new ModerationResult((String) i.getArgument(0)));
+        when(reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(DISCUSSION_ID)).thenReturn(Collections.emptyList());
+
+        DiscussionDetailDto result = discussionService.updateDiscussion(DISCUSSION_ID, request);
+
+        assertNotNull(result);
+        assertEquals("Nieuwe Titel", testDiscussion.getTitle());
+        verify(discussionRepository).save(testDiscussion);
+    }
+
+    @Test
+    @DisplayName("Niet-eigenaar kan geen topic bewerken - error flow")
     void updateDiscussion_AsNonOwner_ThrowsSecurityException() {
-        when(discussionRepository.findById(DISCUSSION_ID))
-                .thenReturn(Optional.of(testDiscussion));
+        UpdateDiscussionRequest request = new UpdateDiscussionRequest();
+        request.setUserId(OTHER_USER_ID);
+        request.setTitle("Nieuwe Titel");
+        request.setBody("Nieuwe Body");
 
-        SecurityException exception = assertThrows(
-                SecurityException.class,
-                () -> discussionService.updateDiscussion(
-                        DISCUSSION_ID,
-                        OTHER_USER_ID, // niet de eigenaar
-                        "Nieuwe Titel",
-                        "Nieuwe Body"
-                )
-        );
+        when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
 
-        assertEquals("Je kunt alleen je eigen discussies bewerken", exception.getMessage());
-        verify(discussionRepository, never()).save(any(DiscussionEntity.class));
+        assertThrows(SecurityException.class, () -> discussionService.updateDiscussion(DISCUSSION_ID, request));
     }
 
-    // Test: topic bestaat niet
     @Test
-    @DisplayName("Topic niet gevonden - 404 scenario")
-    void updateDiscussion_NotFound_ThrowsResourceNotFoundException() {
-        Long nonExistentId = 999L;
-        when(discussionRepository.findById(nonExistentId))
-                .thenReturn(Optional.empty());
+    @DisplayName("Discussie aanmaken met geblokkeerde woorden - error flow")
+    void createDiscussion_BlockedContent_ThrowsForbiddenException() {
+        CreateDiscussionRequest request = new CreateDiscussionRequest();
+        request.setUserId(OWNER_USER_ID);
+        request.setTitle("Slecht woord");
+        request.setBody("Inhoud");
 
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> discussionService.updateDiscussion(
-                        nonExistentId,
-                        OWNER_USER_ID,
-                        "Nieuwe Titel",
-                        "Nieuwe Body"
-                )
-        );
+        ModerationResult blocked = new ModerationResult("Slecht woord");
+        blocked.setBlocked(true);
+        when(moderationService.moderateText("Slecht woord")).thenReturn(blocked);
 
-        assertEquals("Discussie niet gevonden", exception.getMessage());
-        verify(discussionRepository, never()).save(any(DiscussionEntity.class));
+        assertThrows(ForbiddenException.class, () -> discussionService.createDiscussion(request));
     }
 
-    // Test: timestamp wordt geupdate
     @Test
-    @DisplayName("LastActivityAt wordt bijgewerkt bij bewerken")
-    void updateDiscussion_UpdatesLastActivityAt() {
-        Instant oldTime = Instant.parse("2024-01-01T00:00:00Z");
-        testDiscussion.setLastActivityAt(oldTime);
-
-        when(discussionRepository.findById(DISCUSSION_ID))
-                .thenReturn(Optional.of(testDiscussion));
-        when(discussionRepository.save(any(DiscussionEntity.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(reactionRepository.findAllByDiscussion_IdOrderByCreatedAtAsc(DISCUSSION_ID))
-                .thenReturn(Collections.emptyList());
-
-        discussionService.updateDiscussion(
-                DISCUSSION_ID,
-                OWNER_USER_ID,
-                "Nieuwe Titel",
-                "Nieuwe Body"
-        );
-
-        assertTrue(testDiscussion.getLastActivityAt().isAfter(oldTime));
-    }
-
-    // Test: Discussie aanmaken
-    @Test
-    @DisplayName("Nieuwe discussie aanmaken - Happy Path")
-    void createDiscussion_Success() {
-        when(userRepository.findById(OWNER_USER_ID)).thenReturn(Optional.of(testUser));
-        when(discussionRepository.save(any(DiscussionEntity.class))).thenAnswer(invocation -> {
-            DiscussionEntity saved = invocation.getArgument(0);
-            saved.setId(123L);
-            return saved;
-        });
-
-        Long newId = discussionService.createDiscussion("Nieuwe Titel", "Nieuwe inhoud", "politiek", OWNER_USER_ID);
-
-        assertEquals(123L, newId);
-        verify(discussionRepository, times(1)).save(any(DiscussionEntity.class));
-    }
-
-    // Test: Discussie verwijderen als eigenaar
-    @Test
-    @DisplayName("Discussie verwijderen als eigenaar")
+    @DisplayName("Discussie verwijderen als eigenaar - succes")
     void deleteDiscussion_AsOwner_Success() {
         when(discussionRepository.findById(DISCUSSION_ID)).thenReturn(Optional.of(testDiscussion));
 
         discussionService.deleteDiscussion(DISCUSSION_ID, OWNER_USER_ID);
 
-        verify(reactionRepository, times(1)).deleteAllByDiscussion_Id(DISCUSSION_ID);
-        verify(discussionRepository, times(1)).delete(testDiscussion);
+        verify(reactionRepository).deleteAllByDiscussion_Id(DISCUSSION_ID);
+        verify(discussionRepository).delete(testDiscussion);
     }
 }

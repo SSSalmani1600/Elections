@@ -1,10 +1,8 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.*;
-import nl.hva.election_backend.entity.ReactionEntity;
 import nl.hva.election_backend.exception.ForbiddenException;
 import nl.hva.election_backend.service.DiscussionService;
-import nl.hva.election_backend.service.ModerationService;
 import nl.hva.election_backend.service.ReactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,25 +31,26 @@ class DiscussionControllerTest {
     @Mock
     private ReactionService reactionService;
 
-    @Mock
-    private ModerationService moderationService;
-
     private DiscussionController discussionController;
 
     @BeforeEach
     void setUp() {
-        discussionController = new DiscussionController(discussionService, reactionService, moderationService);
+        discussionController = new DiscussionController(discussionService, reactionService);
     }
 
     @Test
-    @DisplayName("Lijst van discussies ophalen")
+    @DisplayName("Lijst van discussies ophalen - succes")
     void list_ReturnsOk() {
-        when(discussionService.list(anyInt(), anyInt())).thenReturn(Collections.emptyList());
+        PageResponseDto<DiscussionListItemDto> pageResponse = new PageResponseDto<>(
+                Collections.emptyList(), 0, 10, 0, 0, true
+        );
+        when(discussionService.list(anyInt(), anyInt())).thenReturn(pageResponse);
 
-        ResponseEntity<List<DiscussionListItemDto>> response = discussionController.list(0, 10);
+        ResponseEntity<PageResponseDto<DiscussionListItemDto>> response = discussionController.list(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
+        assertTrue(response.getBody().getContent().isEmpty());
     }
 
     @Test
@@ -63,15 +62,8 @@ class DiscussionControllerTest {
         request.setCategory("politiek");
         request.setUserId(1L);
         
-        when(moderationService.moderateText(anyString())).thenAnswer(i -> {
-            ModerationResult res = new ModerationResult((String) i.getArgument(0));
-            res.setModerationStatus("PENDING");
-            return res;
-        });
-        when(discussionService.createDiscussion(anyString(), anyString(), anyString(), anyLong())).thenReturn(100L);
-        
         DiscussionDetailDto detail = new DiscussionDetailDto("100", 1L, "Geldige Titel", "testuser", "Geldige inhoud", Instant.now(), Instant.now(), 0, Collections.emptyList());
-        when(discussionService.getDetailById(100L)).thenReturn(detail);
+        when(discussionService.createDiscussion(any())).thenReturn(detail);
 
         ResponseEntity<DiscussionDetailDto> response = discussionController.create(request);
 
@@ -80,18 +72,14 @@ class DiscussionControllerTest {
     }
 
     @Test
-    @DisplayName("Nieuwe discussie aanmaken - geblokkeerde inhoud")
+    @DisplayName("Nieuwe discussie aanmaken - geblokkeerde inhoud (error flow)")
     void create_BlockedContent_ThrowsForbiddenException() {
         CreateDiscussionRequest request = new CreateDiscussionRequest();
         request.setTitle("Slechte Titel");
         request.setBody("Slechte inhoud");
-        request.setCategory("politiek");
         request.setUserId(1L);
         
-        ModerationResult blockedResult = new ModerationResult("Slechte Titel");
-        blockedResult.setModerationStatus("BLOCKED");
-        blockedResult.setBlocked(true);
-        when(moderationService.moderateText(anyString())).thenReturn(blockedResult);
+        when(discussionService.createDiscussion(any())).thenThrow(new ForbiddenException("Bericht bevat verboden inhoud."));
 
         assertThrows(ForbiddenException.class, () -> discussionController.create(request));
     }
@@ -102,12 +90,6 @@ class DiscussionControllerTest {
         CreateReactionRequest request = new CreateReactionRequest();
         request.setUserId(1L);
         request.setMessage("Leuke reactie");
-        
-        when(moderationService.moderateText(anyString())).thenAnswer(i -> {
-            ModerationResult res = new ModerationResult((String) i.getArgument(0));
-            res.setModerationStatus("APPROVED");
-            return res;
-        });
         
         ReactionDto saved = new ReactionDto(500L, 1L, "testuser", "Leuke reactie", Instant.now());
         when(reactionService.addReaction(anyLong(), anyLong(), anyString())).thenReturn(saved);
@@ -121,9 +103,7 @@ class DiscussionControllerTest {
     @Test
     @DisplayName("Reactie verwijderen - succes")
     void deleteReaction_Success() {
-        UserIdRequest request = new UserIdRequest();
-        request.setUserId(1L);
-        ResponseEntity<Map<String, String>> response = discussionController.deleteReaction(500L, request);
+        ResponseEntity<Map<String, String>> response = discussionController.deleteReaction(500L, 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Reactie verwijderd", response.getBody().get("message"));
