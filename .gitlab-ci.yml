@@ -34,7 +34,7 @@ build-frontend:
     - hva
   script:
     - cd election-frontend
-    - npm ci
+    - npm install --legacy-peer-deps
     - npm run build
   artifacts:
     paths:
@@ -110,12 +110,14 @@ deploy-hic:
         
         # Create .env file for production on the server
         ssh $SSH_USER@$SSH_HOST "mkdir -p /app"
-        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL' > /app/.env"
-        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME' >> /app/.env"
-        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD' >> /app/.env"
-        ssh $SSH_USER@$SSH_HOST "echo 'JWT_SECRET_B64=$JWT_SECRET_B64' >> /app/.env"
-        ssh $SSH_USER@$SSH_HOST "echo 'GEMINI_API_KEY=$GEMINI_API_KEY' >> /app/.env"
-        ssh $SSH_USER@$SSH_HOST "echo 'CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE' >> /app/.env"
+        ssh $SSH_USER@$SSH_HOST "cat <<EOF > /app/.env
+SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
+SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
+JWT_SECRET_B64=$JWT_SECRET_B64
+GEMINI_API_KEY=$GEMINI_API_KEY
+CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
+EOF"
         
         # Copy production docker-compose file
         scp docker-compose.prod.yml $SSH_USER@$SSH_HOST:/app/docker-compose.yml
