@@ -11,52 +11,56 @@ const { poll } = defineProps<{
 
 const loading = ref(false)
 const hasVoted = ref(false)
+const isCheckingVote = ref(true)
 const errorMessage = ref("")
 const percentages = ref({ eens: 0, oneens: 0 })
+
+function setPercentages(result: { eens: number; oneens: number; total: number }) {
+  percentages.value = {
+    eens: Math.round((result.eens / result.total) * 100),
+    oneens: Math.round((result.oneens / result.total) * 100)
+  }
+}
 
 async function loadUserVote() {
   try {
     const result = await getMyVote(poll.id)
 
     if (result) {
-      percentages.value = {
-        eens: Math.round((result.eens / result.total) * 100),
-        oneens: Math.round((result.oneens / result.total) * 100)
-      }
+      setPercentages(result)
       hasVoted.value = true
     }
   } catch (e) {
     console.error("Kon user vote status niet ophalen", e)
+  } finally {
+    isCheckingVote.value = false
   }
 }
 
 async function vote(choice: "eens" | "oneens") {
+  if (hasVoted.value) return // extra safety
+
   loading.value = true
   errorMessage.value = ""
 
   try {
     const result = await votePoll(poll.id, choice)
-
-    percentages.value = {
-      eens: Math.round((result.eens / result.total) * 100),
-      oneens: Math.round((result.oneens / result.total) * 100)
-    }
-
+    setPercentages(result)
     hasVoted.value = true
 
   } catch (err: any) {
-    const msg = err?.message ?? "Er ging iets mis"
-    errorMessage.value = msg.includes("Niet ingelogd")
-      ? "Je moet ingelogd zijn om te stemmen."
-      : msg
+    if (err.message?.includes("gestemd")) {
+      await loadUserVote()
+      hasVoted.value = true
+    } else {
+      errorMessage.value = "Stemmen mislukt"
+    }
   } finally {
     loading.value = false
   }
 }
 
-onMounted(async () => {
-  await loadUserVote()
-})
+onMounted(loadUserVote)
 </script>
 
 <template>
@@ -71,7 +75,7 @@ onMounted(async () => {
     </p>
 
     <div
-      v-if="!hasVoted"
+      v-if="!hasVoted && !isCheckingVote"
       class="flex gap-4 max-sm:flex-col"
     >
       <button
@@ -94,7 +98,7 @@ onMounted(async () => {
     </div>
 
     <div
-      v-else
+      v-else-if="hasVoted"
       class="mt-6 bg-white/10 rounded-xl px-6 py-4 animate-fadeIn relative overflow-hidden"
     >
       <div class="result-progress">
@@ -113,6 +117,10 @@ onMounted(async () => {
         <span class="text-green-400">Eens: {{ percentages.eens }}%</span>
         <span class="text-red-400">Oneens: {{ percentages.oneens }}%</span>
       </div>
+    </div>
+
+    <div v-else class="text-gray-400 text-center">
+      Resultaten laden…
     </div>
 
   </div>
@@ -140,13 +148,13 @@ onMounted(async () => {
 
 .result-green {
   height: 100%;
-  background: rgba(34, 197, 94, 0.25); /* Groen 25% */
+  background: rgba(34, 197, 94, 0.25);
   transition: width 0.5s ease;
 }
 
 .result-red {
   height: 100%;
-  background: rgba(239, 68, 68, 0.25); /* Rood 25% */
+  background: rgba(239, 68, 68, 0.25);
   transition: width 0.5s ease;
 }
 

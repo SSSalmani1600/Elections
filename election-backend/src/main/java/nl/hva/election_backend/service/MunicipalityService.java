@@ -9,6 +9,7 @@ import nl.hva.election_backend.repository.MunicipalityResultRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,14 @@ public class MunicipalityService {
         if (resultRepo.existsByYearAndMunicipalityIdAndPartyId(year, municipalityId, partyId)) return null;
 
         return resultRepo.save(new MunicipalityResultEntity(year, municipalityId, partyId, validVotes));
+    }
+
+    public Set<String> getMunicipalities(Integer year) {
+        Set<MunicipalityEntity> municipalities = municipalityRepo.getAllByYear(year);
+
+        Set<String> dtos = municipalities.stream().map(MunicipalityEntity::getName).collect(Collectors.toSet());
+
+        return dtos;
     }
 
     public MunicipalityDto getMunicipalityData(Integer year, String name) {

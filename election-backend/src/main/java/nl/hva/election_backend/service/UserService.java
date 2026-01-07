@@ -34,19 +34,20 @@ public class UserService {
         this.passwordHasher = passwordHasher;
     }
 
-    // haal user op via id
+    // haalt gebruiker op via id
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+        return userRepository.findById(Objects.requireNonNull(id, "id is verplicht"));
     }
 
     // check of user bestaat
     public boolean existsById(Long id) {
-        return userRepository.existsById(id);
+        return userRepository.existsById(Objects.requireNonNull(id, "id is verplicht"));
     }
 
     // update user gegevens
     public User updateUser(Long id, UpdateUserRequest request) {
-        User user = userRepository.findById(id)
+        Long requiredId = Objects.requireNonNull(id, "id is verplicht");
+        User user = userRepository.findById(requiredId)
                 .orElseThrow(() -> new ResourceNotFoundException("Gebruiker niet gevonden"));
 
         // check huidig wachtwoord

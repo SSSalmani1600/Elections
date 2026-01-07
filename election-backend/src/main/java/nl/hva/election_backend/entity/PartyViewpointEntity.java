@@ -1,6 +1,7 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "party_statement_positions")
@@ -20,7 +21,8 @@ public class PartyViewpointEntity {
     @Column(name = "position", nullable = false)
     private String position;
 
-    public PartyViewpointEntity(){}
+    public PartyViewpointEntity() {
+    }
 
     public PartyViewpointEntity(Long id, VotingGuidePartyEntity party, StatementEntity statement, String position) {
         this.id = id;
@@ -59,5 +61,17 @@ public class PartyViewpointEntity {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PartyViewpointEntity that = (PartyViewpointEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

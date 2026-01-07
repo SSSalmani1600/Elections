@@ -106,9 +106,20 @@ deploy-hic:
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-        # Kopieer de standaard docker-compose.yml naar de server
-        scp docker-compose.yml $SSH_USER@$SSH_HOST:/app/docker-compose.yml
-        # Log in op de registry op de server en herstart de containers
+        
+        # Create .env file for production on the server
+        ssh $SSH_USER@$SSH_HOST "mkdir -p /app"
+        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL' > /app/.env"
+        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME' >> /app/.env"
+        ssh $SSH_USER@$SSH_HOST "echo 'SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD' >> /app/.env"
+        ssh $SSH_USER@$SSH_HOST "echo 'JWT_SECRET_B64=$JWT_SECRET_B64' >> /app/.env"
+        ssh $SSH_USER@$SSH_HOST "echo 'GEMINI_API_KEY=$GEMINI_API_KEY' >> /app/.env"
+        ssh $SSH_USER@$SSH_HOST "echo 'CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE' >> /app/.env"
+        
+        # Copy production docker-compose file
+        scp docker-compose.prod.yml $SSH_USER@$SSH_HOST:/app/docker-compose.yml
+        
+        # Log in on registry and restart containers
         ssh $SSH_USER@$SSH_HOST "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY && cd /app && docker compose pull && docker compose up -d"
       else
         echo "SSH_PRIVATE_KEY niet set, overslaan van feitelijke deployment."
