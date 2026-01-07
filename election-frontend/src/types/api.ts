@@ -20,6 +20,7 @@ export type ParserResponse = {
 export interface Candidate {
   firstName: string
   lastName: string
+  namePrefix: string
   initials: string
   gender: string
   localityName: string
@@ -29,17 +30,11 @@ export interface Candidate {
   votes: string
 }
 
-export interface Candidate {
-  firstName: string
-  namePrefix?: string
-  lastName: string
-  initials: string
-  gender: string
-  localityName: string
-  electionName: string
-  partiesId: string
-  candidateId: string
-  votes: string
+export interface PartyDetail {
+  partyId: string
+  name: string
+  year: number
+  candidates: Candidate[]
 }
 
 export interface Party {
