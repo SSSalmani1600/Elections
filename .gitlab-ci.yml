@@ -65,33 +65,29 @@ test-frontend:
     - npm run lint || true # Maak de pipeline niet rood op linting-fouten
   allow_failure: true
 
-# Docker Build and Push to Registry
+# Docker Build and Push to Registry using Kaniko (required for HvA runners)
 docker-package:
   stage: package
-  image: docker:24.0.5
-  services:
-    - name: docker:24.0.5-dind
-      alias: docker
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_DRIVER: overlay2
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
   tags:
     - hva
-  before_script:
-    - docker info
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA ./election-backend
-    - docker build --build-arg VITE_API_URL=$VITE_API_URL -t $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA ./election-frontend
-    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA
-    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA
-    - if [ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]; then
-        docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/backend:latest;
-        docker tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/frontend:latest;
-        docker push $CI_REGISTRY_IMAGE/backend:latest;
-        docker push $CI_REGISTRY_IMAGE/frontend:latest;
-      fi
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(printf "%s:%s" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    # Build Backend
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/election-backend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_SHA}"
+      --destination "${CI_REGISTRY_IMAGE}/backend:latest"
+    # Build Frontend
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/election-frontend/Dockerfile"
+      --build-arg VITE_API_URL=$VITE_API_URL
+      --destination "${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_SHA}"
+      --destination "${CI_REGISTRY_IMAGE}/frontend:latest"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
