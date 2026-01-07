@@ -105,10 +105,13 @@ deploy-hic:
     - |
       if [ -n "$SSH_PRIVATE_KEY" ]; then
         eval $(ssh-agent -s)
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        # Create a temporary file for the key to avoid "error in libcrypto"
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/id_rsa
+        chmod 600 /tmp/id_rsa
+        ssh-add /tmp/id_rsa
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
-        ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
         
         # Create .env file for production on the server
         ssh $SSH_USER@$SSH_HOST "mkdir -p /app"
@@ -119,6 +122,7 @@ deploy-hic:
         
         # Log in on registry and restart containers
         ssh $SSH_USER@$SSH_HOST "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY && cd /app && docker compose pull && docker compose up -d"
+        rm /tmp/id_rsa
       else
         echo "SSH_PRIVATE_KEY niet set, overslaan van feitelijke deployment."
       fi
