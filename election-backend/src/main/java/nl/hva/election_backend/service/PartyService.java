@@ -2,15 +2,19 @@ package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.Candidate;
 import nl.hva.election_backend.dto.PartyDetail;
+
 import nl.hva.election_backend.entity.CandidateEntity;
 import nl.hva.election_backend.entity.PartyEntity;
 import nl.hva.election_backend.repository.CandidateRepository;
 import nl.hva.election_backend.repository.PartyRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PartyService {
@@ -33,35 +37,38 @@ public class PartyService {
         return new HashSet<>(partyRepository.findAll());
     }
 
-    public PartyDetail getPartyDetail(String partyName) {
+    public PartyDetail getPartyDetail(String idOrName) {
 
         PartyEntity newest = partyRepository
-                .findTopByNameIgnoreCaseOrderByYearDesc(partyName)
-                .orElseThrow(() ->
-                        new RuntimeException("Partij niet gevonden: " + partyName)
-                );
+                .findTopByPartyIdOrderByYearDesc(idOrName)
+                .or(() -> partyRepository.findTopByNameIgnoreCaseOrderByYearDesc(idOrName))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Partij niet gevonden: " + idOrName
+                ));
 
-        String partyId = newest.getPartyId();
+        String resolvedPartyId = newest.getPartyId();
 
         List<CandidateEntity> candidates =
                 candidateRepository.findByParty_PartyIdAndYearOrderByCandidateIdAsc(
-                        partyId,
+                        resolvedPartyId,
                         newest.getYear()
                 );
 
         PartyDetail dto = new PartyDetail();
-        dto.partyId = partyId;
+        dto.partyId = resolvedPartyId;
         dto.name = newest.getName();
         dto.year = newest.getYear();
         dto.candidates = candidates.stream()
-                .collect(java.util.stream.Collectors.toMap(
+                .collect(Collectors.toMap(
                         CandidateEntity::getCandidateId,
                         this::mapCandidate,
-                        (existing, duplicate) -> existing
+                        (a, b) -> a
                 ))
                 .values()
                 .stream()
                 .toList();
+
         return dto;
     }
 
