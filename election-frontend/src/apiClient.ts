@@ -1,7 +1,9 @@
 let refreshPromise: Promise<Response> | null = null
 
+export const backendAPI = "http://oege.ie.hva.nl:9000"
+
 async function callRefresh(): Promise<Response> {
-  return fetch('http://localhost:8080/api/auth/refresh', {
+  return fetch(`${backendAPI}/api/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
   })

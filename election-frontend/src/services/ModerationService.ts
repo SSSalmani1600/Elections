@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:8080/api/admin/moderation";
+import { backendAPI } from '@/apiClient';
+
+const API_URL = `${backendAPI}/api/admin/moderation`;
 
 
 
@@ -29,7 +31,7 @@ export async function moderateText(text: string): Promise<ModerationResult> {
   const token = localStorage.getItem("JWT");
 
 
-  const MODERATE_URL = "http://localhost:8080/api/moderateText";
+  const MODERATE_URL = `${backendAPI}/api/moderateText`;
 
   const res = await fetch(MODERATE_URL, {
     method: "POST",

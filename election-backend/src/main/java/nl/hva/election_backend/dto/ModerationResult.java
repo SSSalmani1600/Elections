@@ -14,10 +14,27 @@ public class ModerationResult {
     private String moderationStatus = "PENDING";
     private final List<String> warnings = new ArrayList<>();
 
-    public ModerationResult(String originalText) {
+    public ModerationResult(String originalText,
+                            String moderationStatus,
+                            boolean flagged,
+                            boolean blocked,
+                            List<String> warnings) {
+
         this.originalText = originalText;
-        this.moderatedText = originalText;
+        this.moderatedText = originalText; // default: geen censoring
+
+        this.moderationStatus = moderationStatus;
+        this.flagged = flagged;
+        this.blocked = blocked;
+
+        if (warnings != null) {
+            this.warnings.addAll(warnings);
+        }
     }
+
+    public ModerationResult(String text) {
+    }
+
 
     public String getOriginalText() {
         return originalText;

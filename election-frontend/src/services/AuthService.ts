@@ -1,8 +1,8 @@
-import { apiFetch } from '@/apiClient'
+import { apiFetch, backendAPI } from '@/apiClient'
 import type { LoginResponse, RegisterResponse } from '@/types/api'
 
 export async function loginRequest(email: string, password: string): Promise<LoginResponse> {
-  const res = await apiFetch('http://localhost:8080/api/auth/login', {
+  const res = await apiFetch(`${backendAPI}/api/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ export async function loginRequest(email: string, password: string): Promise<Log
 
 export async function logoutRequest(): Promise<void> {
   await apiFetch(
-    'http://localhost:8080/api/auth/logout',
+    `${backendAPI}/api/auth/logout`,
     {
       method: 'POST',
     },
@@ -37,7 +37,7 @@ export async function register(
   password: string,
   username: string,
 ): Promise<RegisterResponse> {
-  const res = await fetch('http://localhost:8080/api/auth/register', {
+  const res = await fetch(`${backendAPI}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

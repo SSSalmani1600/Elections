@@ -108,21 +108,9 @@ const router = createRouter({
     },
 
     {
-      path: '/admin/users',
-      name: 'admin-users',
-      component: () => import('@/views/admin/AdminUsersView.vue'),
-    },
-
-    {
       path: '/admin/moderation',
       name: 'admin-moderation',
       component: () => import('@/views/admin/AdminModerationView.vue'),
-    },
-
-    {
-      path: '/admin/positions',
-      name: 'admin-positions',
-      component: () => import('@/views/admin/AdminPositionsView.vue'),
     },
     {
       path: '/admin/polls',

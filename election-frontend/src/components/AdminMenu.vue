@@ -56,24 +56,10 @@ onMounted(async () => {
       <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
 
         <router-link
-          to="/admin/users"
-          class="bg-[#EF3054] text-white text-center py-4 rounded-xl font-semibold shadow-md hover:bg-[#D9294B] transition-all"
-        >
-          Gebruikersbeheer
-        </router-link>
-
-        <router-link
           to="/admin/moderation"
           class="bg-[#EF3054] text-white text-center py-4 rounded-xl font-semibold shadow-md hover:bg-[#D9294B] transition-all"
         >
           Moderatie
-        </router-link>
-
-        <router-link
-          to="/admin/positions"
-          class="bg-[#EF3054] text-white text-center py-4 rounded-xl font-semibold shadow-md hover:bg-[#D9294B] transition-all"
-        >
-          Standpunten beheren
         </router-link>
 
         <router-link

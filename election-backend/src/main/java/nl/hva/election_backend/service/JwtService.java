@@ -9,6 +9,7 @@ import nl.hva.election_backend.model.RefreshToken;
 import nl.hva.election_backend.repository.RefreshTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -21,8 +22,8 @@ import java.util.*;
 @Service
 public class JwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
-    private final String SECRET_KEY = System.getenv().getOrDefault("JWT_SECRET_B64",
-            "dLRPokUNE7CfDTv2Nq1JmKZLuDSbMLvfTn9yJAxCx4A=");
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
     private final String issuer = "ga-stemmen.nl";
     private final RefreshTokenRepository refreshRepo;
 
@@ -51,11 +52,11 @@ public class JwtService {
 
     public Claims extractAllClaims(String token) {
         return Jwts
-            .parser()
-            .verifyWith(getKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+                .parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractUserId(String token) {
@@ -91,7 +92,8 @@ public class JwtService {
         try {
             Claims claims = extractAllClaims(token);
 
-            if (!issuer.equals(claims.getIssuer())) return false;
+            if (!issuer.equals(claims.getIssuer()))
+                return false;
             return !isTokenExpired(token);
 
         } catch (Exception e) {
@@ -108,7 +110,8 @@ public class JwtService {
         Optional<RefreshToken> oldRefreshToken = refreshRepo.findByTokenHash(refreshToken);
         if (oldRefreshToken.isEmpty()) {
             throw new InvalidRefreshTokenException("Empty refresh token");
-        };
+        }
+        ;
 
         if (!isRefreshTokenValid(refreshToken)) {
             throw new InvalidRefreshTokenException("Invalid or expired refresh token");
@@ -117,14 +120,14 @@ public class JwtService {
         try {
             String newTokenHash = this.generateRefreshToken();
             Instant newExpiryDate = Instant.now().plus(Duration.ofMinutes(15));
-            RefreshToken newRefreshToken =
-                    new RefreshToken(oldRefreshToken.get().getUserId(), newTokenHash, newExpiryDate);
+            RefreshToken newRefreshToken = new RefreshToken(oldRefreshToken.get().getUserId(), newTokenHash,
+                    newExpiryDate);
             oldRefreshToken.get().setRevokedAt(Instant.now());
             newRefreshToken.setFamilyId(oldRefreshToken.get().getFamilyId());
 
             refreshRepo.saveAllAndFlush(java.util.List.of(oldRefreshToken.get(), newRefreshToken));
             return newRefreshToken;
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("e: ", e);
             throw new RuntimeException("Server error while rotating refresh token");
         }

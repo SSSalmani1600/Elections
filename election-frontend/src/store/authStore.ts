@@ -5,7 +5,7 @@
  * Wordt gebruikt door AccountView om te checken of gebruiker ingelogd is.
  */
 
-import { apiFetch } from '@/apiClient'
+import { apiFetch, backendAPI } from '@/apiClient'
 import { loginRequest, logoutRequest } from '@/services/AuthService'
 import type { User } from '@/types/api'
 import { reactive, readonly, toRefs } from 'vue'
@@ -28,7 +28,7 @@ const state = reactive<AuthState>({
 async function fetchUser() {
   state.loading = true
   try {
-    const res = await apiFetch('http://localhost:8080/api/auth/session')
+    const res = await apiFetch(`${backendAPI}/api/auth/session`)
 
     if (res.ok) {
       const data = await res.json()

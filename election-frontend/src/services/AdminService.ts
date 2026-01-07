@@ -1,7 +1,9 @@
+import { backendAPI } from '@/apiClient';
+
 export async function getAdminStats() {
   const token = localStorage.getItem("JWT");
 
-  const res = await fetch("http://localhost:8080/api/admin/stats", {
+  const res = await fetch(`${backendAPI}/api/admin/stats`, {
     method: "GET",
     headers: {
       "Authorization": "Bearer " + token,

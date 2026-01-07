@@ -1,7 +1,8 @@
 import type { BasicPartyInfo } from '@/types/api.ts'
+import { backendAPI } from '@/apiClient';
 
 export async function getParties(): Promise<Set<BasicPartyInfo>> {
-  const res = await fetch("http://localhost:8080/api/parties", {
+  const res = await fetch(`${backendAPI}/api/parties`, {
     method: "GET",
     headers: {
       'Content-Type': 'application/json',

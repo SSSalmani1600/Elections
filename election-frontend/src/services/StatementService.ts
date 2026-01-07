@@ -1,8 +1,9 @@
-import type {Statement} from "@/types/api.ts";
+import type { Statement } from "@/types/api.ts";
+import { backendAPI } from '@/apiClient';
 
 export async function getAllStatements(): Promise<Set<Statement>> {
   try {
-    const res = await fetch("http://localhost:8080/api/statements/all")
+    const res = await fetch(`${backendAPI}/api/statements/all`)
 
     if (!res.ok) {
       const text = await res.text()
@@ -17,7 +18,7 @@ export async function getAllStatements(): Promise<Set<Statement>> {
 
 export async function getAllCategories(): Promise<string[]> {
   try {
-    const res = await fetch("http://localhost:8080/api/statements/categories", {
+    const res = await fetch(`${backendAPI}/api/statements/categories`, {
       method: "GET",
       headers: {
         'Content-Type': 'application/json',
