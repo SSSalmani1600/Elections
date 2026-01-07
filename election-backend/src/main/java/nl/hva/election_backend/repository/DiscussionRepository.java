@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface DiscussionRepository extends JpaRepository<DiscussionEntity, Long> {
 
-    // Haalt alle discussies op met user data, gesorteerd op laatste activiteit (gepagineerd)
+    // Haalt alle discussies op met user data, gesorteerd op laatste activiteit pageable
     @Query(value = """
         SELECT d FROM DiscussionEntity d
         LEFT JOIN FETCH d.user
