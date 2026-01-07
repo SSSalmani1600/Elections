@@ -7,6 +7,7 @@ import nl.hva.election_backend.dto.CreateDiscussionRequest;
 import nl.hva.election_backend.dto.CreateReactionRequest;
 import nl.hva.election_backend.dto.DiscussionDetailDto;
 import nl.hva.election_backend.dto.DiscussionListItemDto;
+import nl.hva.election_backend.dto.PageResponseDto;
 import nl.hva.election_backend.dto.ReactionDto;
 import nl.hva.election_backend.dto.UpdateDiscussionRequest;
 import nl.hva.election_backend.dto.UpdateReactionRequest;
@@ -45,7 +46,7 @@ public class DiscussionController {
 
     // GET - alle discussies (met optionele paginering)
     @GetMapping
-    public ResponseEntity<List<DiscussionListItemDto>> list(
+    public ResponseEntity<PageResponseDto<DiscussionListItemDto>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
