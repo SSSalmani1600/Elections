@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface PartyRepository extends JpaRepository<PartyEntity, PartyId> {
     Optional<PartyEntity> findTopByNameIgnoreCaseOrderByYearDesc(String name);
-
+    Optional<PartyEntity> findTopByPartyIdOrderByYearDesc(String partyId);
     java.util.Optional<PartyEntity> findByNameAndYear(String name, int year);
 }
