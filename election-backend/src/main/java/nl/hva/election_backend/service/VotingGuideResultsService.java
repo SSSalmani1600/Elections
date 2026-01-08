@@ -49,8 +49,8 @@ public class VotingGuideResultsService {
 
 //        Converting List to nested Map
         partyViewpoints.forEach(partyViewpoint -> {
-            Long partyId = partyViewpoint.getParty().getId();
-            Long statementId = partyViewpoint.getStatement().getId();
+            Long partyId = partyViewpoint.getPartyId();
+            Long statementId = partyViewpoint.getStatementId();
             if (!partyViewpointsMap.containsKey(partyId)) {
                 partyViewpointsMap.put(partyId, new HashMap<>());
                 Map<Long, String> innerMap = partyViewpointsMap.get(partyId);
