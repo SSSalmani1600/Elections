@@ -48,7 +48,7 @@ export async function getConstituencies(electionId: string): Promise<Constituenc
 
 export async function getMunicipalities(electionId: string): Promise<string[]> {
   const res = await apiFetch(
-    `http://localhost:8080/api/electionresults/${electionId}/municipalities`,
+    `${backendAPI}/api/electionresults/${electionId}/municipalities`,
     {
       method: 'GET',
       headers: {
