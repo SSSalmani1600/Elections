@@ -9,25 +9,20 @@ public class PartyViewpointEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "party_id", nullable = false)
-    private VotingGuidePartyEntity party;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "statement_id", nullable = false)
-    private StatementEntity statement;
-
+    @Column(name = "party_id")
+    private Long partyId;
+    @Column(name = "statement_id")
+    private Long statementId;
     @Column(name = "position", nullable = false)
     private String position;
 
     public PartyViewpointEntity() {
     }
 
-    public PartyViewpointEntity(Long id, VotingGuidePartyEntity party, StatementEntity statement, String position) {
+    public PartyViewpointEntity(Long id, Long partyId, Long statementId, String position) {
         this.id = id;
-        this.party = party;
-        this.statement = statement;
+        this.partyId = partyId;
+        this.statementId = statementId;
         this.position = position;
     }
 
@@ -35,33 +30,18 @@ public class PartyViewpointEntity {
         return id;
     }
 
-    public VotingGuidePartyEntity getParty() {
-        return party;
+    public Long getPartyId() {
+        return partyId;
     }
 
-    public StatementEntity getStatement() {
-        return statement;
+    public Long getStatementId() {
+        return statementId;
     }
 
     public String getPosition() {
         return position;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setParty(VotingGuidePartyEntity party) {
-        this.party = party;
-    }
-
-    public void setStatement(StatementEntity statement) {
-        this.statement = statement;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
