@@ -43,7 +43,8 @@ onMounted(async () => {
   try {
     const res = await fetch(`${backendAPI}/api/discussions`)
     if (!res.ok) throw new Error('Kon discussies niet laden')
-    discussions.value = await res.json()
+    const data = await res.json()
+    discussions.value = data.content || []
   } catch (e: any) {
     error.value = e.message ?? 'Er ging iets mis'
   } finally {

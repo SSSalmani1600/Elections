@@ -144,11 +144,9 @@ async function deleteTopic() {
   deletingTopic.value = true
 
   try {
-    // API call naar backend
-    const res = await fetch(`${backendAPI}/api/discussions/${discussion.value.id}`, {
+    // API call naar backend met userId als query parameter
+    const res = await fetch(`${backendAPI}/api/discussions/${discussion.value.id}?userId=${user.value.id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.value.id }),
     })
 
     if (!res.ok) {
@@ -232,10 +230,8 @@ async function deleteReaction(reactionId: number) {
   deletingId.value = reactionId
 
   try {
-    const res = await fetch(`${backendAPI}/api/discussions/reactions/${reactionId}`, {
+    const res = await fetch(`${backendAPI}/api/discussions/reactions/${reactionId}?userId=${user.value.id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.value.id }),
     })
 
     if (!res.ok) {

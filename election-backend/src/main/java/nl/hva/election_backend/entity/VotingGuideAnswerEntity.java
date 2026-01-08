@@ -1,6 +1,7 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import nl.hva.election_backend.model.User;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -12,11 +13,13 @@ public class VotingGuideAnswerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "statement_id", nullable = false)
-    private Long statementId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "statement_id", nullable = false)
+    private StatementEntity statement;
 
     @Column(nullable = false)
     private String answer;
@@ -27,9 +30,9 @@ public class VotingGuideAnswerEntity {
 
     public VotingGuideAnswerEntity() {}
 
-    public VotingGuideAnswerEntity(Long userId, Long statementId, String answer) {
-        this.userId = userId;
-        this.statementId = statementId;
+    public VotingGuideAnswerEntity(User user, StatementEntity statement, String answer) {
+        this.user = user;
+        this.statement = statement;
         this.answer = answer;
     }
 
@@ -41,12 +44,12 @@ public class VotingGuideAnswerEntity {
         return answer;
     }
 
-    public Long getStatementId() {
-        return statementId;
+    public StatementEntity getStatement() {
+        return statement;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
     public Long getId() {
@@ -57,12 +60,12 @@ public class VotingGuideAnswerEntity {
         this.id = id;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public void setStatementId(Long statementId) {
-        this.statementId = statementId;
+    public void setStatement(StatementEntity statement) {
+        this.statement = statement;
     }
 
     public void setAnswer(String answer) {

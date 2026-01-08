@@ -3,6 +3,11 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Define build-time variable
+ARG VITE_API_URL
+# Set environment variable for build process
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

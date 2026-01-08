@@ -1,19 +1,19 @@
 package nl.hva.election_backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "party_statement_positions")
 public class PartyViewpointEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "party_id")
     private Long partyId;
     @Column(name = "statement_id")
     private Long statementId;
+    @Column(name = "position", nullable = false)
     private String position;
 
     public PartyViewpointEntity() {
@@ -42,37 +42,16 @@ public class PartyViewpointEntity {
         return position;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setPartyId(Long partyId) {
-        this.partyId = partyId;
-    }
-
-    public void setStatementId(Long statementId) {
-        this.statementId = statementId;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PartyViewpointEntity that = (PartyViewpointEntity) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-
-        if (o == null || getClass() != o.getClass())
-            return false;
-
-        PartyEntity that = (PartyEntity) o;
-
-        return statementId.equals(that.getPartyId());
+        return Objects.hashCode(id);
     }
 }

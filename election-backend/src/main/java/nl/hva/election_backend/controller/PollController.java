@@ -1,7 +1,6 @@
 package nl.hva.election_backend.controller;
 
 import nl.hva.election_backend.dto.PollResult;
-import nl.hva.election_backend.model.Poll;
 import nl.hva.election_backend.service.JwtService;
 import nl.hva.election_backend.service.PollService;
 import org.springframework.http.HttpStatus;
@@ -22,11 +21,11 @@ public class PollController {
         this.jwtService = jwtService;
     }
 
-    record VoteRequest(String choice) {}
+    public record VoteRequest(String choice) {}
 
     @GetMapping("/latest")
-    public Poll getLatestPoll() {
-        return pollService.getLatestPoll();
+    public ResponseEntity<?> getLatestPoll() {
+        return ResponseEntity.ok(pollService.getLatestPoll());
     }
 
     @PostMapping("/{id}/vote")
@@ -36,34 +35,22 @@ public class PollController {
             @RequestBody VoteRequest req
     ) {
         if (jwt == null || jwt.isBlank()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         }
 
-        String userIdStr;
+        Long userId;
         try {
-            userIdStr = jwtService.extractUserId(jwt);
+            userId = Long.parseLong(jwtService.extractUserId(jwt));
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Long userId = Long.parseLong(userIdStr);
-
-        var result =  pollService.vote(id, userId, req.choice());
+        PollResult result = pollService.vote(id, userId, req.choice());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/{id}/results")
-    public PollResult getResults(@PathVariable UUID id) {
-        return pollService.getResults(id);
+    public ResponseEntity<PollResult> getResults(@PathVariable UUID id) {
+        return ResponseEntity.ok(pollService.getResults(id));
     }
-    @GetMapping("/{id}/my-vote")
-    public PollResult myVote(
-            @PathVariable UUID id,
-            @CookieValue(value = "jwt", required = false) String jwt
-    ) {
-        if (jwt == null) return null;
-        Long userId = Long.parseLong(jwtService.extractUserId(jwt));
-        return pollService.getUserVote(id, userId);
-    }
-
 }

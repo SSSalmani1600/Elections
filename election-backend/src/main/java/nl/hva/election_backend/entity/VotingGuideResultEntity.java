@@ -1,6 +1,7 @@
 package nl.hva.election_backend.entity;
 
 import jakarta.persistence.*;
+import nl.hva.election_backend.model.User;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -16,11 +17,13 @@ public class VotingGuideResultEntity {
     @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "party_id", nullable = false)
-    private Long partyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "party_id", nullable = false)
+    private VotingGuidePartyEntity party;
 
     @Column(name = "party_name", nullable = false)
     private String partyName;
@@ -28,9 +31,9 @@ public class VotingGuideResultEntity {
     @Column(nullable = false)
     private Long percentage;
 
-    public VotingGuideResultEntity(Long userId, Long partyId, String partyName, Long percentage) {
-        this.userId = userId;
-        this.partyId = partyId;
+    public VotingGuideResultEntity(User user, VotingGuidePartyEntity party, String partyName, Long percentage) {
+        this.user = user;
+        this.party = party;
         this.partyName = partyName;
         this.percentage = percentage;
     }
@@ -47,12 +50,12 @@ public class VotingGuideResultEntity {
         return createdAt;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public Long getPartyId() {
-        return partyId;
+    public VotingGuidePartyEntity getParty() {
+        return party;
     }
 
     public String getPartyName() {
@@ -71,12 +74,12 @@ public class VotingGuideResultEntity {
         this.createdAt = createdAt;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public void setPartyId(Long partyId) {
-        this.partyId = partyId;
+    public void setParty(VotingGuidePartyEntity party) {
+        this.party = party;
     }
 
     public void setPartyName(String partyName) {

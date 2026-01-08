@@ -1,11 +1,14 @@
 package nl.hva.election_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import java.util.List;
 
 // Model class: representeert een gebruiker in de applicatie
 // Dit is zowel een database entiteit als een model class
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     // Primaire sleutel: automatisch gegenereerd door de database
@@ -28,6 +31,15 @@ public class User {
     // Of deze gebruiker admin rechten heeft
     @Column(name = "is_admin")
     private boolean isAdmin;
+
+    // Relatie naar discussies: 1 gebruiker kan meerdere discussies hebben
+    // LAZY betekent dat discussies pas worden opgehaald als je ze nodig hebt
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<nl.hva.election_backend.entity.DiscussionEntity> discussions;
+
+    // Relatie naar reacties: 1 gebruiker kan meerdere reacties hebben
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<nl.hva.election_backend.entity.ReactionEntity> reactions;
 
     public boolean getIsAdmin() {
         return isAdmin;

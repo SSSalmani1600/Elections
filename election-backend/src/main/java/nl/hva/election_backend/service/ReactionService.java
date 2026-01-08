@@ -1,26 +1,35 @@
 package nl.hva.election_backend.service;
 
 import nl.hva.election_backend.dto.ModerationResult;
+import nl.hva.election_backend.dto.ReactionDto;
 import nl.hva.election_backend.entity.DiscussionEntity;
 import nl.hva.election_backend.entity.ReactionEntity;
+import nl.hva.election_backend.exception.ForbiddenException;
+import nl.hva.election_backend.exception.ResourceNotFoundException;
+import nl.hva.election_backend.model.User;
 import nl.hva.election_backend.repository.DiscussionRepository;
 import nl.hva.election_backend.repository.ReactionRepository;
+import nl.hva.election_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 public class ReactionService {
 
     private final ReactionRepository reactionRepository;
     private final DiscussionRepository discussionRepository;
+    private final UserRepository userRepository;
     private final ModerationService moderationService;
 
     public ReactionService(ReactionRepository reactionRepository,
                            DiscussionRepository discussionRepository,
+                           UserRepository userRepository,
                            ModerationService moderationService) {
         this.reactionRepository = reactionRepository;
         this.discussionRepository = discussionRepository;
+        this.userRepository = userRepository;
         this.moderationService = moderationService;
     }
 
@@ -30,17 +39,26 @@ public class ReactionService {
      *  - FLAGGED → verdacht, admin moet beoordelen
      *  - PENDING → geen problemen, admin moet nog steeds keuren
      */
-    public ReactionEntity addReaction(Long discussionId, Long userId, String message) {
+    public ReactionDto addReaction(Long discussionId, Long userId, String message) {
 
-        DiscussionEntity discussion = discussionRepository.findById(discussionId)
-                .orElseThrow(() -> new IllegalArgumentException("Discussion not found"));
+        Long requiredDiscussionId = Objects.requireNonNull(discussionId, "discussionId is verplicht");
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
 
-        // 📌 AI wordt ALLEEN hier aangeroepen
+        DiscussionEntity discussion = discussionRepository.findById(requiredDiscussionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Discussion not found"));
+
+        User user = userRepository.findById(requiredUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         ModerationResult moderation = moderationService.moderateText(message);
+
+        if (moderation.isBlocked()) {
+            throw new ForbiddenException("Reactie bevat verboden inhoud.");
+        }
 
         ReactionEntity reaction = new ReactionEntity();
         reaction.setDiscussion(discussion);
-        reaction.setUserId(userId);
+        reaction.setUser(user);
         reaction.setCreatedAt(Instant.now());
         reaction.setMessage(moderation.getModeratedText());
 
@@ -51,26 +69,57 @@ public class ReactionService {
             reaction.setFlaggedReason(String.join(", ", moderation.getWarnings()));
         }
 
-        return reactionRepository.save(reaction);
+        ReactionEntity saved = reactionRepository.save(reaction);
+
+        // Update de discussie: verhoog reactie teller en update laatste activiteit
+        discussion.setReactionsCount(discussion.getReactionsCount() + 1);
+        discussion.setLastActivityAt(Instant.now());
+        discussionRepository.save(discussion);
+
+        return new ReactionDto(
+                saved.getId(),
+                saved.getUser().getId(),
+                saved.getUser().getUsername(),
+                saved.getMessage(),
+                saved.getCreatedAt()
+        );
     }
 
     /**
      * Bewerkt een reactie als de gebruiker de eigenaar is
      */
-    public ReactionEntity updateReaction(Long reactionId, Long userId, String newMessage) {
-        // Zoek de reactie in de database
-        ReactionEntity reaction = reactionRepository.findById(reactionId)
-                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+    public ReactionDto updateReaction(Long reactionId, Long userId, String newMessage) {
+        Long requiredReactionId = Objects.requireNonNull(reactionId, "reactionId is verplicht");
 
-        // Check of de gebruiker de eigenaar is van de reactie
-        if (!reaction.getUserId().equals(userId)) {
+        ReactionEntity reaction = reactionRepository.findById(requiredReactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reactie niet gevonden"));
+
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
+
+        if (reaction.getUser() == null || !reaction.getUser().getId().equals(requiredUserId)) {
             throw new SecurityException("Je kunt alleen je eigen reacties bewerken");
         }
 
-        // Update de reactie met de gemodereerde tekst
-        reaction.setMessage(newMessage);
+        ModerationResult moderation = moderationService.moderateText(newMessage);
+        if (moderation.isBlocked()) {
+            throw new ForbiddenException("Reactie bevat verboden inhoud.");
+        }
+
+        reaction.setMessage(moderation.getModeratedText());
+        reaction.setModerationStatus(moderation.getModerationStatus());
+        reaction.setFlaggedReason(moderation.isFlagged() || moderation.isBlocked()
+                ? String.join(", ", moderation.getWarnings())
+                : null);
         
-        return reactionRepository.save(reaction);
+        ReactionEntity saved = reactionRepository.save(reaction);
+
+        return new ReactionDto(
+                saved.getId(),
+                saved.getUser().getId(),
+                saved.getUser().getUsername(),
+                saved.getMessage(),
+                saved.getCreatedAt()
+        );
     }
 
     /**
@@ -78,11 +127,15 @@ public class ReactionService {
      */
     public void deleteReaction(Long reactionId, Long userId) {
         // Zoek de reactie in de database
-        ReactionEntity reaction = reactionRepository.findById(reactionId)
-                .orElseThrow(() -> new IllegalArgumentException("Reactie niet gevonden"));
+        Long requiredReactionId = Objects.requireNonNull(reactionId, "reactionId is verplicht");
+
+        ReactionEntity reaction = reactionRepository.findById(requiredReactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reactie niet gevonden"));
+
+        Long requiredUserId = Objects.requireNonNull(userId, "userId is verplicht");
 
         // Check of de gebruiker de eigenaar is van de reactie
-        if (!reaction.getUserId().equals(userId)) {
+        if (reaction.getUser() == null || !reaction.getUser().getId().equals(requiredUserId)) {
             throw new SecurityException("Je kunt alleen je eigen reacties verwijderen");
         }
 

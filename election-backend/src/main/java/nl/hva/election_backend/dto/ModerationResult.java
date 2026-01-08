@@ -33,6 +33,8 @@ public class ModerationResult {
     }
 
     public ModerationResult(String text) {
+        this.originalText = text;
+        this.moderatedText = text; // standaard: geen aanpassing
     }
 
 
