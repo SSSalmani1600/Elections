@@ -60,7 +60,7 @@ public class VotingGuideAnswersService {
         return entitySet
                 .stream()
                 .map(entity -> new VotingGuideAnswerDto(
-                        entity.getStatement().getId().intValue(),
+                        entity.getStatement().getId(),
                         entity.getAnswer()))
                 .collect(Collectors.toSet());
     }
